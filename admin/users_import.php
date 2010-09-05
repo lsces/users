@@ -49,12 +49,12 @@ if( isset( $_REQUEST["batchimport"])) {
 		foreach( $userRecords as $userRecord ) {
 			$newUser = new BitPermUser();
 			if( $newUser->importUser( $userRecord ) ) {
-				if( !empty( $userRecord['groups'] ) ) {
-					// groups need to be separated by spaces since this is a csv file
-					$groups = explode( " ", $userRecord['groups'] );
-					foreach( $groups as $group ) {
-						if( $groupId = $gBitUser->groupExists( $group, ROOT_USER_ID ) ) {
-							$newUser->addUserToGroup( $newUser->mUserId, $groupId );
+				if( !empty( $userRecord['roles'] ) ) {
+					// roles need to be separated by spaces since this is a csv file
+					$roles = explode( " ", $userRecord['roles'] );
+					foreach( $roles as $role ) {
+						if( $roleId = $gBitUser->roleExists( $role, ROOT_USER_ID ) ) {
+							$newUser->addUserToRole( $newUser->mUserId, $roleId );
 						}
 					}
 				}
@@ -84,10 +84,10 @@ if( isset( $_REQUEST["batchimport"])) {
 	}
 }
 
-// get default group and pass it to tpl
-foreach( $gBitUser->getDefaultGroup() as $defaultGroupId => $defaultGroupName ) {
-	$gBitSmarty->assign('defaultGroupId', $defaultGroupId );
-	$gBitSmarty->assign('defaultGroupName', $defaultGroupName );
+// get default role and pass it to tpl
+foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
+	$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
+	$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
 }
 
 // Display the template

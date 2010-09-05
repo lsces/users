@@ -26,9 +26,9 @@
 						<tr>
 							<th class="width1p"></th>
 							<th>{tr}Permission{/tr} - {$perm.package}</th>
-							{foreach from=$allGroups item=group name=groups}
-								<th class="width10p"{if $group.group_id lt 4} colspan="2"{/if}>
-									<abbr title="{$group.group_name}">{if $smarty.foreach.groups.total > 8}{$group.group_id}{else}{$group.group_name}{/if}</abbr>
+							{foreach from=$allGroups item=role name=roles}
+								<th class="width10p"{if $role.role_id lt 4} colspan="2"{/if}>
+									<abbr title="{$role.role_name}">{if $smarty.foreach.roles.total > 8}{$role.role_id}{else}{$role.role_name}{/if}</abbr>
 								</th>
 							{/foreach}
 						</tr>
@@ -37,29 +37,29 @@
 					<tr class="{cycle values="odd,even"}{if $unassignedPerms.$p} prio5{/if}">
 						<td>{if $unassignedPerms.$p}{biticon iname=dialog-warning iexplain="Unassigned Permission"}{/if}</td>
 						<td title="{$perm.perm_desc}"><abbr title="{$perm.perm_desc}">{$p}</abbr></td>
-						{foreach from=$allGroups item=group}
+						{foreach from=$allGroups item=role}
 							{if     $perm.perm_level == 'admin'     }{assign var=id value=1}
 							{elseif $perm.perm_level == 'editors'   }{assign var=id value=2}
 							{elseif $perm.perm_level == 'registered'}{assign var=id value=3}
 							{elseif $perm.perm_level == 'basic'     }{assign var=id value=-1}{/if}
 
-							{if $id == $group.group_id and !$group.perms.$p}
+							{if $id == $role.role_id and !$role.perms.$p}
 								{assign var=class value="prio5"}
-							{elseif $id == $group.group_id and $group.perms.$p}
+							{elseif $id == $role.role_id and $role.perms.$p}
 								{assign var=class value="prio1"}
-							{elseif $id != $group.group_id and $group.perms.$p}
+							{elseif $id != $role.role_id and $role.perms.$p}
 								{assign var=class value="prio5"}
 							{else}
 								{assign var=class value=""}
 							{/if}
 
-							<td class="{if $group.group_id lt 4}alignright{else}aligncenter{/if} {$class}">
-								<input id="{$p}{$group.group_id}" type="checkbox" value="{$p}" name="perms[{$group.group_id}][{$p}]" title="{$group.group_name}" {if $group.perms.$p}checked="checked"{/if}/>
+							<td class="{if $role.role_id lt 4}alignright{else}aligncenter{/if} {$class}">
+								<input id="{$p}{$role.role_id}" type="checkbox" value="{$p}" name="perms[{$role.role_id}][{$p}]" title="{$role.role_name}" {if $role.perms.$p}checked="checked"{/if}/>
 							</td>
 
-							{if $group.group_id lt 4}
+							{if $role.role_id lt 4}
 								<td class="alignleft {$class} width5p">
-									{if $id == $group.group_id}<label for="{$p}{$group.group_id}">{biticon iname=dialog-ok iexplain="Default"}</label>{/if}
+									{if $id == $role.role_id}<label for="{$p}{$role.role_id}">{biticon iname=dialog-ok iexplain="Default"}</label>{/if}
 								</td>
 							{/if}
 						{/foreach}
@@ -74,11 +74,11 @@
 			</div>
 		{/form}
 
-		{if $smarty.foreach.groups.total > 8}
+		{if $smarty.foreach.roles.total > 8}
 			<dl>
-				{foreach from=$allGroups item=group}
-					<dt>{$group.group_id}</dt>
-					<dd>{$group.group_name}: {$group.group_desc}</dd>
+				{foreach from=$allGroups item=role}
+					<dt>{$role.role_id}</dt>
+					<dd>{$role.role_name}: {$role.role_desc}</dd>
 				{/foreach}
 			</dl>
 		{/if}
@@ -94,7 +94,7 @@
 									<ul>
 										{foreach from=$perms item=perm}
 											<li>
-												{$perm.group_name}: {if $perm.is_revoked}
+												{$perm.role_name}: {if $perm.is_revoked}
 													{biticon iname=list-remove iexplain="Removed Permission"}
 												{else}
 													{biticon iname=list-add iexplain="Added Permission"}

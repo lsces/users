@@ -219,23 +219,23 @@
 					{captcha force=true variant=row}
 				{/if}
 
-				{if count($groupList) > 1}
+				{if count($roleList) > 1}
 					<hr />
-					{formlabel label="Group" for="group"}
+					{formlabel label="Group" for="role"}
 					{forminput}
-						{foreach item=gr from=$groupList name=group}
-							<input type="radio" name="group" value="{$gr.group_id|escape}"{if ($reg.group eq '' and $smarty.foreach.group.last) or $reg.group eq $gr.group_id} checked="checked"{/if}>
+						{foreach item=gr from=$roleList name=role}
+							<input type="radio" name="role" value="{$gr.role_id|escape}"{if ($reg.role eq '' and $smarty.foreach.role.last) or $reg.role eq $gr.role_id} checked="checked"{/if}>
 								{if $gr.is_default eq "y"}
 									{tr}None{/tr}
-								{elseif $gr.group_desc}
-									{$gr.group_desc}
+								{elseif $gr.role_desc}
+									{$gr.role_desc}
 								{else}
-									{$gr.group_name}
+									{$gr.role_name}
 								{/if}
 							</input>
-							{if !$smarty.foreach.group.last}<br />{/if}
+							{if !$smarty.foreach.role.last}<br />{/if}
 						{/foreach}
-						{formhelp note="Choose the group you belong to."}
+						{formhelp note="Choose the role you belong to."}
 					{/forminput}
 				{/if}
 

@@ -191,21 +191,21 @@ array( 'ALTER' => array(
 		'user_id' => array( '`user_id`', 'I4' ), 
 	),
 	'users_groups' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
+		'role_id' => array( '`group_id`', 'I4' ), 
 		'user_id' => array( '`user_id`', 'I4' ), 
 	),
 	'users_grouppermissions' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
+		'role_id' => array( '`group_id`', 'I4' ), 
 	),
 	'users_objectpermissions' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
+		'role_id' => array( '`group_id`', 'I4' ), 
 		'object_id' => array( '`object_id`', 'I4' ), 
 	),
 	'users_groups_map' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
+		'role_id' => array( '`group_id`', 'I4' ), 
 	),
 	'users_groups_inclusion' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
+		'role_id' => array( '`group_id`', 'I4' ), 
 		'include_group_id' => array( '`include_group_id`', 'I4' ), 
 	),
 )),

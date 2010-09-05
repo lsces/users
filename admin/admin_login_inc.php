@@ -32,10 +32,10 @@ $loginSettings = array(
 		'type' => "text",
 		'note' => "Set a custom url where users will be directed after logging in. It should not include a leading slash or subdirectory. Default is users/my.php",
 	),
-	'users_eponymous_groups' => array(
-		'label' => "Create a group for each user",
+	'users_eponymous_roles' => array(
+		'label' => "Create a rol for each user",
 		'type' => "checkbox",
-		'note' => "This will create a group for each user with the same name as the user. This might be useful if you want to assign different permission settings to every user.",
+		'note' => "This will create a role for each user with the same name as the user. This might be useful if you want to assign different permission settings to every user.",
 	),
 	'users_register_require_passcode' => array(
 		'label' => "Request passcode to register",
@@ -111,14 +111,14 @@ $loginSettings = array(
 		'label' => "Validate email address",
 		'type' => "checkbox",
 		'link' => "kernel/admin/index.php?page=server/General Settings",
-		'note' => "This feature should be used only when you need the maximum security and should be used with discretion. If a visitor's email server is not responding, they will not be placed into the group specified below for verified emails. If a users email is determined to be invalid (meaning, the server does respond, but negatively) they will not be able to register. You also must have a valid sender email to use this feature.",
+		'note' => "This feature should be used only when you need the maximum security and should be used with discretion. If a visitor's email server is not responding, they will not be placed into the role specified below for verified emails. If a users email is determined to be invalid (meaning, the server does respond, but negatively) they will not be able to register. You also must have a valid sender email to use this feature.",
 	),
 );
 $gBitSmarty->assign( 'loginSettings', $loginSettings );
 
-$listHash = array( 'sort_mode' => 'group_name_asc' );
+$listHash = array( 'sort_mode' => 'role_name_asc' );
 
-$gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
+$gBitSmarty->assign('roles', $gBitUser->getAllRoles( $listHash ));
 
 if( !function_exists("gd_info" ) ) {
 	$gBitSmarty->assign( 'warning', 'PHP GD library is required for this feature (not found on your system)' );
@@ -144,23 +144,23 @@ if( !empty( $_REQUEST["loginprefs"] ) ) {
 	}
 	simple_set_value( 'users_remember_time', USERS_PKG_NAME );
 	simple_set_value( 'users_auth_method', USERS_PKG_NAME );
-	simple_set_value( 'users_validate_email_group', USERS_PKG_NAME );
+	simple_set_value( 'users_validate_email_role', USERS_PKG_NAME );
 
-	if( isset( $_REQUEST['registration_group_choice'] ) ) {
+	if( isset( $_REQUEST['registration_role_choice'] ) ) {
 		$listHash = array();
-		$groupList = $gBitUser->getAllGroups( $listHash );
+		$roleList = $gBitUser->getAllRoles( $listHash );
 		$in = array();
 		$out = array();
-		foreach( $groupList as $gr ) {
-			if( $gr['group_id'] == ANONYMOUS_GROUP_ID ) {
+		foreach( $roleList as $gr ) {
+			if( $gr['role_id'] == ANONYMOUS_ROLE_ID ) {
 				continue;
 			}
 
 			// work out if someting has been selected or deselected
-			if( $gr['is_public'] == 'y' && !in_array( $gr['group_id'], $_REQUEST['registration_group_choice'] )) {
-				$out[] = $gr['group_id'];
-			} elseif( $gr['is_public'] != 'y' && in_array( $gr['group_id'], $_REQUEST['registration_group_choice'] )) {
-				$in[] = $gr['group_id'];
+			if( $gr['is_public'] == 'y' && !in_array( $gr['role_id'], $_REQUEST['registration_role_choice'] )) {
+				$out[] = $gr['role_id'];
+			} elseif( $gr['is_public'] != 'y' && in_array( $gr['role_id'], $_REQUEST['registration_role_choice'] )) {
+				$in[] = $gr['role_id'];
 			}
 		}
 		if( count( $in ) ) {
@@ -266,7 +266,7 @@ if( !empty( $_REQUEST["httpprefs"] ) ) {
 }
 
 $listHash = array();
-$gBitSmarty->assign_by_ref( 'groupList', $gBitUser->getAllGroups( $listHash ));
+$gBitSmarty->assign_by_ref( 'roleList', $gBitUser->getAllRoles( $listHash ));
 
 // This needs to be made more generic so that it picks up all plugins
 // Could not see where the 'auth_ldap' was defined in the $options['avail'] array

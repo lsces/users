@@ -47,16 +47,16 @@ if( isset( $_REQUEST["register"] ) ) {
 	if( $newUser->preRegisterVerify( $reg ) && $newUser->register( $reg ) ) {
 		$gBitUser->mUserId = $newUser->mUserId;
 
-		// add user to user-selected group
-		if ( !empty( $_REQUEST['group'] ) ) {
-			$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group'] );
-			if ( empty($groupInfo) || $groupInfo['is_public'] != 'y' ) {
-				$errors[] = "You can't use this group";
+		// add user to user-selected role
+		if ( !empty( $_REQUEST['role'] ) ) {
+			$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['role'] );
+			if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
+				$errors[] = "You can't use this role";
 				$gBitSmarty->assign_by_ref( 'errors', $errors );
 			} else {
 				$userId = $newUser->getUserId();
-				$gBitUser->addUserToGroup( $userId, $_REQUEST['group'] );
-				$gBitUser->storeUserDefaultGroup( $userId, $_REQUEST['group'] );
+				$gBitUser->addUserToRole( $userId, $_REQUEST['role'] );
+				$gBitUser->storeUserDefaultRole( $userId, $_REQUEST['role'] );
 			}
 		}
 
@@ -83,14 +83,14 @@ if( isset( $_REQUEST["register"] ) ) {
 			// return to referring page
 			if( !empty( $_SESSION['returnto'] ) ) {
 				$url = $_SESSION['returnto'];
-			// forward to group post-registration page 
-			} elseif ( !empty( $_REQUEST['group'] ) && !empty( $groupInfo['after_registration_page'] ) ) {
-				if ( $newUser->verifyId( $groupInfo['after_registration_page'] ) ) {
-					$url = BIT_ROOT_URI."index.php?content_id=".$groupInfo['after_registration_page'];
-				} elseif( strpos( $groupInfo['after_registration_page'], '/' ) === FALSE ) {
-					$url = BitPage::getDisplayUrl( $groupInfo['after_registration_page'] );
+			// forward to role post-registration page 
+			} elseif ( !empty( $_REQUEST['role'] ) && !empty( $roleInfo['after_registration_page'] ) ) {
+				if ( $newUser->verifyId( $roleInfo['after_registration_page'] ) ) {
+					$url = BIT_ROOT_URI."index.php?content_id=".$roleInfo['after_registration_page'];
+				} elseif( strpos( $roleInfo['after_registration_page'], '/' ) === FALSE ) {
+					$url = BitPage::getDisplayUrl( $roleInfo['after_registration_page'] );
 				} else {
-					$url = $groupInfo['after_registration_page'];
+					$url = $roleInfo['after_registration_page'];
 				}
 			}
 			header( 'Location: '.$url );
@@ -142,10 +142,10 @@ $gBitSmarty->assign('flags', $flags);
 
 $listHash = array(
 	'is_public' => 'y',
-	'sort_mode' => array( 'is_default_asc', 'group_desc_asc' ),
+	'sort_mode' => array( 'is_default_asc', 'role_desc_asc' ),
 );
-$groupList = $gBitUser->getAllGroups( $listHash );
-$gBitSmarty->assign_by_ref( 'groupList', $groupList );
+$roleList = $gBitUser->getAllRoles( $listHash );
+$gBitSmarty->assign_by_ref( 'roleList', $roleList );
 
 // invoke edit services
 $gBitUser->invokeServices( 'content_edit_function' );

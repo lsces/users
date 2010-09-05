@@ -50,7 +50,7 @@ Join us!
 </h3>
 <div class="boxcontent">
 bitweaver is a fairly young project and needs all the help we can get. 
-There are many ways of contributing - the first step is to learn more. Our site is located at <a href="http://www.bitweaver.org/wiki/index.php"> bitweaver CMS Home</a> or join our projects <a href="http://sourceforge.net/mail/?group_id=64258">mailing list</a>
+There are many ways of contributing - the first step is to learn more. Our site is located at <a href="http://www.bitweaver.org/wiki/index.php"> bitweaver CMS Home</a> or join our projects <a href="http://sourceforge.net/mail/?role_id=64258">mailing list</a>
 </div>
 </div>
 <div class="box">
@@ -69,7 +69,7 @@ Some of the many features in bitweaver
 <li>FAQs</li>
 <li>Polls</li>
 <li>Send and receive objects to/from other bitweaver sites</li>
-<li>Powerful permission system with users/groups for all the sections and features</li>
+<li>Powerful permission system with users/roles for all the sections and features</li>
 </ul>
 </div>
 </div>

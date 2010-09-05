@@ -10,13 +10,13 @@ require_once( '../../kernel/setup_inc.php' );
 	$gBitUser->verifyTicket();
 
 	$whereSql = '';
-	$bindVars = array( $gBitSystem->getConfig('users_validate_email_group') );
+	$bindVars = array( $gBitSystem->getConfig('users_validate_email_role') );
 	if( !empty( $_REQUEST['start_user_id'] ) ) {
 		$whereSql = " AND user_id>?";
 		$bindVars[] = $_REQUEST['start_user_id'];
 	}
 
-	$selectSql = "SELECT uu.user_id,uu.email  FROM users_users uu WHERE user_id NOT IN (SELECT user_id FROM users_groups_map WHERE group_id = ?) $whereSql ORDER BY uu.user_id";
+	$selectSql = "SELECT uu.user_id,uu.email  FROM users_users uu WHERE user_id NOT IN (SELECT user_id FROM users_roles_map WHERE role_id = ?) $whereSql ORDER BY uu.user_id";
 	$users     = $gBitDb->getAssoc($selectSql, $bindVars );
 	$errors;
 	foreach ( $users as $id=>$email ){
@@ -24,7 +24,7 @@ require_once( '../../kernel/setup_inc.php' );
 		flush();
 		$emailStatus = $gBitUser->verifyMx($email,$errors);
 		if( $emailStatus === true){
-			$gBitUser->addUserToGroup( $id , $gBitSystem->getConfig('users_validate_email_group') );
+			$gBitUser->addUserToRole( $id , $gBitSystem->getConfig('users_validate_email_role') );
 			print "valid";
 		} elseif( $emailStatus === -1 )  {
 			print "MX connection failed";
