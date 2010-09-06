@@ -142,12 +142,12 @@ class LDAPAuth extends BaseAuth {
 	function getSettings() {
 		global $gBitUser;
 		$listHash = array();
-		$groups = $gBitUser->getAllGroups($listHash);
-		$groupsD =array();
-		foreach ($groups as $g) {
-			$groupsD[$g['group_id']]= "{$g['group_name']} ( {$g['group_desc']} )";
+		$roles = $gBitUser->getAllRoles($listHash);
+		$rolesD = array();
+		foreach ($roles as $r) {
+			$rolesD[$r['role_id']]= "{$r['role_name']} ( {$r['role_desc']} )";
 		}
-		$groups = $groupsD;
+		$roles = $rolesD;
 		return array(
 		'users_ldap_url' => array(
 			'label' => "LDAP Connection URL",

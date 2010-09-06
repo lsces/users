@@ -34,8 +34,8 @@ class BitPermUser extends BitUser {
 	var $debug = FALSE;
 
 	// we use these to cache data
-	var $cUserGroups = array();
-	var $cGroupPerms = array( array() );
+	var $cUserRoles = array();
+	var $cRolePerms = array( array() );
 
 	/**
 	 * BitPermUser Initialise class
@@ -63,7 +63,7 @@ class BitPermUser extends BitUser {
 		global $gBitUser;
 		$ret = FALSE;
 		// make double sure the current logged in user has permission, check for p_users_admin, not admin, as that is all you need for assuming another user.
-		// this enables creating of a non technical site adminstrators group, eg customer support representatives.
+		// this enables creating of a non technical site adminstrators role, eg customer support representatives.
 		if( $gBitUser->hasPermission( 'p_users_admin' ) ) {
 			$assumeUser = new BitPermUser( $pUserId );
 			$assumeUser->loadPermissions();
@@ -127,17 +127,17 @@ class BitPermUser extends BitUser {
 		$newUser = !$this->isRegistered();
 		$this->mDb->StartTrans();
 		if( BitUser::store( $pParamHash ) && $newUser ) {
-			$defaultGroups = $this->getDefaultGroup();
-			$this->addUserToGroup( $this->mUserId, $defaultGroups );
-			if( $gBitSystem->isFeatureActive( 'users_eponymous_groups' ) ) {
-				// Create a group just for this user, for permissions assignment.
-				$groupParams = array(
+			$defaultRoles = $this->getDefaultRole();
+			$this->addUserToRole( $this->mUserId, $defaultRoles );
+			if( $gBitSystem->isFeatureActive( 'users_eponymous_roles' ) ) {
+				// Create a role just for this user, for permissions assignment.
+				$roleParams = array(
 					'user_id' => $this->mUserId,
 					'name'    => $pParamHash['user_store']['login'],
-					'desc'    => "Personal group for ".( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] )
+					'desc'    => "Personal role for ".( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] )
 				);
-				if( $this->storeGroup( $groupParams ) ) {
-					$this->addUserToGroup( $this->mUserId, $groupParams['group_id'] );
+				if( $this->storeRole( $roleParams ) ) {
+					$this->addUserToRole( $this->mUserId, $roleParams['role_id'] );
 				}
 			}
 			$this->load( TRUE );
@@ -151,36 +151,36 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * groupExists work out if a given group exists
+	 * roleExists work out if a given role exists
 	 * 
-	 * @param string $pGroupName 
+	 * @param string $pRoleName 
 	 * @param numeric $pUserId 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function groupExists( $pGroupName, $pUserId = ROOT_USER_ID ) {
+	function roleExists( $pRoleName, $pUserId = ROOT_USER_ID ) {
 		static $sGroups = array();
-		if( !isset( $sGroups[$pUserId][$pGroupName] ) ) {
-			$bindVars = array( $pGroupName );
+		if( !isset( $sGroups[$pUserId][$pRoleName] ) ) {
+			$bindVars = array( $pRoleName );
 			$whereSql = '';
 			if( $pUserId != '*' ) {
 				$whereSql = 'AND `user_id`=?';
 				$bindVars[] = $pUserId;
 			}
 			$query = "
-				SELECT ug.`group_name`, ug.`group_id`,  ug.`user_id`
-				FROM `".BIT_DB_PREFIX."users_groups` ug
-				WHERE `group_name`=? $whereSql";
+				SELECT ur.`role_name`, ur.`role_id`,  ur.`user_id`
+				FROM `".BIT_DB_PREFIX."users_roles` ur
+				WHERE `role_name`=? $whereSql";
 			if( $result = $this->mDb->getAssoc( $query, $bindVars ) ) {
 				if( empty( $sGroups[$pUserId] ) ) {
 					$sGroups[$pUserId] = array();
 				}
-				$sGroups[$pUserId][$pGroupName] = $result[$pGroupName];
+				$sGroups[$pUserId][$pRoleName] = $result[$pRoleName];
 			} else {
-				$sGroups[$pUserId][$pGroupName]['group_id'] = NULL;
+				$sGroups[$pUserId][$pRoleName]['role_id'] = NULL;
 			}
 		}
-		return( $sGroups[$pUserId][$pGroupName]['group_id'] );
+		return( $sGroups[$pUserId][$pRoleName]['role_id'] );
 	}
 
 	/**
@@ -199,7 +199,7 @@ class BitPermUser extends BitUser {
 				$gBitSystem->fatalError( tra( 'You cannot delete yourself' ) );
 			} elseif( $this->mUserId != ANONYMOUS_USER_ID ) {
 				$userTables = array(
-					'users_groups_map',
+					'users_roles_map',
 				);
 
 				foreach( $userTables as $table ) {
@@ -225,71 +225,71 @@ class BitPermUser extends BitUser {
 
 	// =-=-=-=-=-=-=-=-=-=-=-= Group Functions =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	/**
-	 * loadGroups load groups into $this->mGroups
+	 * loadRoles load roles into $this->mRoles
 	 * 
 	 * @param boolean $pForceRefresh 
 	 * @access public
 	 * @return void
 	 */
-	function loadGroups( $pForceRefresh = FALSE ) {
+	function loadRoles( $pForceRefresh = FALSE ) {
 		if( $this->isValid() ) {
-			$this->mGroups = $this->getGroups( NULL, $pForceRefresh );
+			$this->mRoles = $this->getRoles( NULL, $pForceRefresh );
 		}
 	}
 
 	/**
-	 * isInGroup work out if a given user is in a group
+	 * isInRole work out if a given user is assigned to a role
 	 * 
-	 * @param mixed $pGroupMixed Group ID or Group Name (deprecated)
+	 * @param mixed $pRoleMixed Role ID or Role Name (deprecated)
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function isInGroup( $pGroupMixed ) {
+	function isInRole( $pGroupMixed ) {
 		$ret = FALSE;
 		if( $this->isAdmin() ) {
 			$ret = TRUE;
 		} if( $this->isValid() ) {
-			if( empty( $this->mGroups ) ) {
-				$this->loadGroups();
+			if( empty( $this->mRoles ) ) {
+				$this->loadRoles();
 			}
 			if( preg_match( '/A-Za-z/', $pGroupMixed ) ) {
-				// Old style group name passed in
+				// Old style role name passed in
 				deprecated( "Please use the Group ID instead of the Group name." );
-				$ret = in_array( $pGroupMixed, $this->mGroups );
+				$ret = in_array( $pRoleMixed, $this->mRoles );
 			} else {
-				$ret = isset( $this->mGroups[$pGroupMixed] );
+				$ret = isset( $this->mRoles[$pRoleMixed] );
 			}
 		}
 		return $ret;
 	}
 
 	/**
-	 * getAllGroups Get a list of all Groups
+	 * getAllRoless Get a list of all Groups
 	 * 
 	 * @param array $pListHash List Hash
 	 * @access public
-	 * @return array of groups
+	 * @return array of roles
 	 */
-	function getAllGroups( &$pListHash ) {
+	function getAllRoles( &$pListHash ) {
 		if( empty(  $pListHash['sort_mode'] ) || $pListHash['sort_mode'] == 'name_asc' ) {
-			$pListHash['sort_mode'] = 'group_name_asc';
+			$pListHash['sort_mode'] = 'role_name_asc';
 		}
 		$this->prepGetList( $pListHash );
 		$sortMode = $this->mDb->convertSortmode( $pListHash['sort_mode'] );
-		if( !empty( $pListHash['find_groups'] ) ) {
-			$mid = " AND UPPER(`group_name`) like ?";
-			$bindvars[] = "%".strtoupper( $pListHash['find_groups'] )."%";
+		if( !empty( $pListHash['find_roles'] ) ) {
+			$mid = " AND UPPER(`role_name`) like ?";
+			$bindvars[] = "%".strtoupper( $pListHash['find_roles'] )."%";
 		} elseif( !empty( $pListHash['find'] ) ) {
-			$mid = " AND  UPPER(`group_name`) like ?";
+			$mid = " AND  UPPER(`role_name`) like ?";
 			$bindvars[] = "%".strtoupper( $pListHash['find'] )."%";
 		} else {
 			$mid = '';
 			$bindvars = array();
 		}
 
-		if( !empty( $pListHash['hide_root_groups'] )) {
+		if( !empty( $pListHash['hide_root_roles'] )) {
 			$mid .= ' AND `user_id` <> '.ROOT_USER_ID;
-		} elseif( !empty( $pListHash['only_root_groups'] )) {
+		} elseif( !empty( $pListHash['only_root_roles'] )) {
 			$mid .= ' AND `user_id` = '.ROOT_USER_ID;
 		}
 
@@ -312,199 +312,199 @@ class BitPermUser extends BitUser {
 		$mid =  preg_replace('/^ AND */',' WHERE ', $mid);
 
 		$query = "
-			SELECT `user_id`, `group_id`, `group_name` , `group_desc`, `group_home`, `is_default`, `is_public`
-			FROM `".BIT_DB_PREFIX."users_groups` $mid
+			SELECT `user_id`, `role_id`, `role_name` , `role_desc`, `role_home`, `is_default`, `is_public`
+			FROM `".BIT_DB_PREFIX."users_roles` $mid
 			ORDER BY $sortMode";
 		$ret = array();
 		if( $rs = $this->mDb->query( $query, $bindvars ) ) {
 			while( $row = $rs->fetchRow() ) {
-				$groupId = $row['group_id'];
-				$ret[$groupId] = $row;
-				$ret[$groupId]['perms'] = $this->getGroupPermissions( array( 'group_id' => $groupId ));
+				$roleId = $row['role_id'];
+				$ret[$roleId] = $row;
+				$ret[$roleId]['perms'] = $this->getRolePermissions( array( 'role_id' => $roleId ));
 			}
 		}
 
-		$pListHash['cant'] = $this->mDb->getOne( "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_groups` $mid", $bindvars );
+		$pListHash['cant'] = $this->mDb->getOne( "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_roles` $mid", $bindvars );
 
 		return $ret;
 	}
 
 	/**
-	 * getAllUserGroups 
+	 * getAllUserRoles 
 	 * 
 	 * @param numeric $pUserId 
 	 * @access public
-	 * @return array of groups a user belongs to
+	 * @return array of roles a user belongs to
 	 */
-	function getAllUserGroups( $pUserId = NULL ) {
+	function getAllUserRoles( $pUserId = NULL ) {
 		if( empty( $pUserId ) ) {
 			$pUserId = $this->mUserId;
 		}
 
 		$sql = "
-			SELECT ug.`group_id` AS `hash_key`, ug.* FROM `".BIT_DB_PREFIX."users_groups` ug
+			SELECT ur.`role_id` AS `hash_key`, ur.* FROM `".BIT_DB_PREFIX."users_roles` ur
 			WHERE `user_id`=?
-			ORDER BY ug.`group_name` ASC";
+			ORDER BY ur.`role_name` ASC";
 		return $this->mDb->getAssoc( $sql, array( $pUserId ));
 	}
 
 	/**
-	 * expungeGroup remove a group
+	 * expungeRole remove a role
 	 * 
-	 * @param numeric $pGroupId 
+	 * @param numeric $pRoleId 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure
 	 */
-	function expungeGroup( $pGroupId ) {
-		// we cannot remove the anonymous group
-		if( $pGroupId != ANONYMOUS_GROUP_ID ) {
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_groups_map` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ));
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_group_permissions` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ));
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_groups` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ));
+	function expungeRole( $pRoleId ) {
+		// we cannot remove the anonymous role
+		if( $pRoleId != ANONYMOUS_ROLE_ID ) {
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_roles_map` WHERE `role_id` = ?";
+			$result = $this->mDb->query( $query, array( $pRoleId ));
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_role_permissions` WHERE `role_id` = ?";
+			$result = $this->mDb->query( $query, array( $pRoleId ));
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_roles` WHERE `role_id` = ?";
+			$result = $this->mDb->query( $query, array( $pRoleId ));
 			return TRUE;
 		}
 	}
 
 	/**
-	 * getDefaultGroup get the default group of a given user
+	 * getDefaultRole get the default role of a given user
 	 * 
-	 * @param array $pGroupId pass in a Group ID to make conditional function
+	 * @param array $pRoleId pass in a Group ID to make conditional function
 	 * @access public
 	 * @return Default Group ID if one is set
 	 */
-	function getDefaultGroup( $pGroupId = NULL ) {
+	function getDefaultRole( $pRoleId = NULL ) {
 		$bindvars = NULL;
 		$whereSql = '';
-		if( @BitBase::verifyId( $pGroupId )) {
-			$whereSql = "AND `group_id`=? ";
-			$bindvars = array( $pGroupId );
+		if( @BitBase::verifyId( $pRoleId )) {
+			$whereSql = "AND `role_id`=? ";
+			$bindvars = array( $pRoleId );
 		}
-		return( $this->mDb->getAssoc( "SELECT `group_id`, `group_name` FROM `".BIT_DB_PREFIX."users_groups` WHERE `is_default` = 'y' $whereSql ", $bindvars ) );
+		return( $this->mDb->getAssoc( "SELECT `role_id`, `role_name` FROM `".BIT_DB_PREFIX."users_roles` WHERE `is_default` = 'y' $whereSql ", $bindvars ) );
 	}
 
 	/**
-	 * getGroupUsers Get a list of users who share a given group id
+	 * getRoleUsers Get a list of users who share a given role id
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
-	 * @return list of users who are in the group id
+	 * @return list of users who are in the role id
 	 */
-	function getGroupUsers( $pGroupId ) {
+	function getRoleUsers( $pRoleId ) {
 		$ret = array();
-		if( @BitBase::verifyId( $pGroupId )) {
+		if( @BitBase::verifyId( $pRoleId )) {
 			$query = "
 				SELECT uu.`user_id` AS hash_key, uu.`login`, uu.`real_name`, uu.`user_id`
 				FROM `".BIT_DB_PREFIX."users_users` uu
-				INNER JOIN `".BIT_DB_PREFIX."users_groups_map` ug ON (uu.`user_id`=ug.`user_id`)
-				WHERE `group_id`=?";
-			$ret = $this->mDb->getAssoc( $query, array( $pGroupId ));
+				INNER JOIN `".BIT_DB_PREFIX."users_roles_map` ur ON (uu.`user_id`=ur.`user_id`)
+				WHERE `role_id`=?";
+			$ret = $this->mDb->getAssoc( $query, array( $pRoleId ));
 		}
 		return $ret;
 	}
 
 	/**
-	 * getGroupHome get the URL where a user of that group should be sent
+	 * getHomeRole get the URL where a user of that role should be sent
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function getGroupHome( $pGroupId ) {
+	function getHomeRole( $pRoleId ) {
 		$ret = FALSE;
-		if( @BitBase::verifyId( $pGroupId )) {
-			$query = "SELECT `group_home` FROM `".BIT_DB_PREFIX."users_groups` WHERE `group_id`=?";
-			$ret = $this->mDb->getOne( $query,array( $pGroupId ) );
+		if( @BitBase::verifyId( $pRoleId )) {
+			$query = "SELECT `role_home` FROM `".BIT_DB_PREFIX."users_roles` WHERE `role_id`=?";
+			$ret = $this->mDb->getOne( $query,array( $pRoleId ) );
 		}
 		return $ret;
 	}
 
 	/**
-	 * storeUserDefaultGroup 
+	 * storeUserDefaultRole 
 	 * 
 	 * @param array $pUserId 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure
 	 */
-	function storeUserDefaultGroup( $pUserId, $pGroupId ) {
-		if( @BitBase::verifyId( $pUserId ) && @BitBase::verifyId( $pGroupId )) {
-			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `default_group_id` = ? WHERE `user_id` = ?";
-			return $this->mDb->query( $query, array( $pGroupId, $pUserId ));
+	function storeUserDefaultRole( $pUserId, $pRoleId ) {
+		if( @BitBase::verifyId( $pUserId ) && @BitBase::verifyId( $pRoleId )) {
+			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `default_role_id` = ? WHERE `user_id` = ?";
+			return $this->mDb->query( $query, array( $pRoleId, $pUserId ));
 		}
 	}
 
 	/**
-	 * batchAssignUsersToGroup assign all users to a given group
+	 * batchAssignUsersToRole assign all users to a given role
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return void
 	 */
-	function batchAssignUsersToGroup( $pGroupId ) {
-		if( @BitBase::verifyId( $pGroupId )) {
-			$users = $this->getGroupUsers( $pGroupId );
+	function batchAssignUsersToRole( $pRoleId ) {
+		if( @BitBase::verifyId( $pRoleId )) {
+			$users = $this->getRoleUsers( $pRoleId );
 			$result = $this->mDb->getCol( "SELECT uu.`user_id` FROM `".BIT_DB_PREFIX."users_users` uu" );
 			foreach( $result as $userId ) {
 				if( empty( $users[$userId] ) && $userId != ANONYMOUS_USER_ID ) {
-					$this->addUserToGroup( $userId, $pGroupId );
+					$this->addUserToRole( $userId, $pRoleId );
 				}
 			}
 		}
 	}
 
 	/**
-	 * batchSetUserDefaultGroup 
+	 * batchSetUserDefaultRole 
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function batchSetUserDefaultGroup( $pGroupId ) {
-		if( @BitBase::verifyId( $pGroupId )) {
-			$users = $this->getGroupUsers($pGroupId);
+	function batchSetUserDefaultRole( $pRoleId ) {
+		if( @BitBase::verifyId( $pRoleId )) {
+			$users = $this->getRoleUsers($pRoleId);
 			foreach( array_keys( $users ) as $userId ) {
-				$this->storeUserDefaultGroup( $userId, $pGroupId );
+				$this->storeUserDefaultRole( $userId, $pRoleId );
 			}
 		}
 	}
 
 	/**
-	 * getGroupInfo 
+	 * getRoleInfo 
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
-	 * @return group information
+	 * @return role information
 	 */
-	function getGroupInfo( $pGroupId ) {
-		if( @BitBase::verifyId( $pGroupId )) {
-			$sql = "SELECT * FROM `".BIT_DB_PREFIX."users_groups` WHERE `group_id` = ?";
-			$ret = $this->mDb->getRow( $sql, array( $pGroupId ));
+	function getRoleInfo( $pRoleId ) {
+		if( @BitBase::verifyId( $pRoleId )) {
+			$sql = "SELECT * FROM `".BIT_DB_PREFIX."users_roles` WHERE `role_id` = ?";
+			$ret = $this->mDb->getRow( $sql, array( $pRoleId ));
 
 			$listHash = array(
-				'group_id' => $pGroupId,
+				'role_id' => $pRoleId,
 				'sort_mode' => 'up.perm_name_asc',
 			);
-			$ret["perms"] = $this->getGroupPermissions( $listHash );
+			$ret["perms"] = $this->getRolePermissions( $listHash );
 
-			$sql = "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_groups_map` WHERE `group_id` = ?";
-			$ret['num_members'] = $this->mDb->getOne( $sql, array( $pGroupId ));
+			$sql = "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_roles_map` WHERE `role_id` = ?";
+			$ret['num_members'] = $this->mDb->getOne( $sql, array( $pRoleId ));
 
 			return $ret;
 		}
 	}
 
 	/**
-	 * addUserToGroup Adds user pUserId to group(s) pGroupMixed.
+	 * addUserToRole Adds user pUserId to role(s) pGroupMixed.
 	 * 
 	 * @param numeric $pUserId User ID
-	 * @param mixed $pGroupMixed A single group ID or an array of group IDs
+	 * @param mixed $pGroupMixed A single role ID or an array of role IDs
 	 * @access public
 	 * @return Either an ADO RecordSet (success) or FALSE (failure).
 	 */
-	function addUserToGroup( $pUserId, $pGroupMixed ) {
+	function addUserToRole( $pUserId, $pGroupMixed ) {
 		$result = FALSE;
 		if( @BitBase::verifyId( $pUserId ) && !empty( $pGroupMixed )) {
 			$result = TRUE;
@@ -515,16 +515,16 @@ class BitPermUser extends BitUser {
 				$addGroups = array( $pGroupMixed );
 			}
 			$currentUserGroups = $this->getGroups( $pUserId );
-			foreach( $addGroups AS $groupId ) {
+			foreach( $addGroups AS $roleId ) {
 				$isInGroup = FALSE;
 				foreach( $currentUserGroups as $curGroupId => $curGroupInfo ) {
-					if( $curGroupId == $groupId ) {
+					if( $curGroupId == $roleId ) {
 						$isInGroup = TRUE;
 					}
 				}
 				if( !$isInGroup ) {
-					$query = "INSERT INTO `".BIT_DB_PREFIX."users_groups_map` (`user_id`,`group_id`) VALUES(?,?)";
-					$result = $this->mDb->query( $query, array( $pUserId, $groupId ));
+					$query = "INSERT INTO `".BIT_DB_PREFIX."users_roles_map` (`user_id`,`role_id`) VALUES(?,?)";
+					$result = $this->mDb->query( $query, array( $pUserId, $roleId ));
 				}
 			}
 		}
@@ -532,84 +532,84 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * removeUserFromGroup 
+	 * removeUserFromRole 
 	 * 
 	 * @param array $pUserId 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return void
 	 */
-	function removeUserFromGroup( $pUserId, $pGroupId ) {
-		if( @BitBase::verifyId( $pUserId ) && @BitBase::verifyId( $pGroupId )) {
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_groups_map` WHERE `user_id` = ? AND `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pUserId, $pGroupId ));
+	function removeUserFromRole( $pUserId, $pRoleId ) {
+		if( @BitBase::verifyId( $pUserId ) && @BitBase::verifyId( $pRoleId )) {
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_roles_map` WHERE `user_id` = ? AND `role_id` = ?";
+			$result = $this->mDb->query( $query, array( $pUserId, $pRoleId ));
 			$default = $this->getDefaultGroup();
-			if( $pGroupId == key( $default )) {
-				$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `default_group_id` = NULL WHERE `user_id` = ?";
+			if( $pRoleId == key( $default )) {
+				$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `default_role_id` = NULL WHERE `user_id` = ?";
 				$this->mDb->query( $query, array( $pUserId ));
 			}
 		}
 	}
 
 	/**
-	 * verifyGroup 
+	 * verifyRole 
 	 * 
 	 * @param array $pParamHash 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function verifyGroup( &$pParamHash ) {
-		if( !empty($pParamHash['group_id'] )) {
-			if( @$this->verifyId( $pParamHash['group_id'] )) {
-				$pParamHash['group_store']['group_id'] = $pParamHash['group_id'];
+	function verifyRole( &$pParamHash ) {
+		if( !empty($pParamHash['role_id'] )) {
+			if( @$this->verifyId( $pParamHash['role_id'] )) {
+				$pParamHash['role_store']['role_id'] = $pParamHash['role_id'];
 			} else {
-				$this->mErrors['groups'] = 'Unknown Group';
+				$this->mErrors['roles'] = 'Unknown Role';
 			}
 		}
 
 		if( !empty( $pParamHash["name"] )) {
-			$pParamHash['group_store']['group_name'] = substr( $pParamHash["name"], 0, 30 );
+			$pParamHash['role_store']['role_name'] = substr( $pParamHash["name"], 0, 30 );
 		}
 		if( !empty( $pParamHash["desc"] )) {
-			$pParamHash['group_store']['group_desc'] = substr( $pParamHash["desc"], 0, 255 );;
+			$pParamHash['role_store']['role_desc'] = substr( $pParamHash["desc"], 0, 255 );;
 		}
-		$pParamHash['group_store']['group_home']              = !empty( $pParamHash["home"] )                    ? $pParamHash["home"]                    : '';
-		$pParamHash['group_store']['is_default']              = !empty( $pParamHash["is_default"] )              ? $pParamHash["is_default"]              : NULL;
-		$pParamHash['group_store']['user_id']                 = @$this->verifyId( $pParamHash["user_id"] )       ? $pParamHash["user_id"]                 : $this->mUserId;
-		$pParamHash['group_store']['is_public']               = !empty( $pParamHash['is_public'] )               ? $pParamHash['is_public']               : NULL;
-		$pParamHash['group_store']['after_registration_page'] = !empty( $pParamHash['after_registration_page'] ) ? $pParamHash['after_registration_page'] : '';
+		$pParamHash['role_store']['role_home']              = !empty( $pParamHash["home"] )                    ? $pParamHash["home"]                    : '';
+		$pParamHash['role_store']['is_default']              = !empty( $pParamHash["is_default"] )              ? $pParamHash["is_default"]              : NULL;
+		$pParamHash['role_store']['user_id']                 = @$this->verifyId( $pParamHash["user_id"] )       ? $pParamHash["user_id"]                 : $this->mUserId;
+		$pParamHash['role_store']['is_public']               = !empty( $pParamHash['is_public'] )               ? $pParamHash['is_public']               : NULL;
+		$pParamHash['role_store']['after_registration_page'] = !empty( $pParamHash['after_registration_page'] ) ? $pParamHash['after_registration_page'] : '';
 		return( count( $this->mErrors ) == 0 );
 	}
 
 	/**
-	 * storeGroup 
+	 * storeRole 
 	 * 
 	 * @param array $pParamHash 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function storeGroup( &$pParamHash ) {
+	function storeRole( &$pParamHash ) {
 		global $gBitSystem;
-		if ($this->verifyGroup( $pParamHash)) {
+		if ($this->verifyRole( $pParamHash)) {
 			$this->mDb->StartTrans();
-			if( empty( $pParamHash['group_id'] ) ) {
-				$pParamHash['group_id'] = $this->mDb->GenID( 'users_groups_id_seq' );
-				$pParamHash['group_store']['group_id'] = $pParamHash['group_id'];
-				$result = $this->mDb->associateInsert( BIT_DB_PREFIX.'users_groups', $pParamHash['group_store'] );
+			if( empty( $pParamHash['role_id'] ) ) {
+				$pParamHash['role_id'] = $this->mDb->GenID( 'users_roles_id_seq' );
+				$pParamHash['role_store']['role_id'] = $pParamHash['role_id'];
+				$result = $this->mDb->associateInsert( BIT_DB_PREFIX.'users_roles', $pParamHash['role_store'] );
 			} else {
-				$sql = "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_groups` WHERE `group_id` = ?";
-				$groupExists = $this->mDb->getOne($sql, array($pParamHash['group_id']));
-				if ($groupExists) {
-					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_groups', $pParamHash['group_store'], array( "group_id" => $pParamHash['group_id'] ) );
+				$sql = "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_roles` WHERE `role_id` = ?";
+				$roleExists = $this->mDb->getOne($sql, array($pParamHash['role_id']));
+				if ($roleExists) {
+					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_roles', $pParamHash['role_store'], array( "role_id" => $pParamHash['role_id'] ) );
 				} else {
-					// A group_id was specified but that group does not exist yet
-					$pParamHash['group_store']['group_id'] = $pParamHash['group_id'];
-					$result = $this->mDb->associateInsert(BIT_DB_PREFIX.'users_groups', $pParamHash['group_store']);
+					// A role_id was specified but that role does not exist yet
+					$pParamHash['role_store']['role_id'] = $pParamHash['role_id'];
+					$result = $this->mDb->associateInsert(BIT_DB_PREFIX.'users_roles', $pParamHash['role_store']);
 				}
 			}
 
 			if( isset( $_REQUEST['batch_set_default'] ) and $_REQUEST['batch_set_default'] == 'on' ) {
-				$gBitUser->batchSetUserDefaultGroup( $pParamHash['group_id'] );
+				$gBitUser->batchSetUserDefaultRole( $pParamHash['role_id'] );
 			}
 			$this->mDb->CompleteTrans();
 		}
@@ -617,16 +617,16 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * getGroupUserData 
+	 * getRoleUserData 
 	 * 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @param array $pColumns 
 	 * @access public
-	 * @return array of group data
+	 * @return array of role data
 	 */
-	function getGroupUserData( $pGroupId, $pColumns ) {
+	function getRoleUserData( $pRoleId, $pColumns ) {
 		$ret = array();
-		if( @$this->verifyId( $pGroupId ) && !empty( $pColumns ) ) {
+		if( @$this->verifyId( $pRoleId ) && !empty( $pColumns ) ) {
 			if( is_array( $pColumns ) ) {
 				$col = implode( $pColumns, ',' );
 				$exec = 'getAssoc';
@@ -637,9 +637,9 @@ class BitPermUser extends BitUser {
 			$query = "
 				SELECT $col
 				FROM `".BIT_DB_PREFIX."users_users` uu
-					INNER JOIN `".BIT_DB_PREFIX."users_groups_map` ugm ON (uu.`user_id`=ugm.`user_id`)
-				WHERE ugm.`group_id` = ?";
-			$ret = $this->mDb->$exec( $query, array( $pGroupId ));
+					INNER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON (uu.`user_id`=urm.`user_id`)
+				WHERE ugm.`role_id` = ?";
+			$ret = $this->mDb->$exec( $query, array( $pRoleId ));
 		}
 		return $ret;
 	}
@@ -658,10 +658,10 @@ class BitPermUser extends BitUser {
 			$query = "
 				SELECT up.`perm_name` AS `hash_key`, up.`perm_name`, up.`perm_desc`, up.`perm_level`, up.`package`
 				FROM `".BIT_DB_PREFIX."users_permissions` up
-					INNER JOIN `".BIT_DB_PREFIX."users_group_permissions` ugp ON ( ugp.`perm_name`=up.`perm_name` )
-					INNER JOIN `".BIT_DB_PREFIX."users_groups` ug ON ( ug.`group_id`=ugp.`group_id` )
-					LEFT OUTER JOIN `".BIT_DB_PREFIX."users_groups_map` ugm ON ( ugm.`group_id`=ugp.`group_id` AND ugm.`user_id` = ? )
-				WHERE ug.`group_id`= ".ANONYMOUS_GROUP_ID." OR ugm.`group_id`=ug.`group_id`";
+					INNER JOIN `".BIT_DB_PREFIX."users_role_permissions` urp ON ( urp.`perm_name`=up.`perm_name` )
+					INNER JOIN `".BIT_DB_PREFIX."users_roles` ur ON ( ur.`role_id`=urp.`role_id` )
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON ( urm.`role_id`=urp.`role_id` AND urm.`user_id` = ? )
+				WHERE ur.`role_id`= ".ANONYMOUS_ROLE_ID." OR urm.`role_id`=ur.`role_id`";
 			$this->mPerms = $this->mDb->getAssoc( $query, array( $this->mUserId ));
 			// Add in override permissions
 			if( !empty( $this->mPermsOverride ) ) {
@@ -677,13 +677,13 @@ class BitPermUser extends BitUser {
 	 * getUnassignedPerms 
 	 * 
 	 * @access public
-	 * @return array of permissions that have not been assigned to any group yet
+	 * @return array of permissions that have not been assigned to any role yet
 	 */
 	function getUnassignedPerms() {
 		$query = "SELECT up.`perm_name` AS `hash_key`, up.*
 			FROM `".BIT_DB_PREFIX."users_permissions` up
-				LEFT OUTER JOIN `".BIT_DB_PREFIX."users_group_permissions` ugp ON( up.`perm_name` = ugp.`perm_name` )
-			WHERE ugp.`group_id` IS NULL AND up.`perm_name` <> ?
+				LEFT OUTER JOIN `".BIT_DB_PREFIX."users_role_permissions` urp ON( up.`perm_name` = urp.`perm_name` )
+			WHERE urp.`role_id` IS NULL AND up.`perm_name` <> ?
 			ORDER BY `package`, up.`perm_name` ASC";
 		return( $this->mDb->getAssoc( $query, array( '' )));
 	}
@@ -734,16 +734,16 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * getGroupPermissions 
+	 * getRolePermissions 
 	 * 
-	 * @param array $pGroupId Group id, if unset, all groups are returned
-	 * @param string $pPackage permissions to give group, if unset, all permissions are returned
+	 * @param array $pRoleId Role id, if unset, all roles are returned
+	 * @param string $pPackage permissions to give role, if unset, all permissions are returned
 	 * @param string $find search for a particular permission
 	 * @param array $pSortMode sort mode of return hash
 	 * @access public
 	 * @return TRUE on success, FALSE on failure
 	 */
-	function getGroupPermissions( $pParamHash = NULL ) {
+	function getRolePermissions( $pParamHash = NULL ) {
 		global $gBitSystem;
 		$ret = $bindVars = array();
 		$whereSql = $selectSql = $fromSql = '';
@@ -759,16 +759,16 @@ class BitPermUser extends BitUser {
 			$bindVars[] = $pParamHash['package'];
 		}
 
-		if( @BitBase::verifyId( $pParamHash['group_id'] )) {
+		if( @BitBase::verifyId( $pParamHash['role_id'] )) {
 			$selectSql = ', ugp.`perm_value` AS `hasPerm` ';
-			$fromSql = ' INNER JOIN `'.BIT_DB_PREFIX.'users_group_permissions` ugp ON ( ugp.`perm_name`=up.`perm_name` ) ';
+			$fromSql = ' INNER JOIN `'.BIT_DB_PREFIX.'users_role_permissions` urp ON ( ugp.`perm_name`=up.`perm_name` ) ';
 			if( $whereSql ) {
-				$whereSql .= " AND  ugp.`group_id`=?";
+				$whereSql .= " AND  urp.`role_id`=?";
 			} else {
-				$whereSql .= " WHERE ugp.`group_id`=?";
+				$whereSql .= " WHERE urp.`role_id`=?";
 			}
 
-			$bindVars[] = $pParamHash['group_id'];
+			$bindVars[] = $pParamHash['role_id'];
 		}
 
 		if( !empty( $pParamHash['find'] )) {
@@ -799,16 +799,16 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * assignLevelPermissions Assign the permissions of a given level to a given group
+	 * assignLevelPermissions Assign the permissions of a given level to a given role
 	 * 
-	 * @param array $pGroupId Group we want to assign permissions to
+	 * @param array $pRoleId Group we want to assign permissions to
 	 * @param array $pLevel permission level we wish to assign from
 	 * @param array $pPackage limit set of permissions to a given package
 	 * @access public
 	 * @return void
 	 */
-	function assignLevelPermissions( $pGroupId, $pLevel, $pPackage = NULL) {
-		if( @BitBase::verifyId( $pGroupId ) && !empty( $pLevel )) {
+	function assignLevelPermissions( $pRoleId, $pLevel, $pPackage = NULL) {
+		if( @BitBase::verifyId( $pRoleId ) && !empty( $pLevel )) {
 			$bindvars = array( $pLevel );
 			$whereSql = '';
 			if( !empty( $pPackage ) ) {
@@ -818,7 +818,7 @@ class BitPermUser extends BitUser {
 			$query = "SELECT `perm_name` FROM `".BIT_DB_PREFIX."users_permissions` WHERE `perm_level` = ? $whereSql";
 			$result = $this->mDb->query( $query, $bindvars );
 			while( $row = $result->fetchRow() ) {
-				$this->assignPermissionToGroup( $row['perm_name'], $pGroupId );
+				$this->assignPermissionToRole( $row['perm_name'], $pRoleId );
 			}
 		}
 	}
@@ -834,35 +834,35 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * assignPermissionToGroup 
+	 * assignPermissionToRole 
 	 * 
 	 * @param array $perm 
-	 * @param array $pGroupId 
+	 * @param array $pRoleId 
 	 * @access public
 	 * @return TRUE on success
 	 */
-	function assignPermissionToGroup( $pPerm, $pGroupId ) {
-		if( @BitBase::verifyId( $pGroupId ) && !empty( $pPerm )) {
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_group_permissions` WHERE `group_id` = ? AND `perm_name` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId, $pPerm ));
-			$query = "INSERT INTO `".BIT_DB_PREFIX."users_group_permissions`(`group_id`, `perm_name`) VALUES(?, ?)";
-			$result = $this->mDb->query( $query, array( $pGroupId, $pPerm ));
+	function assignPermissionToRole( $pPerm, $pRoleId ) {
+		if( @BitBase::verifyId( $pRoleId ) && !empty( $pPerm )) {
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_role_permissions` WHERE `role_id` = ? AND `perm_name` = ?";
+			$result = $this->mDb->query( $query, array( $pRoleId, $pPerm ));
+			$query = "INSERT INTO `".BIT_DB_PREFIX."users_role_permissions`(`role_id`, `perm_name`) VALUES(?, ?)";
+			$result = $this->mDb->query( $query, array( $pRoleId, $pPerm ));
 			return TRUE;
 		}
 	}
 
 	/**
-	 * removePermissionFromGroup 
+	 * removePermissionFromRole 
 	 * 
 	 * @param string $pPerm Perm name
-	 * @param numeric $pGroupId Group ID
+	 * @param numeric $pRoleId Role ID
 	 * @access public
 	 * @return TRUE on success
 	 */
-	function removePermissionFromGroup( $pPerm, $pGroupId ) {
-		if( @BitBase::verifyId( $pGroupId ) && !empty( $pPerm )) {
-			$query = "DELETE FROM `".BIT_DB_PREFIX."users_group_permissions` WHERE `perm_name` = ? AND `group_id` = ?";
-			$result = $this->mDb->query($query, array($pPerm, $pGroupId));
+	function removePermissionFromRole( $pPerm, $pRoleId ) {
+		if( @BitBase::verifyId( $pRoleId ) && !empty( $pPerm )) {
+			$query = "DELETE FROM `".BIT_DB_PREFIX."users_role_permissions` WHERE `perm_name` = ? AND `role_id` = ?";
+			$result = $this->mDb->query($query, array($pPerm, $pRoleId));
 			return TRUE;
 		}
 	}
@@ -870,7 +870,7 @@ class BitPermUser extends BitUser {
 	/**
 	 * storeRegistrationChoice 
 	 * 
-	 * @param mixed $pGroupMixed A single group ID or an array of group IDs
+	 * @param mixed $pGroupMixed A single role ID or an array of role IDs
 	 * @param array $pValue Value you wish to store - use NULL to delete a value
 	 * @access public
 	 * @return ADO record set on success, FALSE on failure
@@ -885,7 +885,7 @@ class BitPermUser extends BitUser {
 				$bindVars[] = $pGroupMixed;
 				$mid = 'LIKE ?';
 			}
-			$query = "UPDATE `".BIT_DB_PREFIX."users_groups` SET `is_public`= ? where `group_id` IN ($mid)";
+			$query = "UPDATE `".BIT_DB_PREFIX."users_roles` SET `is_public`= ? where `role_id` IN ($mid)";
 			return $this->mDb->query( $query, $bindVars );
 		}
 	}
@@ -907,137 +907,6 @@ class BitPermUser extends BitUser {
 			}
 		}
 	}
-
-
-	// {{{ ==================== deprecated methods - will be removed soon ====================
-	//  - xing - Saturday Oct 18, 2008   11:38:05 CEST
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function get_user_id( $pUserName ) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		if( !empty( $pUserName ) ) {
-			$id = $this->mDb->getOne("select `user_id` from `".BIT_DB_PREFIX."users_users` where `login`=?", array($pUserName));
-			$id = ($id === NULL) ? -1 : $id;
-			return $id;
-		}
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function remove_group($pGroupId) {
-		deprecated( 'Method has been renamed to $gBitUser->expungeGroup()' );
-		$this->expungeGroup( $pGroupId );
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function get_group_users( $pGroupId ) {
-		deprecated( 'Method has been renamed to $gBitUser->getGroupUsers()' );
-		$this->getGroupUsers( $pGroupId );
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function batch_set_user_default_group( $pGroupId ) {
-		deprecated( 'Method has been renamed to $gBitUser->batchSetUserDefaultGroup()' );
-		$this->batchSetUserDefaultGroup( $pGroupId );
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function countGroupUsers( $pGroupId ) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		static $sGroupUsers = array();
-		if( !isset( $sGroupUsers[$pGroupId] ) ) {
-			$query = "SELECT COUNT(`user_id`) from `".BIT_DB_PREFIX."users_groups_map` WHERE `group_id` = ?";
-			$sGroupUsers[$pGroupId] = $this->mDb->getOne($query, array( $pGroupId ) );
-		}
-		return $sGroupUsers[$pGroupId];
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function changePermissionLevel($perm, $pLevel) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		$query = "update `".BIT_DB_PREFIX."users_permissions` set `perm_level` = ?
-			where `perm_name` = ?";
-		$this->mDb->query($query, array($pLevel, $perm));
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function removeLevelPermissions($group, $pLevel) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		$query = "select `perm_name` from `".BIT_DB_PREFIX."users_permissions` where `perm_level` = ?";
-		$result = $this->mDb->query($query, array($pLevel));
-		while ($res = $result->fetchRow()) {
-			$this->removePermissionFromGroup($res['perm_name'], $group);
-		}
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function createDummyLevel($pLevel) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		$query = "delete from `".BIT_DB_PREFIX."users_permissions` where `perm_name` = ?";
-		$result = $this->mDb->query($query, array(''));
-		$query = "insert into `".BIT_DB_PREFIX."users_permissions` (`perm_name`, `perm_desc`,
-			`package`, `perm_level`) VALUES ('','','',?)";
-		$this->mDb->query($query, array($pLevel));
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function getPermissionLevels() {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		return( $this->mDb->getCol( "SELECT DISTINCT(`perm_level`) FROM `".BIT_DB_PREFIX."users_permissions` ORDER BY `perm_level`" ));
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function group_has_permission( $pGroupId, $pPerm ) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		if (!isset($pPerm, $this->cGroupPerms[$pGroupId][$pPerm])) {
-			$query = "SELECT count(*)
-					  FROM `".BIT_DB_PREFIX."users_group_permissions`
-					  WHERE `group_id`=? AND `perm_name`=?";
-			$result = $this->mDb->getOne( $query, array( $pGroupId, $pPerm ) );
-			$this->cGroupPerms[$pGroupId][$pPerm] = $result;
-			return $result;
-		} else {
-			return $this->cGroupPerms[$pGroupId][$pPerm];
-		}
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function getContentTypeList( $pUserId ) {
-		deprecated( "This method doesn't seem to be used. Please remove this note if it is actually used." );
-		foreach( $gLibertySystem->mContentTypes as $contentType ) {
-			// TODO: if this method is used somewhere, please fix this to use mViewContentPerm
-			$perm = $contentType["content_type_guid"].'_p_view';
-			if (!empty( $perm ) and $gBitUser->hasPermission( $perm )) {
-				$contentTypes[$contentType["content_type_guid"]] = $gLibertySystem->getContentTypeName( $contentType["content_type_guid"] );
-			}
-		}
-	}
-	/**
-	 * @deprecated deprecated since version 2.1.0-beta
-	 */
-	function setPermission( $pPerm, $pValue = NULL ) {
-		deprecated( "This method doesn't do what it's supposed to and it seems it's not used." );
-		if( $this->isAdmin() ) {
-			$this->mPerms[$pPerm] = TRUE;
-		} elseif( $this->isValid() ) {
-			if( $pValue == 'y' || $pValue == TRUE ) {
-				$this->mPerms[$pPerm] = TRUE;
-			} else {
-				unset( $this->mPerms[$pPerm] );
-			}
-		}
-	}
-	// }}}
 }
 
 /* vim: :set fdm=marker : */

@@ -24,9 +24,9 @@ hfd
 require_once "lib/NNTP.php";
 $nntp = new Net_NNTP;
 $ret = $nntp->connect("news.php.net");
-$groups = $nntp->getGroups();
-//print_r($groups);
-$z = $nntp->selectGroup('php.announce');
+$roles = $nntp->getRoles();
+//print_r($roles);
+$z = $nntp->selectRole('php.announce');
 print_r($z);
 $h = $nntp->splitHeaders(1);
 print_r($h);

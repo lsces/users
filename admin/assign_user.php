@@ -24,21 +24,21 @@ if( $assignUser->isAdmin() && !$gBitUser->isAdmin() ) {
 if( isset( $_REQUEST["action"] ) ) {
 	$gBitUser->verifyTicket();
 	if ($_REQUEST["action"] == 'assign') {
-		$assignUser->addUserToGroup( $assignUser->mUserId, $_REQUEST["group_id"] );
-	} elseif ($_REQUEST["action"] == 'removegroup') {
-		$gBitUser->removeUserFromGroup($_REQUEST["assign_user"], $_REQUEST["group_id"]);
+		$assignUser->addUserToRole( $assignUser->mUserId, $_REQUEST["role_id"] );
+	} elseif ($_REQUEST["action"] == 'removerole') {
+		$gBitUser->removeUserFromRole($_REQUEST["assign_user"], $_REQUEST["role_id"]);
 	}
 	header( 'Location: '.$_SERVER['PHP_SELF'].'?assign_user='.$assignUser->mUserId );
 	die;
 }elseif(isset($_REQUEST['set_default'])) {
 	$gBitUser->verifyTicket();
-	$assignUser->storeUserDefaultGroup( $assignUser->mUserId, $_REQUEST['default_group'] );
+	$assignUser->storeUserDefaultRole( $assignUser->mUserId, $_REQUEST['default_role'] );
 	$assignUser->load();
 }
 $gBitSmarty->assign_by_ref( 'assignUser', $assignUser );
 
-$listHash = array( 'sort_mode' => 'group_name_asc' );
-$gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
+$listHash = array( 'sort_mode' => 'role_name_asc' );
+$gBitSmarty->assign('roles', $gBitUser->getAllRoles( $listHash ));
 
 $gBitSystem->setBrowserTitle( 'Edit User: '.$assignUser->mUsername );
 

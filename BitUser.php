@@ -2,7 +2,7 @@
 /**
  * $Header$
  *
- * Lib for user administration, groups and permissions
+ * Lib for user administration, roles and permissions
  * This lib uses pear so the constructor requieres
  * a pear DB object
 
@@ -553,7 +553,7 @@ class BitUser extends LibertyMime {
 							}
 						} else {
 							//fsockopen failed
-							if(!$gBitSystem->getConfig('users_validate_email_group')){ //will ONLY stuff mErrors if you have not set a default group for verifiable emails, otherwise this is not a game breaking case
+							if(!$gBitSystem->getConfig('users_validate_email_role')){ //will ONLY stuff mErrors if you have not set a default role for verifiable emails, otherwise this is not a game breaking case
 								$pErrors['email'] = "One or more mail servers not responding";	
 							}
 							$ret = -1; //-1 implies ambiguity, MX servers found, but unable to be reached.
@@ -601,8 +601,8 @@ class BitUser extends LibertyMime {
 				}
 			}
 
-			if( !empty( $pParamHash['verified_email'] ) && $pParamHash['verified_email'] && $gBitSystem->getConfig('users_validate_email_group') ) {
-				BitPermUser::addUserToGroup( $this->mUserId, $gBitSystem->getConfig('users_validate_email_group') );
+			if( !empty( $pParamHash['verified_email'] ) && $pParamHash['verified_email'] && $gBitSystem->getConfig('users_validate_email_role') ) {
+				BitPermUser::addUserToRole( $this->mUserId, $gBitSystem->getConfig('users_validate_email_role') );
 			}
 
 			$this->mLogs['register'] = 'New user registered.';
@@ -751,10 +751,10 @@ class BitUser extends LibertyMime {
 			$this->mDb->StartTrans();
 			$pParamHash['content_type_guid'] = BITUSER_CONTENT_TYPE_GUID;
 			if( !empty( $pParamHash['user_store'] ) && count( $pParamHash['user_store'] ) ) {
-				// lookup and asign the default group for user
-				$defaultGroups = BitPermUser::getDefaultGroup();
-				if( !empty( $defaultGroups ) ) {
-					$pParamHash['user_store']['default_group_id'] = key( $defaultGroups );
+				// lookup and asign the default role for user
+				$defaultRoles = BitPermUser::getDefaultRole();
+				if( !empty( $defaultRoles ) ) {
+					$pParamHash['user_store']['default_role_id'] = key( $defaultRoles );
 				}
 				if( $this->isValid() ) {
 					$userId = array ( "user_id" => $this->mUserId );
@@ -766,9 +766,9 @@ class BitUser extends LibertyMime {
 					$this->mUserId = $pParamHash['user_store']['user_id'];
 					$result = $this->mDb->associateInsert( BIT_DB_PREFIX.'users_users', $pParamHash['user_store'] );
 				}
-				// make sure user is added into the default group map
-				if( !empty( $pParamHash['user_store']['default_group_id'] ) ) {
-					BitPermUser::addUserToGroup( $pParamHash['user_store']['user_id'],$pParamHash['user_store']['default_group_id'] );
+				// make sure user is added into the default role map
+				if( !empty( $pParamHash['user_store']['default_role_id'] ) ) {
+					BitPermUser::addUserToRole( $pParamHash['user_store']['user_id'],$pParamHash['user_store']['default_role_id'] );
 				}
 
 			}
@@ -1074,7 +1074,7 @@ class BitUser extends LibertyMime {
 		session_destroy();
 		$this->mUserId = NULL;
 		// ensure Guest default page is loaded if required
-		$this->mInfo['default_group_id'] = -1;
+		$this->mInfo['default_role_id'] = -1;
 	}
 
 	function sendSessionCookie( $pCookie=TRUE ) {
@@ -1235,15 +1235,15 @@ class BitUser extends LibertyMime {
 				$this->loadPermissions( TRUE );
 
 				// set post-login url
-				// if group home is set for this user we get that
+				// if role home is set for this user we get that
 				// default to general post-login
 				// @see BitSystem::getIndexPage 
 				$indexType = 'my_page';
-				// getGroupHome is BitPermUser method
-				if( method_exists( $this, 'getGroupHome' ) && 
-					(( @$this->verifyId( $this->mInfo['default_group_id'] ) && ( $group_home = $this->getGroupHome( $this->mInfo['default_group_id'] ) ) ) ||
-					( $gBitSystem->getConfig( 'default_home_group' ) && ( $group_home = $this->getGroupHome( $gBitSystem->getConfig( 'default_home_group' ) ) ) )) ){
-					$indexType = 'group_home';
+				// getHomeRole is BitPermUser method
+				if( method_exists( $this, 'getHomeRole' ) && 
+					(( @$this->verifyId( $this->mInfo['default_role_id'] ) && ( $role_home = $this->getHomeRole( $this->mInfo['default_role_id'] ) ) ) ||
+					( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getHomeRole( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
+					$indexType = 'role_home';
 				}
 
 				$url = isset($_SESSION['loginfrom']) ? $_SESSION['loginfrom'] : $gBitSystem->getIndexPage( $indexType );
@@ -2415,7 +2415,7 @@ class BitUser extends LibertyMime {
 					'size'         => 'avatar'
 				));
 			}
-			$res["groups"] = $this->getGroups( $res['user_id'] );
+			$res["roles"] = $this->getRoles( $res['user_id'] );
 			array_push( $ret, $res );
 		}
 		$retval = array();
@@ -2434,34 +2434,34 @@ class BitUser extends LibertyMime {
 	}
 
 	/**
-	 * getGroups 
+	 * getRoles 
 	 * 
 	 * @param array $pUserId 
 	 * @param array $pForceRefresh 
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function getGroups( $pUserId=NULL, $pForceRefresh = FALSE ) {
+	function getRoles( $pUserId=NULL, $pForceRefresh = FALSE ) {
 		$pUserId = !empty( $pUserId ) ? $pUserId : $this->mUserId;
-		if( !isset( $this->cUserGroups[$pUserId] ) || $pForceRefresh ) {
+		if( !isset( $this->cUserRoles[$pUserId] ) || $pForceRefresh ) {
 			$query = "
-				SELECT ug.`group_id`, ug.`group_name`, ug.`user_id` as group_owner_user_id
-				FROM `".BIT_DB_PREFIX."users_groups_map` ugm INNER JOIN `".BIT_DB_PREFIX."users_groups` ug ON (ug.`group_id`=ugm.`group_id`)
-				WHERE ugm.`user_id`=? OR ugm.`group_id`=".ANONYMOUS_GROUP_ID;
+				SELECT ur.`role_id`, ur.`role_name`, ur.`user_id` as role_owner_user_id
+				FROM `".BIT_DB_PREFIX."users_roles_map` urm INNER JOIN `".BIT_DB_PREFIX."users_roles` ur ON (ur.`role_id`=urm.`role_id`)
+				WHERE urm.`user_id`=? OR urm.`role_id`=".ANONYMOUS_ROLE_ID;
 			$ret = $this->mDb->getAssoc( $query, array(( int )$pUserId ));
 			if( $ret ) {
-				foreach( array_keys( $ret ) as $groupId ) {
+				foreach( array_keys( $ret ) as $roleId ) {
 					$res = array();
 					foreach( $res as $key=>$val) {
-						$ret[$key] = array( 'group_name' => $val );
+						$ret[$key] = array( 'role_name' => $val );
 					}
 				}
 			}
 			// cache it
-			$this->cUserGroups[$pUserId] = $ret;
+			$this->cUserRoles[$pUserId] = $ret;
 			return $ret;
 		} else {
-			return $this->cUserGroups[$pUserId];
+			return $this->cUserRoles[$pUserId];
 		}
 	}
 

@@ -154,15 +154,15 @@ if( isset( $_REQUEST["action"] ) ) {
 			$feedback['error'][] = tra( 'User not found' );
 		}
 	}
-	if ($_REQUEST["action"] == 'removegroup') {
-		$gBitUser->removeUserFromGroup($_REQUEST["user"], $_REQUEST["group"]);
+	if ($_REQUEST["action"] == 'removerole') {
+		$gBitUser->removeUserFromRole($_REQUEST["user"], $_REQUEST["role"]);
 	}
 }
 
 // get default group and pass it to tpl
-foreach( $gBitUser->getDefaultGroup() as $defaultGroupId => $defaultGroupName ) {
-	$gBitSmarty->assign('defaultGroupId', $defaultGroupId );
-	$gBitSmarty->assign('defaultGroupName', $defaultGroupName );
+foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
+	$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
+	$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
 }
 
 // override default max_records
@@ -183,8 +183,8 @@ $userObj = new BitPermUser();
 $userObj->invokeServices( 'content_edit_function' );
 
 // Get groups (list of groups)
-$grouplist = $gBitUser->getGroups('', '', 'group_name_asc');
-$gBitSmarty->assign( 'grouplist', $grouplist );
+$rolelist = $gBitUser->getRoles('', '', 'role_name_asc');
+$gBitSmarty->assign( 'rolelist', $rolelist );
 $gBitSmarty->assign( 'feedback', $feedback );
 
 $gBitSmarty->assign( (!empty( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'userlist').'TabSelect', 'tdefault' );
