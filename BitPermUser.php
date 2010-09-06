@@ -638,7 +638,7 @@ class BitPermUser extends BitUser {
 				SELECT $col
 				FROM `".BIT_DB_PREFIX."users_users` uu
 					INNER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON (uu.`user_id`=urm.`user_id`)
-				WHERE ugm.`role_id` = ?";
+				WHERE urm.`role_id` = ?";
 			$ret = $this->mDb->$exec( $query, array( $pRoleId ));
 		}
 		return $ret;
