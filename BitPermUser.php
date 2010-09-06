@@ -90,7 +90,7 @@ class BitPermUser extends BitUser {
 		if( BitUser::load( $pFull, $pUserName ) ) {
 			if( $pFull ) {
 				unset( $this->mPerms );
-				$this->loadGroups();
+				$this->loadRoles();
 				$this->loadPermissions();
 			}
 		}
@@ -514,15 +514,15 @@ class BitPermUser extends BitUser {
 			} elseif( @BitBase::verifyId($pGroupMixed) ) {
 				$addGroups = array( $pGroupMixed );
 			}
-			$currentUserGroups = $this->getGroups( $pUserId );
+			$currentUserRoles = $this->getRoles( $pUserId );
 			foreach( $addGroups AS $roleId ) {
 				$isInGroup = FALSE;
-				foreach( $currentUserGroups as $curGroupId => $curGroupInfo ) {
-					if( $curGroupId == $roleId ) {
-						$isInGroup = TRUE;
+				foreach( $currentUserRoles as $curRoleId => $curRoleInfo ) {
+					if( $curRoleId == $roleId ) {
+						$isInRole = TRUE;
 					}
 				}
-				if( !$isInGroup ) {
+				if( !$isInRole ) {
 					$query = "INSERT INTO `".BIT_DB_PREFIX."users_roles_map` (`user_id`,`role_id`) VALUES(?,?)";
 					$result = $this->mDb->query( $query, array( $pUserId, $roleId ));
 				}
@@ -543,7 +543,7 @@ class BitPermUser extends BitUser {
 		if( @BitBase::verifyId( $pUserId ) && @BitBase::verifyId( $pRoleId )) {
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_roles_map` WHERE `user_id` = ? AND `role_id` = ?";
 			$result = $this->mDb->query( $query, array( $pUserId, $pRoleId ));
-			$default = $this->getDefaultGroup();
+			$default = $this->getDefaultRole();
 			if( $pRoleId == key( $default )) {
 				$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `default_role_id` = NULL WHERE `user_id` = ?";
 				$this->mDb->query( $query, array( $pUserId ));
