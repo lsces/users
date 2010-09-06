@@ -1,4 +1,4 @@
-{* $Header: /srv/website/bitweaver-hg/users $ *}
+{* $Header$ *}
 {strip}
 <div class="floaticon">
 	<a href="{$smarty.const.USERS_PKG_URL}my_roles.php">{tr}&laquo; Role List{/tr}</a> 

@@ -1,6 +1,6 @@
 <?php
 /**
- * @version $Header: /srv/website/bitweaver-hg/users $
+ * @version $Header$
  */
 global $gBitInstaller;
 

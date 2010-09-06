@@ -4,7 +4,7 @@ $gBitSystem->verifyPermission( 'p_admin' );
 
 $feedback = array();
 
-// get a list of all groups and their permissions
+// get a list of all roles and their permissions
 $listHash = array(
 	'only_root_roles' => TRUE,
 	'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc'
@@ -12,7 +12,7 @@ $listHash = array(
 $allRoles = $gBitUser->getAllRoles( $listHash );
 $allPerms = $gBitUser->getRolePermissions( $_REQUEST );
 
-// deal with assigning permissions to various groups
+// deal with assigning permissions to various roles
 if( !empty( $_REQUEST['save'] )) {
 	$gBitUser->verifyTicket();
 	foreach( array_keys( $allGroups ) as $roleId ) {
@@ -26,7 +26,7 @@ if( !empty( $_REQUEST['save'] )) {
 	}
 
 	$feedback['success'] = tra( "The permissions were successfully added to the requested roles." );
-	// we need to update the groups list
+	// we need to update the roles list
 	$allRoles = $gBitUser->getAllRoles( $listHash );
 }
 

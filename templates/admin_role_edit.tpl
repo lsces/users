@@ -1,4 +1,4 @@
-{* $Header: /srv/website/bitweaver-hg/users $ *}
+{* $Header$ *}
 {strip}
 
 <div class="floaticon">

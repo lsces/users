@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /srv/website/bitweaver-hg/users $
+ * $Header$
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See below for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details
  *
- * $Id: my_roles.php,v 9f09e92ff65d 2010/09/05 14:49:48 lsces $
+ * $Id$
  * @package users
  * @subpackage functions
  */

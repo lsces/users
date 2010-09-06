@@ -2,7 +2,7 @@
 /**
  * $Header$
  *
- * Lib for user administration, groups and permissions
+ * Lib for user administration, roles and permissions
  * This lib uses pear so the constructor requieres
 
  * Copyright (c) 2004 bitweaver.org

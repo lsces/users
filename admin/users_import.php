@@ -50,7 +50,7 @@ if( isset( $_REQUEST["batchimport"])) {
 			$newUser = new BitPermUser();
 			if( $newUser->importUser( $userRecord ) ) {
 				if( !empty( $userRecord['roles'] ) ) {
-					// groups need to be separated by spaces since this is a csv file
+					// roles need to be separated by spaces since this is a csv file
 					$roles = explode( " ", $userRecord['roles'] );
 					foreach( $roles as $role ) {
 						if( $roleId = $gBitUser->roleExists( $role, ROOT_USER_ID ) ) {
@@ -84,7 +84,7 @@ if( isset( $_REQUEST["batchimport"])) {
 	}
 }
 
-// get default group and pass it to tpl
+// get default role and pass it to tpl
 foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
 	$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
 	$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
