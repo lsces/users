@@ -47,7 +47,7 @@
 			<div class="row">
 				{formlabel label="Roles"}
 				{forminput}
-					{foreach from=$assignUser->mGroups key=roleId item=role}
+					{foreach from=$assignUser->mRoles key=roleId item=role}
 						{if $roleId eq $assignUser->mInfo.default_role_id}<strong>{/if}
 						<a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php?role_id={$roleId}">{$role.role_name}</a>
 						{if $roleId eq $assignUser->mInfo.default_role_id}</strong>{/if}
@@ -63,7 +63,7 @@
 				{formlabel label="Default Role" for="default_role"}
 				{forminput}
 					<select name="default_role" id="default_role">
-						{foreach from=$assignUser->mGroups key=roleId item=role}
+						{foreach from=$assignUser->mRoles key=roleId item=role}
 							<option value="{$roleId}" {if $roleId eq $assignUser->mInfo.default_role_id}selected="selected"{/if}>{$role.role_name}</option>
 						{/foreach}
 					</select>
@@ -85,7 +85,7 @@
 			</tr>
 			{cycle values="even,odd" print=false}
 			{foreach from=$roles key=roleId item=role}
-				{if !$assignUser->mGroups.$roleId && $roleId != -1}
+				{if !$assignUser->mRoles.$roleId && $roleId != -1}
 					<tr class="{cycle}">
 						<td>{$role.role_name}</td>
 						<td>{$role.role_desc}</td>

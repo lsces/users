@@ -19,7 +19,7 @@
 							<th>{tr}Action{/tr}</th>
 						{/if}
 					</tr>
-					{foreach from=$systemGroups key=roleId item=role}
+					{foreach from=$systemRoles key=roleId item=role}
 						<tr class="{cycle values="odd,even"}">
 							<td>{$role.role_name}</td>
 							<td>{$role.role_desc}</td>
@@ -45,12 +45,12 @@
 							<th>{tr}Description{/tr}</th>
 							<th>{tr}Action{/tr}</th>
 						</tr>
-						{foreach from=$publicGroups key=roleId item=role}
+						{foreach from=$publicRoles key=roleId item=role}
 							{if $role.used ne 'y' and $role.is_default ne 'y'}			
 								<tr class="{cycle values="odd,even"}">
 									<td>{$role.role_name}</td>
 									<td>{$role.role_desc}</td>
-									<td><a href="{$smarty.const.USERS_PKG_URL}my_roles.php?add_public_role=y&amp;public_role_id={$role.role_id}"  title="{tr}Assign Group{/tr}">{biticon ipackage="icons" iname="emblem-shared" iexplain="join role"}</a></td>								
+									<td><a href="{$smarty.const.USERS_PKG_URL}my_roles.php?add_public_role=y&amp;public_role_id={$role.role_id}"  title="{tr}Assign Role{/tr}">{biticon ipackage="icons" iname="emblem-shared" iexplain="join role"}</a></td>								
 								</tr>
 							{/if}
 						{/foreach}
@@ -60,7 +60,7 @@
 				
 			{if $gBitUser->hasPermission( 'p_users_create_personal_roles' )}
 
-				{jstab title="My User Groups"}
+				{jstab title="My User Roles"}
 					<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?action=create">{tr}Add new role{/tr}</a>
 
 					<table class="data">
@@ -85,10 +85,10 @@
 									{$role.role_desc}<br />
 									{if $role.role_home}{tr}Home Page{/tr}:<strong> {$role.role_home}</strong><br />{/if}
 									{if $role.included}
-										{tr}Included Groups{/tr}
+										{tr}Included Roles{/tr}
 										<ul>
-											{foreach from=$role.included key=incGroupId item=incGroupName}
-												<li>{$incGroupName}</li>
+											{foreach from=$role.included key=incRoleId item=incRoleName}
+												<li>{$incRoleName}</li>
 											{/foreach}
 										</ul>
 									{/if}
@@ -118,7 +118,7 @@
 									<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?role_id={$roleId}">{biticon ipackage="icons" iname="accessories-text-editor" iexplain="edit"}</a>
 									{if $roleId ne -1}{* sorry for hardcoding, really need php define ANONYMOUS_ROLE_ID - spiderr *}
 										<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=delete&amp;role_id={$roleId}" 
-										onclick="return confirm('{tr}Are you sure you want to delete this role?{/tr}')">{biticon ipackage="icons" iname="edit-delete" iexplain="Delete Group"}</a>
+										onclick="return confirm('{tr}Are you sure you want to delete this role?{/tr}')">{biticon ipackage="icons" iname="edit-delete" iexplain="Delete Role"}</a>
 									{/if}
 								</td>
 							</tr>

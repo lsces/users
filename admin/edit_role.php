@@ -105,7 +105,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 		$successMsg = 'The permission '.$_REQUEST['permission'].' was removed successflly. <a href="'.USERS_PKG_URL.'admin/edit_role.php?action=assign&amp;perm='.$_REQUEST['permission'].'&amp;role_id='.$_REQUEST['role_id'].'&amp;pacakge='.$_REQUEST['package'].'">Undo last action.</a>';
 	} elseif( $_REQUEST["action"] == 'create' ) {
 		$mid = 'bitpackage:users/admin_role_edit.tpl';
-		$gBitSystem->setBrowserTitle( tra( 'Create New Group' ) );
+		$gBitSystem->setBrowserTitle( tra( 'Create New Role' ) );
 	} elseif ($_REQUEST["action"] == 'assign') {
 		$gBitUser->assignPermissionToRole($_REQUEST["perm"], $_REQUEST['role_id']);
 	}

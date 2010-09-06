@@ -221,7 +221,7 @@
 
 				{if count($roleList) > 1}
 					<hr />
-					{formlabel label="Group" for="role"}
+					{formlabel label="Role" for="role"}
 					{forminput}
 						{foreach item=gr from=$roleList name=role}
 							<input type="radio" name="role" value="{$gr.role_id|escape}"{if ($reg.role eq '' and $smarty.foreach.role.last) or $reg.role eq $gr.role_id} checked="checked"{/if}>

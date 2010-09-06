@@ -88,7 +88,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 			$mid = 'bitpackage:users/my_role_edit.tpl';
 		// Create a new role
 		} elseif( $_REQUEST["action"] == 'create' ) {
-			$gBitSystem->setBrowserTitle( tra('Create New Group') );
+			$gBitSystem->setBrowserTitle( tra('Create New Role') );
 			$mid = 'bitpackage:users/my_role_edit.tpl';
 		// Assign a permission to a role
 		} elseif ($_REQUEST["action"] == 'assign') {
@@ -176,11 +176,11 @@ $listHash = array(
 );
 $publicRoles = $gBitUser->getAllRoles( $listHash );	
 if( count( $publicRoles )) {
-	foreach ( $systemGroups as $roleId=>$roleInfo ) {
-		foreach ( $publicRoles as $key=>$publicGroup) {
+	foreach ( $systemRoles as $roleId=>$roleInfo ) {
+		foreach ( $publicRoles as $key=>$publicRole) {
 			if ( $publicRoles[$key]['role_id'] == $roleId) {
 				if ($publicRoles[$key]['is_default'] != 'y' ) {
-					$systemGroups[$roleId]['public'] = 'y';
+					$systemRoles[$roleId]['public'] = 'y';
 					$canRemovePublic = 'y';
 				}
 				$publicRoles[$key]['used'] = 'y';

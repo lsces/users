@@ -20,7 +20,7 @@
 				{form legend="Add or Edit a Role"}
 					<input type="hidden" name="role_id" value="{$roleInfo.role_id}" />
 					<div class="row">
-						{formlabel label="Group" for="roles_role"}
+						{formlabel label="Role" for="roles_role"}
 						{forminput}
 							<input type="text" name="name" id="roles_role" value="{$roleInfo.role_name}" />
 						{/forminput}
@@ -51,7 +51,7 @@
 
 					<div class="row submit">
 						<input type="submit" name="cancel" value="{tr}Cancel{/tr}" />&nbsp;
-						<input type="submit" name="save" value="{tr}Save Group{/tr}" />
+						<input type="submit" name="save" value="{tr}Save Role{/tr}" />
 					</div>
 				{/form}
 			{/jstab}

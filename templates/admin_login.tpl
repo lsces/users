@@ -92,7 +92,7 @@
 			</div>
 
 			<div class="row">
-				{formlabel label="Groups choice at registration" for="registration_role_choice"}
+				{formlabel label="Roles choice at registration" for="registration_role_choice"}
 				{forminput}
 					<select name="registration_role_choice[]" multiple="multiple" size="5">
 						<option value="">&nbsp;</option>

@@ -15,7 +15,7 @@ $allPerms = $gBitUser->getRolePermissions( $_REQUEST );
 // deal with assigning permissions to various roles
 if( !empty( $_REQUEST['save'] )) {
 	$gBitUser->verifyTicket();
-	foreach( array_keys( $allGroups ) as $roleId ) {
+	foreach( array_keys( $allRoles ) as $roleId ) {
 		foreach( array_keys( $allPerms ) as $perm ) {
 			if( !empty( $_REQUEST['perms'][$roleId][$perm] )) {
 				$gBitUser->assignPermissionToRole( $perm, $roleId );

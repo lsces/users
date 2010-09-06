@@ -49,7 +49,7 @@ define( "ACCOUNT_DISABLED", -6 );
 class BitUser extends LibertyMime {
 	var $mUserId;
 	var $mUsername;
-	var $mGroups;
+	var $mRoles;
 	var $mInfo;
 	var $mTicket;
 	var $mAuth;

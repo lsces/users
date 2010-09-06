@@ -3,25 +3,25 @@
 
 <div class="floaticon">
 	<a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php">
-		{biticon ipackage="icons" iname="system-users" iexplain="Group List"}
+		{biticon ipackage="icons" iname="system-users" iexplain="Role List"}
 	</a>
 	{bithelp}
 </div>
 
 <div class="admin roles">
 	<div class="header">
-		<h1>{if $roleInfo.role_name}{tr}Administer Group{/tr}: {$roleInfo.role_name}{else}{tr}Create New Group{/tr}{/if}</h1>
+		<h1>{if $roleInfo.role_name}{tr}Administer Role{/tr}: {$roleInfo.role_name}{else}{tr}Create New Role{/tr}{/if}</h1>
 	</div>
 
 	<div class="body">
 		{formfeedback success=$successMsg error=$errorMsg}
 
 		{jstabs}
-			{jstab title="Edit Group"}
-				{form legend="Add or Edit a Group"}
+			{jstab title="Edit Role"}
+				{form legend="Add or Edit a Role"}
 					<input type="hidden" name="role_id" value="{$roleInfo.role_id}" />
 					<div class="row">
-						{formlabel label="Group" for="roles_role"}
+						{formlabel label="Role" for="roles_role"}
 						{forminput}
 							<input type="text" name="name" id="roles_role" size="30" maxlength="30" value="{$roleInfo.role_name}" />
 						{/forminput}
@@ -35,10 +35,10 @@
 					</div>
 
 					<div class="row">
-						{formlabel label="Group home page" for="role_home"}
+						{formlabel label="Role home page" for="role_home"}
 						{forminput}
 							<input type="text" name="home" id="role_home" value="{$roleInfo.role_home|escape}" />
-							{formhelp note="Here you can enter the content id of any page, the wiki page name or the absolute path of any page you wish to use as a role home page. For this to work set the site homepage to <strong>Group Home</strong>" link="kernel/admin/index.php?page=features/General Settings"}
+							{formhelp note="Here you can enter the content id of any page, the wiki page name or the absolute path of any page you wish to use as a role home page. For this to work set the site homepage to <strong>Role Home</strong>" link="kernel/admin/index.php?page=features/General Settings"}
 
 							Search for Content:<br/>
 							{html_options options=$contentTypes name=content_type_guid selected=$contentSelect}
@@ -58,7 +58,7 @@
 						{formlabel label="After registration page" for="after_registration_page"}
 						{forminput}
 							<input type="text" name="after_registration_page" id="after_registration_page" value="{$roleInfo.after_registration_page|escape}" />
-							{formhelp note="The same format than the Group home page. Used to redirect a user after his registration if other that the default after login page."}
+							{formhelp note="The same format than the Role home page. Used to redirect a user after his registration if other that the default after login page."}
 						{/forminput}
 					</div>
 
@@ -88,7 +88,7 @@
 
 					<div class="row submit">
 						<input type="submit" name="cancel" value="{tr}Cancel{/tr}" />&nbsp;
-						<input type="submit" name="save" value="{tr}Save Group{/tr}" />
+						<input type="submit" name="save" value="{tr}Save Role{/tr}" />
 					</div>
 				{/form}
 			{/jstab}

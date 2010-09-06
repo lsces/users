@@ -159,8 +159,8 @@ class BitPermUser extends BitUser {
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
 	function roleExists( $pRoleName, $pUserId = ROOT_USER_ID ) {
-		static $sGroups = array();
-		if( !isset( $sGroups[$pUserId][$pRoleName] ) ) {
+		static $sRoles = array();
+		if( !isset( $sRoles[$pUserId][$pRoleName] ) ) {
 			$bindVars = array( $pRoleName );
 			$whereSql = '';
 			if( $pUserId != '*' ) {
@@ -172,15 +172,15 @@ class BitPermUser extends BitUser {
 				FROM `".BIT_DB_PREFIX."users_roles` ur
 				WHERE `role_name`=? $whereSql";
 			if( $result = $this->mDb->getAssoc( $query, $bindVars ) ) {
-				if( empty( $sGroups[$pUserId] ) ) {
-					$sGroups[$pUserId] = array();
+				if( empty( $sRoles[$pUserId] ) ) {
+					$sRoles[$pUserId] = array();
 				}
-				$sGroups[$pUserId][$pRoleName] = $result[$pRoleName];
+				$sRoles[$pUserId][$pRoleName] = $result[$pRoleName];
 			} else {
-				$sGroups[$pUserId][$pRoleName]['role_id'] = NULL;
+				$sRoles[$pUserId][$pRoleName]['role_id'] = NULL;
 			}
 		}
-		return( $sGroups[$pUserId][$pRoleName]['role_id'] );
+		return( $sRoles[$pUserId][$pRoleName]['role_id'] );
 	}
 
 	/**
@@ -223,7 +223,7 @@ class BitPermUser extends BitUser {
 
 
 
-	// =-=-=-=-=-=-=-=-=-=-=-= Group Functions =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	// =-=-=-=-=-=-=-=-=-=-=-= Role Functions =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	/**
 	 * loadRoles load roles into $this->mRoles
 	 * 
@@ -244,7 +244,7 @@ class BitPermUser extends BitUser {
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function isInRole( $pGroupMixed ) {
+	function isInRole( $pRoleMixed ) {
 		$ret = FALSE;
 		if( $this->isAdmin() ) {
 			$ret = TRUE;
@@ -252,9 +252,9 @@ class BitPermUser extends BitUser {
 			if( empty( $this->mRoles ) ) {
 				$this->loadRoles();
 			}
-			if( preg_match( '/A-Za-z/', $pGroupMixed ) ) {
+			if( preg_match( '/A-Za-z/', $pRoleMixed ) ) {
 				// Old style role name passed in
-				deprecated( "Please use the Group ID instead of the Group name." );
+				deprecated( "Please use the Role ID instead of the Role name." );
 				$ret = in_array( $pRoleMixed, $this->mRoles );
 			} else {
 				$ret = isset( $this->mRoles[$pRoleMixed] );
@@ -264,7 +264,7 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * getAllRoless Get a list of all Groups
+	 * getAllRoless Get a list of all Roles
 	 * 
 	 * @param array $pListHash List Hash
 	 * @access public
@@ -371,9 +371,9 @@ class BitPermUser extends BitUser {
 	/**
 	 * getDefaultRole get the default role of a given user
 	 * 
-	 * @param array $pRoleId pass in a Group ID to make conditional function
+	 * @param array $pRoleId pass in a Role ID to make conditional function
 	 * @access public
-	 * @return Default Group ID if one is set
+	 * @return Default Role ID if one is set
 	 */
 	function getDefaultRole( $pRoleId = NULL ) {
 		$bindvars = NULL;
@@ -497,26 +497,26 @@ class BitPermUser extends BitUser {
 	}
 
 	/**
-	 * addUserToRole Adds user pUserId to role(s) pGroupMixed.
+	 * addUserToRole Adds user pUserId to role(s) pRoleMixed.
 	 * 
 	 * @param numeric $pUserId User ID
-	 * @param mixed $pGroupMixed A single role ID or an array of role IDs
+	 * @param mixed $pRoleMixed A single role ID or an array of role IDs
 	 * @access public
 	 * @return Either an ADO RecordSet (success) or FALSE (failure).
 	 */
-	function addUserToRole( $pUserId, $pGroupMixed ) {
+	function addUserToRole( $pUserId, $pRoleMixed ) {
 		$result = FALSE;
-		if( @BitBase::verifyId( $pUserId ) && !empty( $pGroupMixed )) {
+		if( @BitBase::verifyId( $pUserId ) && !empty( $pRoleMixed )) {
 			$result = TRUE;
-			$addGroups = array();
-			if( is_array( $pGroupMixed ) ) {
-				$addGroups = array_keys( $pGroupMixed );
-			} elseif( @BitBase::verifyId($pGroupMixed) ) {
-				$addGroups = array( $pGroupMixed );
+			$addRoles = array();
+			if( is_array( $pRoleMixed ) ) {
+				$addRoles = array_keys( $pRoleMixed );
+			} elseif( @BitBase::verifyId($pRoleMixed) ) {
+				$addRoles = array( $pRoleMixed );
 			}
 			$currentUserRoles = $this->getRoles( $pUserId );
-			foreach( $addGroups AS $roleId ) {
-				$isInGroup = FALSE;
+			foreach( $addRoles AS $roleId ) {
+				$isInRole = FALSE;
 				foreach( $currentUserRoles as $curRoleId => $curRoleInfo ) {
 					if( $curRoleId == $roleId ) {
 						$isInRole = TRUE;
@@ -760,8 +760,8 @@ class BitPermUser extends BitUser {
 		}
 
 		if( @BitBase::verifyId( $pParamHash['role_id'] )) {
-			$selectSql = ', ugp.`perm_value` AS `hasPerm` ';
-			$fromSql = ' INNER JOIN `'.BIT_DB_PREFIX.'users_role_permissions` urp ON ( ugp.`perm_name`=up.`perm_name` ) ';
+			$selectSql = ', urp.`perm_value` AS `hasPerm` ';
+			$fromSql = ' INNER JOIN `'.BIT_DB_PREFIX.'users_role_permissions` urp ON ( urp.`perm_name`=up.`perm_name` ) ';
 			if( $whereSql ) {
 				$whereSql .= " AND  urp.`role_id`=?";
 			} else {
@@ -801,7 +801,7 @@ class BitPermUser extends BitUser {
 	/**
 	 * assignLevelPermissions Assign the permissions of a given level to a given role
 	 * 
-	 * @param array $pRoleId Group we want to assign permissions to
+	 * @param array $pRoleId Role we want to assign permissions to
 	 * @param array $pLevel permission level we wish to assign from
 	 * @param array $pPackage limit set of permissions to a given package
 	 * @access public
@@ -870,19 +870,19 @@ class BitPermUser extends BitUser {
 	/**
 	 * storeRegistrationChoice 
 	 * 
-	 * @param mixed $pGroupMixed A single role ID or an array of role IDs
+	 * @param mixed $pRoleMixed A single role ID or an array of role IDs
 	 * @param array $pValue Value you wish to store - use NULL to delete a value
 	 * @access public
 	 * @return ADO record set on success, FALSE on failure
 	 */
-	function storeRegistrationChoice( $pGroupMixed, $pValue = NULL ) {
-		if( !empty( $pGroupMixed )) {
+	function storeRegistrationChoice( $pRoleMixed, $pValue = NULL ) {
+		if( !empty( $pRoleMixed )) {
 			$bindVars[] = $pValue;
-			if( is_array( $pGroupMixed )) {
-				$mid = implode( ',', array_fill( 0, count( $pGroupMixed ),'?' ));
-				$bindVars = array_merge( $bindVars, $pGroupMixed );
+			if( is_array( $pRoleMixed )) {
+				$mid = implode( ',', array_fill( 0, count( $pRoleMixed ),'?' ));
+				$bindVars = array_merge( $bindVars, $pRoleMixed );
 			} else {
-				$bindVars[] = $pGroupMixed;
+				$bindVars[] = $pRoleMixed;
 				$mid = 'LIKE ?';
 			}
 			$query = "UPDATE `".BIT_DB_PREFIX."users_roles` SET `is_public`= ? where `role_id` IN ($mid)";
