@@ -3,8 +3,8 @@
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See below for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
-// This script is used to assign groups to a particular user
-// ASSIGN USER TO GROUPS
+// This script is used to assign roles to a particular user
+// ASSIGN USER TO ROLES
 // Initialization
 require_once( '../../kernel/setup_inc.php' );
 
