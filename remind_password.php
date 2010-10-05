@@ -50,6 +50,7 @@ if( $gBitUser->isRegistered() ) {
 		$gBitSmarty->assign('mail_user', $userInfo[$loginCol]);
 		$gBitSmarty->assign('mail_same', $gBitSystem->isFeatureActive( 'users_clear_passwords' ));
 		$gBitSmarty->assign('mail_pass', $pass);
+		$gBitSmarty->assign('linkUri', $gBitSystem->isFeatureActive("site_https_login_required") ? 'https://'.$_SERVER['HTTP_HOST'].USERS_PKG_URL : USERS_PKG_URI );
 		$mail_data = $gBitSmarty->fetch('bitpackage:users/password_reminder.tpl');
 		$subject = tra( "Your password for" ).": ".$gBitSystem->getConfig( 'site_title', $_SERVER['HTTP_HOST'] );
 		mail( $userInfo['email'], $subject, $mail_data, "From: ".$gBitSystem->getConfig( 'site_sender_email' )."\r\nContent-type: text/plain;charset=utf-8\r\n");
