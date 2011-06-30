@@ -12,7 +12,6 @@
  * All Rights Reserved. See below for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details
  *
- * $Id$
  * @package users
  */
 
@@ -42,7 +41,6 @@ define( "ACCOUNT_DISABLED", -6 );
  * Class that holds all information for a given user
  *
  * @author   spider <spider@steelsun.com>
- * @version  $Revision$
  * @package  users
  * @subpackage  BitUser
  */
@@ -111,14 +109,18 @@ class BitUser extends LibertyMime {
 			}
 			// uu.`user_id` AS `uu_user_id` is last and aliases to avoid possible column name collisions
 			$query = "
-				SELECT uu.*, tf_ava.`storage_path` AS `avatar_storage_path`, tf_por.`storage_path` AS `portrait_storage_path`, tf_logo.`storage_path` AS `logo_storage_path`  $fullSelect, uu.`user_id` AS `uu_user_id`
+				SELECT uu.*,
+						lf_ava.`file_name` AS `avatar_file_name`,  la_ava.`attachment_id` AS `avatar_attachment_id`, lf_ava.`mime_type` AS `avatar_mime_type`,
+						lf_por.`file_name` AS `portrait_file_name`, ta_por.`attachment_id` AS `portrait_attachment_id`, lf_por.`mime_type` AS `portrait_mime_type`,
+						lf_logo.`file_name` AS `logo_file_name`, ta_logo.`attachment_id` AS `logo_attachment_id`, lf_logo.`mime_type` AS `logo_mime_type`
+					  $fullSelect, uu.`user_id` AS `uu_user_id`
 				FROM `".BIT_DB_PREFIX."users_users` uu
-					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` ta_ava ON ( uu.`avatar_attachment_id`=ta_ava.`attachment_id` )
-					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` tf_ava ON ( tf_ava.`file_id`=ta_ava.`foreign_id` )
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` la_ava ON ( uu.`avatar_attachment_id`=la_ava.`attachment_id` )
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` lf_ava ON ( lf_ava.`file_id`=la_ava.`foreign_id` )
 					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` ta_por ON ( uu.`portrait_attachment_id`=ta_por.`attachment_id` )
-					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` tf_por ON ( tf_por.`file_id`=ta_por.`foreign_id` )
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` lf_por ON ( lf_por.`file_id`=ta_por.`foreign_id` )
 					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` ta_logo ON ( uu.`logo_attachment_id`=ta_logo.`attachment_id` )
-					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` tf_logo ON ( tf_logo.`file_id`=ta_logo.`foreign_id` )
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` lf_logo ON ( lf_logo.`file_id`=ta_logo.`foreign_id` )
 					$fullJoin
 				$whereSql";
 			if(( $result = $this->mDb->query( $query, $bindVars )) && $result->numRows() ) {
@@ -127,12 +129,10 @@ class BitUser extends LibertyMime {
 				$this->mInfo['valid']         = @$this->verifyId( $this->mInfo['uu_user_id'] );
 				$this->mInfo['user_id']       = $this->mInfo['uu_user_id'];
 				$this->mInfo['is_registered'] = $this->isRegistered();
-				$this->mInfo['avatar_url']    = liberty_fetch_thumbnail_url( array( 'storage_path' => $this->mInfo['avatar_storage_path'],   'size' => 'avatar', 'mime_image' => FALSE ));
-				$this->mInfo['portrait_url']  = liberty_fetch_thumbnail_url( array( 'storage_path' => $this->mInfo['portrait_storage_path'], 'size' => 'medium', 'mime_image' => FALSE ));
-				$this->mInfo['logo_url']      = ( !empty( $this->mInfo['logo_storage_path'] )     ? BIT_ROOT_URL.$this->mInfo['logo_storage_path']     : NULL);
-				$this->mInfo['avatar_path']   = ( !empty( $this->mInfo['avatar_storage_path'] )   ? BIT_ROOT_PATH.$this->mInfo['avatar_storage_path']  : NULL);
-				$this->mInfo['portrait_path'] = ( !empty( $this->mInfo['portrait_storage_path'] ) ? BIT_ROOT_PATH.$this->mInfo['portrait_storage_path']: NULL);
-				$this->mInfo['logo_path']     = ( !empty( $this->mInfo['logo_storage_path'] )     ? BIT_ROOT_PATH.$this->mInfo['logo_storage_path']    : NULL);
+				foreach( array( 'portrait', 'avatar', 'logo' ) as $img ) {
+					$this->mInfo[$img.'_path']   = $this->getSourceFile( array( 'user_id'=>$this->getField( 'user_id' ), 'package'=>liberty_mime_get_storage_sub_dir_name( array( 'type' => $this->getField( $img.'_mime_type' ), 'name' =>  $this->getField( $img.'_file_name' ) ) ), 'file_name' => basename( $this->mInfo[$img.'_file_name'] ), 'sub_dir' =>  $this->getField( $img.'_attachment_id' ) ) );
+					$this->mInfo[$img.'_url']    = liberty_fetch_thumbnail_url( array( 'source_file'=>$this->mInfo[$img.'_path'], 'size' => 'small', 'mime_image' => FALSE ));
+				}
 
 				// break the real name into first and last name using the last space as the beginning of the last name
 				// for people who really want to use first and last name fields 
@@ -1905,7 +1905,7 @@ class BitUser extends LibertyMime {
 					$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `{$pType}_attachment_id` = ? WHERE `user_id`=?";
 					$result = $this->mDb->query( $query, array( $file['attachment_id'], $this->mUserId ) );
 					$this->mInfo["{$pType}_attachment_id"] = $file['attachment_id'];
-					$pStorageHash["{$pType}_storage_path"] = $file['upload']['dest_path'];
+					$pStorageHash["{$pType}_file_name"] = $file['upload']['dest_branch'];
 				}
 			} else {
 				$this->mErrors["{$pType}_file"] = 'File '.$pStorageHash['upload_store']['files'][$pType]['name'].' could not be stored.';
@@ -1927,7 +1927,7 @@ class BitUser extends LibertyMime {
 			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `".$pType."_attachment_id` = NULL WHERE `user_id`=?";
 			$result = $this->mDb->query( $query, array( $this->mUserId ) );
 			if( $this->expungeAttachment( $this->getField( $pType.'_attachment_id' ) ) ) {
-				unset( $this->mInfo[$pType.'_storage_path'] );
+				unset( $this->mInfo[$pType.'_file_name'] );
 				unset( $this->mInfo[$pType.'_attachment_id'] );
 				unset( $this->mInfo[$pType.'_url'] );
 			}
@@ -2285,7 +2285,7 @@ class BitUser extends LibertyMime {
 			}
 
 			if( $pUseLink && $gBitUser->hasPermission( 'p_users_view_user_homepage' )) {
-				$ret = '<a class="username" title="'.( !empty( $pHash['link_title'] ) ? $pHash['link_title'] : tra( 'Visit the userpage of' ).': '.htmlspecialchars( $displayName ))
+				$ret = '<a class="username" title="'.( !empty( $pHash['link_title'] ) ? $pHash['link_title'] : tra( 'Profile for' ).' '.htmlspecialchars( $displayName ))
 					.'" href="'.BitUser::getDisplayUrl( $iHomepage ).'">'
 					. htmlspecialchars( isset( $pHash['link_label'] ) ? $pHash['link_label'] : $displayName )
 					.'</a>';
@@ -2378,15 +2378,20 @@ class BitUser extends LibertyMime {
 			$bindVars[] = '%'.strtoupper( $pParamHash['find'] ).'%';
 		}
 
+		if( $gBitSystem->isPackageActive( 'stats' ) ) {
+			$joinSql .= " LEFT OUTER JOIN `".BIT_DB_PREFIX."stats_referer_users_map` srum ON (srum.`user_id`=uu.`user_id`) 
+						  LEFT OUTER JOIN `".BIT_DB_PREFIX."stats_referer_urls` sru ON (srum.`referer_url_id`=sru.`referer_url_id`)";
+			$selectSql .= ", sru.`referer_url`";
+		}
 		// Return an array of users indicating name, email, last changed pages, versions, last_login
 		$query = "
-			SELECT uu.*, lc.`content_status_id`, tf_ava.`storage_path` AS `avatar_storage_path` $selectSql
+			SELECT uu.*, lc.`content_status_id`, lf_ava.`file_name` AS `avatar_file_name`, lf_ava.`mime_type` AS `avatar_mime_type`, la_ava.`attachment_id` AS `avatar_attachment_id` $selectSql
 			FROM `".BIT_DB_PREFIX."users_users` uu
 				INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON (uu.`content_id`=lc.`content_id`)
 				$joinSql
 				LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_hits` lch ON ( lc.`content_id` = lch.`content_id` )
-				LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` ta_ava ON ( uu.`avatar_attachment_id`=ta_ava.`attachment_id` )
-				LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` tf_ava ON ( tf_ava.`file_id`=ta_ava.`foreign_id` ) 
+				LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_attachments` la_ava ON ( uu.`avatar_attachment_id`=la_ava.`attachment_id` )
+				LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_files` lf_ava ON ( lf_ava.`file_id`=la_ava.`foreign_id` ) 
 			WHERE lc.`content_type_guid` = ? $whereSql ORDER BY ".$this->mDb->convertSortmode( $pParamHash['sort_mode'] );
 		$result = $this->mDb->query( $query, $bindVars, $pParamHash['max_records'], $pParamHash['offset'] );
 
@@ -2407,10 +2412,11 @@ class BitUser extends LibertyMime {
 				}
 			}
 			
-			if( !empty( $res['avatar_storage_path'] )) {
-				$res['avatar_url'] = $res['avatar_storage_path'];
+			if( !empty( $res['avatar_file_name'] )) {
+				$res['avatar_url'] = $this->getSourceUrl( array( 'attachment_id'=>$res['avatar_attachment_id'], 'file_name'=>$res['avatar_file_name'] ) );
 				$res['thumbnail_url'] = liberty_fetch_thumbnail_url( array(
-					'storage_path' => $res['avatar_url'],
+					'source_file' => $this->getSourceFile( array( 'sub_dir'=>$res['avatar_attachment_id'], 'user_id' => $res['user_id'], 'file_name'=>$res['avatar_file_name'], 'package'=>liberty_mime_get_storage_sub_dir_name( array( 'type'=>$res['avatar_mime_type'], 'name'=>$res['avatar_file_name'] ) ) ) ),
+					'file_name' => $res['avatar_url'],
 					// TODO: Make this a preference
 					'size'         => 'avatar'
 				));
