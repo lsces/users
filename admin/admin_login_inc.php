@@ -33,14 +33,14 @@ $loginSettings = array(
 		'note' => "Set a custom url where users will be directed after logging in. It should not include a leading slash or subdirectory. Default is users/my.php",
 	),
 	'users_eponymous_roles' => array(
-		'label' => "Create a rol for each user",
+		'label' => "Create a role for each user",
 		'type' => "checkbox",
 		'note' => "This will create a role for each user with the same name as the user. This might be useful if you want to assign different permission settings to every user.",
 	),
 	'users_register_require_passcode' => array(
 		'label' => "Request passcode to register",
 		'type' => "checkbox",
-		'note' => "",
+		'note' => "Use a Passcode for users to register with your site.",
 	),
 	'users_register_passcode' => array(
 		'label' => "Passcode",
@@ -48,7 +48,7 @@ $loginSettings = array(
 		'note' => "Enter the Passcode that is required for users to register with your site.",
 	),
 	'users_random_number_reg' => array(
-		'label' => "Use captcha to prevent automatic/robot registration",
+		'label' => "Use captcha for registration",
 		'type' => "checkbox",
 		'note' => "This will generate an image with text that the user has to confirm during the registration step.",
 	),
@@ -65,7 +65,7 @@ $loginSettings = array(
 	'users_pass_due' => array(
 		'label' => "Password invalid after days",
 		'type' => "text",
-		'note' => "",
+		'note' => "Request a change of password after X days.",
 	),
 	'users_clear_passwords' => array(
 		'label' => "Store plaintext passwords",
@@ -73,9 +73,9 @@ $loginSettings = array(
 		'note' => "Passwords will be visible in the database. If a user requests a password, their password will *not* be reset and simply emailed to them in plain text. This option is less secure, but better suited to sites with a wide variety of users.",
 	),
 	'users_case_sensitive_login' => array(
-		'label' => 'Case-Sensitive Login',
+		'label' => "Case-Sensitive Login",
 		'type' => "checkbox",
-		'note' => 'This determines whether user login names are case-sensitive.'
+		'note' => "This determines whether user login names are case-sensitive."
 	),
 	'user_password_generator' => array(
 		'label' => "Password generator",
@@ -83,14 +83,14 @@ $loginSettings = array(
 		'note' => "Display password generator on registration page that creates secure passwords.",
 	),
 	'users_pass_chr_num' => array(
-		'label' => "Force to use characters <strong>and</strong> numbers in passwords",
+		'label' => "Force character <strong>and</strong> number passwords",
 		'type' => "checkbox",
-		'note' => "",
+		'note' => "Restict passwords to a more secure format.",
 	),
 	'users_min_pass_length' => array(
 		'label' => "Minimum password length",
 		'type' => "text",
-		'note' => "",
+		'note' => "Set a minimum length of password",
 	),
 	'users_remember_me' => array(
 		'label' => "Remember me feature",
