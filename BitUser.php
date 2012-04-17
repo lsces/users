@@ -1,7 +1,5 @@
 <?php
 /**
- * $Header$
- *
  * Lib for user administration, roles and permissions
  * This lib uses pear so the constructor requieres
  * a pear DB object
@@ -1534,8 +1532,8 @@ class BitUser extends LibertyMime {
 					$val = strtoupper( $val );
 				} else {
 					$col = " uu.`".key( $pUserMixed )."` ";
-					if( $val > 0xFFFFFFFF ) {
-						// 32 bit overflow, set to zero to avoid fatal error in databases with 32 bit integer columns
+					if( $val > 0x1FFFFFFF ) {
+						// 32 bit overflow, set to zero to avoid fatal error in databases with 32 bit signed integer columns
 						$val = 0;
 					}
 				}
@@ -1544,6 +1542,24 @@ class BitUser extends LibertyMime {
 			}
 		}
 		return $ret;
+	}
+
+	/**
+	 * isUserPublic Determine if an arbitrary user can be viewed by non-permissioned users.
+	 *
+	 * @param array $pUserId user_id of user to query visibility, if NULL will use this object
+	 * @access public
+	 * @return boolean if user is publically visible
+	 */
+	function isUserPrivate( $pUserId=NULL ) {
+		$infoPref = NULL;
+		if( BitBase::verifyId( $pUserId ) ) {
+			$infoPref = BitUser::getUserPreference( 'users_information', NULL, $pUserId );
+		} elseif( isset( $this ) && $this->isValid() ) {
+			$infoPref = $this->getPreference( 'users_information' );
+		}
+
+		return $infoPref == 'private';
 	}
 
 	/**
@@ -1780,7 +1796,7 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	function getThumbnailUrl( $pSize = 'small', $pInfoHash = NULL ) {
+	function getThumbnailUrl( $pSize = 'small', $pInfoHash = NULL, $pSecondaryId = NULL, $pDefault=TRUE ) {
 		$ret = '';
 		if( $pInfoHash ) {
 			// do some stuff if we are passed a hash-o-crap, not implemented currently
@@ -2197,10 +2213,7 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return URL to users homepage
 	 */
-	function getDisplayUrl( $pUserName=NULL, $pMixed=NULL ) {
-		if( ( $pUserName === NULL) && !empty( $this ) && !empty( $this->mUsername ) ) {
-			$pUserName = $this->mUsername;
-		}
+	public static function getDisplayUrl( $pUserName=NULL, $pMixed=NULL ) {
 		if( function_exists( 'override_user_url' ) ) {
 			$ret = override_user_url( $pUserName );
 		} else {
@@ -2220,6 +2233,12 @@ class BitUser extends LibertyMime {
 		return $ret;
 	}
 
+	function getContentUrl( $pUserName=NULL ) {
+		if( ( $pUserName === NULL) && !empty( $this ) && !empty( $this->mUsername ) ) {
+			$pUserName = $this->mUsername;
+		}
+		return self::getDisplayUrl( $pUserName );
+	}
 	/**
 	 * getDisplayLink 
 	 * 
@@ -2228,8 +2247,8 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return get a link to the the users homepage
 	 */
-	function getDisplayLink( $pUserName, $pDisplayHash ) {
-		return BitUser::getDisplayName( TRUE, $pDisplayHash );
+	function getDisplayLink( $pLinkText=NULL, $pMixed=NULL, $pAnchor=NULL ) {
+		return BitUser::getDisplayName( TRUE, $pMixed );
 	}
 
 	/**
@@ -2239,7 +2258,7 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return get the users display name
 	 */
-	function getTitle( $pHash = NULL ) {
+	function getTitle( $pHash = NULL, $pDefault=TRUE ) {
 		return BitUser::getDisplayName( FALSE, $pHash );
 	}
 
@@ -2250,7 +2269,7 @@ class BitUser extends LibertyMime {
 	 * @param pHash todo - need explanation on how to use this...
 	 * @return display name or link to user information page
 	 **/
-	function getDisplayName( $pUseLink = FALSE, $pHash=NULL ) {
+	public static function getDisplayName( $pUseLink = FALSE, $pHash=NULL ) {
 		global $gBitSystem, $gBitUser;
 		$ret = NULL;
 		if( empty( $pHash ) && !empty( $this ) && !empty( $this->mInfo )) {
@@ -2358,8 +2377,12 @@ class BitUser extends LibertyMime {
 
 		// limit search to users with a specific IP
 		if( !empty( $pParamHash['ip'] ) ) {
-			$joinSql .= " LEFT OUTER JOIN `".BIT_DB_PREFIX."users_cnxn` uc ON ( uu.`user_id`=uc.`user_id`)";
+			$joinSql .= " LEFT OUTER JOIN `".BIT_DB_PREFIX."users_cnxn` uc ON ( uu.`user_id`=uc.`user_id`) ";
+			if( strpos( $pParamHash['ip'], '%' ) ) {
+				$whereSql = " AND uc.`ip` LIKE ? ";
+			} else {
 			$whereSql = " AND uc.`ip`=? ";
+			}
 			$bindVars[] = $pParamHash['ip'];
 		}
 

@@ -1,3 +1,4 @@
+{* $Header$ *}
 {strip}
 <div class="floaticon">{bithelp}</div>
 
