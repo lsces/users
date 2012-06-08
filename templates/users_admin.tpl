@@ -55,13 +55,13 @@
 					</div>
 
 					<div class="row">
-						{if $defaultRoleId eq ''}
-							{formfeedback error="No default role is currently set. Please set one in the Administration --&gt; Users --&gt; <a href=\"`$smarty.const.USERS_PKG_URL`admin/edit_role.php\">Roles and Permissions</a> page"}
+						{if $defaultGroupId eq ''}
+							{formfeedback error="No default group is currently set. Please set one in the Administration --&gt; Users --&gt; <a href=\"`$smarty.const.USERS_PKG_URL`admin/edit_group.php\">Groups and Permissions</a> page"}
 						{/if}
-						{formlabel label="User will be added to the following role" for=""}
+						{formlabel label="User will be added to the following group" for=""}
 						{forminput}
-							{$defaultRoleName} <a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php?role_id={$defaultRoleId}">{biticon ipackage="icons" iname="accessories-text-editor" iexplain="change settings"}</a>
-							{formhelp note="This is the role that is selected as the default role. If you would like to change the default role, please click on the edit icon and set a different role as default role."}
+							{$defaultGroupName} <a href="{$smarty.const.USERS_PKG_URL}admin/edit_group.php?group_id={$defaultGroupId}">{biticon ipackage="icons" iname="accessories-text-editor" iexplain="change settings"}</a>
+							{formhelp note="This is the group that is selected as the default group. If you would like to change the default group, please click on the edit icon and set a different group as default group."}
 						{/forminput}
 					</div>
 
@@ -100,7 +100,7 @@
 					{*include file="bitpackage:liberty/edit_services_inc.tpl" serviceFile="content_edit_mini_tpl"*}
 
 					<div class="row submit">
-						<input type="submit" name="newuser" value="{tr}Add User{/tr}"{if $defaultRoleId eq ''} disabled="disabled"{/if} />
+						<input type="submit" name="newuser" value="{tr}Add User{/tr}"{if $defaultGroupId eq ''} disabled="disabled"{/if} />
 					</div>
 				{/form}
 			{/jstab}

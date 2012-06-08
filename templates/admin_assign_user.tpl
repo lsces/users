@@ -5,8 +5,8 @@
 
 <div class="admin users">
 	<div class="header">
-		<h1>{tr}Assign user to roles{/tr}</h1>
-		<p>{tr}Assign and remove roles for user {$assignUser->mInfo.login}{/tr}</p>
+		<h1>{tr}Assign user to groups{/tr}</h1>
+		<p>{tr}Assign and remove groups for user {$assignUser->mInfo.login}{/tr}</p>
 	</div>
 
 	<div class="body">
@@ -45,14 +45,14 @@
 			{/if}
 
 			<div class="row">
-				{formlabel label="Roles"}
+				{formlabel label="Groups"}
 				{forminput}
-					{foreach from=$assignUser->mRoles key=roleId item=role}
-						{if $roleId eq $assignUser->mInfo.default_role_id}<strong>{/if}
-						<a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php?role_id={$roleId}">{$role.role_name}</a>
-						{if $roleId eq $assignUser->mInfo.default_role_id}</strong>{/if}
-						{if $roleId != -1}
-							&nbsp;<a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?action=removerole&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}">{biticon ipackage="icons" iname="edit-delete" iexplain="remove from role" iforce="icon"}</a>
+					{foreach from=$assignUser->mGroups key=groupId item=group}
+						{if $groupId eq $assignUser->mInfo.default_group_id}<strong>{/if}
+						<a href="{$smarty.const.USERS_PKG_URL}admin/edit_group.php?group_id={$groupId}">{$group.group_name}</a>
+						{if $groupId eq $assignUser->mInfo.default_group_id}</strong>{/if}
+						{if $groupId != -1}
+							&nbsp;<a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?action=removegroup&amp;group_id={$groupId}&amp;assign_user={$assignUser->mUserId}&amp;tk={$gBitUser->mTicket}">{biticon ipackage="icons" iname="edit-delete" iexplain="remove from group" iforce="icon"}</a>
 						{/if}
 						<br />
 					{/foreach}
@@ -60,11 +60,11 @@
 			</div>
 
 			<div class="row">
-				{formlabel label="Default Role" for="default_role"}
+				{formlabel label="Default Group" for="default_group"}
 				{forminput}
-					<select name="default_role" id="default_role">
-						{foreach from=$assignUser->mRoles key=roleId item=role}
-							<option value="{$roleId}" {if $roleId eq $assignUser->mInfo.default_role_id}selected="selected"{/if}>{$role.role_name}</option>
+					<select name="default_group" id="default_group">
+						{foreach from=$assignUser->mGroups key=groupId item=group}
+							<option value="{$groupId}" {if $groupId eq $assignUser->mInfo.default_group_id}selected="selected"{/if}>{$group.group_name}</option>
 						{/foreach}
 					</select>
 				{/forminput}
@@ -79,18 +79,18 @@
 
 		<table class="data">
 			<tr>
-				<th><a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?assign_user={$assignUser->mUserId}&amp;offset={$offset}&amp;sort_mode={if $sort_mode eq 'role_name_desc'}role_name_asc{else}role_name_desc{/if}">{tr}Role Name{/tr}</a></th>
-				<th><a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?assign_user={$assignUser->mUserId}&amp;offset={$offset}&amp;sort_mode={if $sort_mode eq 'role_desc_desc'}role_desc_asc{else}role_desc_desc{/if}">{tr}Description{/tr}</a></th>
+				<th><a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?assign_user={$assignUser->mUserId}&amp;offset={$offset}&amp;sort_mode={if $sort_mode eq 'group_name_desc'}group_name_asc{else}group_name_desc{/if}">{tr}Group Name{/tr}</a></th>
+				<th><a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?assign_user={$assignUser->mUserId}&amp;offset={$offset}&amp;sort_mode={if $sort_mode eq 'group_desc_desc'}group_desc_asc{else}group_desc_desc{/if}">{tr}Description{/tr}</a></th>
 				<th>{tr}action{/tr}</th>
 			</tr>
 			{cycle values="even,odd" print=false}
-			{foreach from=$roles key=roleId item=role}
-				{if !$assignUser->mRoles.$roleId && $roleId != -1}
+			{foreach from=$groups key=groupId item=group}
+				{if !$assignUser->mGroups.$groupId && $groupId != -1}
 					<tr class="{cycle}">
-						<td>{$role.role_name}</td>
-						<td>{$role.role_desc}</td>
+						<td>{$group.group_name}</td>
+						<td>{$group.group_desc}</td>
 						<td class="actionicon">
-							<a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=assign&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}">
+							<a href="{$smarty.const.USERS_PKG_URL}admin/assign_user.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=assign&amp;group_id={$groupId}&amp;assign_user={$assignUser->mUserId}&amp;{tk}">
 								{biticon ipackage="icons" iname="emblem-shared" iexplain="assign" iforce="icon"}
 							</a>
 						</td>
