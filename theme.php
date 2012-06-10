@@ -19,7 +19,7 @@ $gEditMode = 'theme';
  * required setup
  */
 include_once( '../kernel/setup_inc.php' );
-include_once( USERS_PKG_PATH.'BitUser.php' );
+include_once( USERS_PKG_PATH.'RoleUser.php' );
 include_once( THEMES_PKG_PATH.'css_lib.php' );
 include_once( KERNEL_PKG_PATH.'BitSystem.php' );
 
@@ -285,7 +285,7 @@ if( count( $imageList ) ) {
 
 $gBitSmarty->assign('imagesCount', count($themeImages));
 $gBitSmarty->assign_by_ref('themeImages',$themeImages);
-$gBitSmarty->assign('PHP_SELF', $_SERVER['PHP_SELF']);
+$gBitSmarty->assign('SCRIPT_NAME', $_SERVER['SCRIPT_NAME']);
 $gBitSmarty->assign_by_ref('gQueryUser', $gQueryUser);
 
 $gBitSystem->display( 'bitpackage:users/user_theme.tpl', NULL, array( 'display_mode' => 'display' ));

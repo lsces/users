@@ -14,6 +14,9 @@
 		{if $gBitSystem->isFeatureActive( 'users_preferences' )}
 			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}preferences.php">{biticon iname="emblem-system" iexplain=Preferences ilocation=$location}</a></li>
 		{/if}
+		{if $gBitUser->hasPermission( 'p_users_create_personal_groups' )}
+			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}my_groups.php">{biticon iname="preferences-desktop" iexplain="My Groups" ilocation=$location}</a></li>
+		{/if}
 		{if $gBitUser->hasPermission( 'p_users_create_personal_roles' )}
 			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}my_roles.php">{biticon iname="preferences-desktop" iexplain="My Roles" ilocation=$location}</a></li>
 		{/if}

@@ -14,7 +14,7 @@ $feedback = array();
 
 if( isset($_REQUEST["newuser"] ) ) {
 	$userRecord = $_REQUEST;
-	$newUser = new BitPermUser();
+	$newUser = new RolePermUser();
 
 	if( $newUser->importUser( $userRecord ) ) {
 		$gBitSmarty->assign( 'addSuccess', "User Added Successfully" );
@@ -179,7 +179,7 @@ $_REQUEST['listInfo']["URL"] = USERS_PKG_URL."admin/index.php";
 $gBitSmarty->assign_by_ref('listInfo', $_REQUEST['listInfo']);
 
 // invoke edit service for the add user feature
-$userObj = new BitPermUser();
+$userObj = new RolePermUser();
 $userObj->invokeServices( 'content_edit_function' );
 
 // Get roles (list of roles)

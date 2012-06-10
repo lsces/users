@@ -33,7 +33,7 @@ $loginSettings = array(
 		'note' => "Set a custom url where users will be directed after logging in. It should not include a leading slash or subdirectory. Default is users/my.php",
 	),
 	'users_eponymous_roles' => array(
-		'label' => "Create a rol for each user",
+		'label' => "Create a role for each user",
 		'type' => "checkbox",
 		'note' => "This will create a role for each user with the same name as the user. This might be useful if you want to assign different permission settings to every user.",
 	),
