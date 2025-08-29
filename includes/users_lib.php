@@ -10,12 +10,17 @@
  * 
  * @param array $pParamHash 
  * @access public
- * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+ * @return bool true on success, false on failure - mErrors will contain reason for failure
  */
+
+namespace Bitweaver\Users;
+
+use Bitweaver\KernelTools;
+
 function users_admin_email_user( &$pParamHash ) {
 	global $gBitSmarty, $gBitSystem;
 
-	$ret = FALSE;
+	$ret = false;
 	$siteName = $gBitSystem->getConfig('site_title', $_SERVER['HTTP_HOST'] );
 	$gBitSmarty->assign( 'siteName', $_SERVER["SERVER_NAME"] );
 	$gBitSmarty->assign( 'mail_site', $_SERVER["SERVER_NAME"] );
@@ -23,13 +28,13 @@ function users_admin_email_user( &$pParamHash ) {
 	if( !empty( $_REQUEST['admin_verify_user'] ) && !empty( $pParamHash['user_store']['provpass'] )) {
 		$apass = addslashes( substr( md5( $gBitSystem->genPass() ), 0, 25 ));
 		$apass = $pParamHash['user_store']['provpass'];
-		$machine = httpPrefix().USERS_PKG_URL.'confirm.php';
+		$machine = KernelTools::httpPrefix().USERS_PKG_URL.'confirm.php';
 		// Send the mail
 		$gBitSmarty->assign( 'mail_machine', $machine );
 		$gBitSmarty->assign( 'mailUserId', $pParamHash['user_store']['user_id'] );
 		$gBitSmarty->assign( 'mailProvPass', $apass );
 		$mail_data = $gBitSmarty->fetch( 'bitpackage:users/admin_validation_mail.tpl' );
-		mail( $pParamHash['email'], $siteName.' - '.tra( 'Your registration information' ),$mail_data,"From: ".$gBitSystem->getConfig( 'site_sender_email' )."\r\nContent-type: text/plain;charset=utf-8\r\n" );
+		mail( $pParamHash['email'], $siteName.' - '.KernelTools::tra( 'Your registration information' ),$mail_data,"From: ".$gBitSystem->getConfig( 'site_sender_email' )."\r\nContent-type: text/plain;charset=utf-8\r\n" );
 		$gBitSmarty->assign( 'showmsg', 'n' );
 
 		$ret = array(
@@ -40,10 +45,10 @@ function users_admin_email_user( &$pParamHash ) {
 		$gBitSmarty->assign( 'mailPassword',$pParamHash['password'] );
 		$gBitSmarty->assign( 'mailEmail',$pParamHash['email'] );
 		$mail_data = $gBitSmarty->fetch( 'bitpackage:users/admin_welcome_mail.tpl' );
-		mail( $pParamHash["email"], tra( 'Welcome to' ).' '.$siteName,$mail_data,"From: ".$gBitSystem->getConfig('site_sender_email')."\r\nContent-type: text/plain;charset=utf-8\r\n" );
-		$ret = array(
-			'welcome' => 'Welcome email sent to '.$pParamHash['email'].'.'
-		);
+		mail( $pParamHash["email"], KernelTools::tra( 'Welcome to' ).' '.$siteName,$mail_data,"From: ".$gBitSystem->getConfig('site_sender_email')."\r\nContent-type: text/plain;charset=utf-8\r\n" );
+		$ret = [
+			'welcome' => 'Welcome email sent to ' . $pParamHash['email'] . '.'
+		];
 	}
 	return $ret;
 }
@@ -51,16 +56,16 @@ function users_admin_email_user( &$pParamHash ) {
 /**
  * scramble_email 
  * 
- * @param array $email 
+ * @param string $email 
  * @param string $method 
  * @access public
- * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+ * @return bool true on success, false on failure - mErrors will contain reason for failure
  */
 function scramble_email( $email, $method = 'unicode' ) {
 	switch( $method ) {
 		case 'strtr':
-			$trans = array(	"@" => tra(" AT "),
-			"." => tra(" DOT ")
+			$trans = array(	"@" => KernelTools::tra(" AT "),
+			"." => KernelTools::tra(" DOT ")
 			);
 			$ret = strtr($email, $trans);
 			break;
@@ -84,7 +89,7 @@ function scramble_email( $email, $method = 'unicode' ) {
 			break;
 
 		default:
-			$ret = NULL;
+			$ret = false;
 			break;
 	}
 	return $ret;
@@ -117,13 +122,13 @@ function users_httpauth(){
 	if( $gBitUser->validate( $user, $pass, $challenge, $response ) ){
 		// log in user - returns a url so can't use it for validation check
 		$gBitUser->login( $user, $pass, $challenge, $response );
-		return( TRUE );
+		return true;
 	}
 	// require http auth
 	else{
 		header('WWW-Authenticate: Basic realm="Test"');
 		header('HTTP/1.0 401 Unauthorized');
-		$gBitSystem->fatalError( tra('HTTP Authentication Canceled') );
+		$gBitSystem->fatalError( KernelTools::tra('HTTP Authentication Canceled') );
 		exit;
 	}
 }

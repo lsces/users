@@ -4,7 +4,7 @@
 	$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
 	$newUser = new $userClass();
 
-	if( $newUser->preRegisterVerify( $registerHash ) && $newUser->register( $registerHash ) ) {
+	if( $newUser->preRegisterVerify( $pRegisterHash ) && $newUser->register( $pRegisterHash ) ) {
 		$gBitUser->mUserId = $newUser->mUserId;
 
 		// add user to user-selected group
@@ -12,7 +12,7 @@
 			$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group'] );
 			if ( empty($groupInfo) || $groupInfo['is_public'] != 'y' ) {
 				$errors[] = "You can't use this group";
-				$gBitSmarty->assignByRef( 'errors', $errors );
+				$gBitSmarty->assign( 'errors', $errors );
 			} else {
 				$userId = $newUser->getUserId();
 				$gBitUser->addUserToGroup( $userId, $_REQUEST['group'] );
@@ -38,7 +38,7 @@
 				$_COOKIE[$gBitUser->getSiteCookieName()] = session_id();
 			}
 			// login with email since login is not technically required in the form, as it can be auto generated during store
-			$afterRegDefault = $newUser->login( $registerHash['email'], $registerHash['password'], FALSE, FALSE );
+			$afterRegDefault = $newUser->login( $pRegisterHash['email'], $pRegisterHash['password'], false, false );
 			$url = $gBitSystem->getConfig( 'after_reg_url' )?BIT_ROOT_URI.$gBitSystem->getConfig( 'after_reg_url' ):$afterRegDefault;
 			// return to referring page
 			if( !empty( $_SESSION['returnto'] ) ) {
@@ -47,7 +47,7 @@
 			} elseif ( !empty( $_REQUEST['group'] ) && !empty( $groupInfo['after_registration_page'] ) ) {
 				if ( $newUser->verifyId( $groupInfo['after_registration_page'] ) ) {
 					$url = BIT_ROOT_URI."index.php?content_id=".$groupInfo['after_registration_page'];
-				} elseif( strpos( $groupInfo['after_registration_page'], '/' ) === FALSE ) {
+				} elseif( strpos( $groupInfo['after_registration_page'], '/' ) === false ) {
 					$url = BitPage::getDisplayUrlFromHash( $groupInfo['after_registration_page'] );
 				} else {
 					$url = $groupInfo['after_registration_page'];
@@ -58,5 +58,5 @@
 		}
 	} else {
 		$gBitSystem->setHttpStatus( HttpStatusCodes::HTTP_BAD_REQUEST );
-		$gBitSmarty->assignByRef( 'errors', $newUser->mErrors );
+		$gBitSmarty->assign( 'errors', $newUser->mErrors );
 	}

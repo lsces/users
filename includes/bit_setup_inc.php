@@ -3,31 +3,40 @@
  * @version $Header$
  * @package users
  */
+use Bitweaver\Users\RolePermUser;
+use Bitweaver\KernelTools;
+
 global $gBitDbType, $gBitDbHost, $gBitDbUser, $gBitDbPassword, $gBitDbName, $gBitThemes;
 
-$registerHash = array(
+$pRegisterHash = [
 	'package_name' => 'users',
 	'package_path' => dirname( dirname( __FILE__ ) ).'/',
-	'activatable' => FALSE,
-	'required_package'=> TRUE,
-);
-$gBitSystem->registerPackage( $registerHash );
+	'activatable' => false,
+	'required_package'=> true,
+];
+
+// fix to quieten down VS Code which can't see the dynamic creation of these ...
+define( 'USERS_PKG_NAME', $pRegisterHash['package_name'] );
+define( 'USERS_PKG_URL', BIT_ROOT_URL . basename( $pRegisterHash['package_path'] ) . '/' );
+define( 'USERS_PKG_URI', BIT_ROOT_URL . basename( $pRegisterHash['package_path'] ) . '/' );
+
+$gBitSystem->registerPackage( $pRegisterHash );
 
 /* ---- services ----- */
 define( 'CONTENT_SERVICE_USERS_FAVS', 'users_favorites' );
 $gLibertySystem->registerService( CONTENT_SERVICE_USERS_FAVS,
 	USERS_PKG_NAME,
-	array(
+	[
 		'content_icon_tpl' => 'bitpackage:users/user_favs_service_icon_inc.tpl',
 		'content_list_sql_function' => 'users_favs_content_list_sql',
 		'content_user_collection_function' => 'users_collection_sql',
-	),
-	array(
-		'description' => tra( 'Provides a ajax service enabling users to bookmark any content as a favorite.' ),
-	)
+	],
+	[
+		'description' => KernelTools::tra( 'Provides a ajax service enabling users to bookmark any content as a favorite.' ),
+	]
 );
 
-$gBitSystem->registerNotifyEvent( array( "user_registers" => tra( "A user registers" )));
+$gBitSystem->registerNotifyEvent( [ "user_registers" => KernelTools::tra( "A user registers" ) ] );
 
 if( !defined( 'AVATAR_MAX_DIM' )) {
 	define( 'AVATAR_MAX_DIM', 100 );
@@ -40,8 +49,7 @@ if( !defined( 'LOGO_MAX_DIM' )) {
 }
 
 // a package can decide to override the default user class
-$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
-require_once( USERS_PKG_CLASS_PATH.$userClass.'.php' );
+$userClass = $gBitSystem->getConfig( 'user_class', (defined('ROLE_MODEL') ) ?  '\Bitweaver\Users\RolePermUser' : '\Bitweaver\Users\BitPermUser' );
 
 // set session lifetime
 if( $gBitSystem->isFeatureActive( 'site_session_lifetime' )) {
@@ -51,11 +59,10 @@ if( $gBitSystem->isFeatureActive( 'site_session_lifetime' )) {
 // is session data stored in DB or in filesystem?
 if( $gBitSystem->isFeatureActive( 'site_store_session_db' ) && !empty( $gBitDbType )) {
 	if( file_exists( EXTERNAL_LIBS_PATH.'adodb/session/adodb-session.php' )) {
-		include_once( EXTERNAL_LIBS_PATH . 'adodb/session/adodb-session.php' );
-	} elseif( file_exists( UTIL_PKG_INCLUDE_PATH.'adodb/session/adodb-session.php' )) {
-		include_once( UTIL_PKG_INCLUDE_PATH.'adodb/session/adodb-session.php' );
+		include_once EXTERNAL_LIBS_PATH . 'adodb/session/adodb-session.php';
 	}
-	if ( class_exists( 'ADODB_Session' ) ) {
+
+/*	if ( class_exists( 'ADODB_Session' ) ) {
 		ADODB_Session::dataFieldName( 'session_data' );
 		ADODB_Session::driver( $gBitDbType );
 		ADODB_Session::host( $gBitDbHost );
@@ -65,6 +72,7 @@ if( $gBitSystem->isFeatureActive( 'site_store_session_db' ) && !empty( $gBitDbTy
 		ADODB_Session::table( BIT_DB_PREFIX.'sessions' );
 		ini_set( 'session.save_handler', 'user' );
 	}
+*/
 }
 
 session_name( BIT_SESSION_NAME );
@@ -80,6 +88,10 @@ global $gShellScript;
 if( empty( $gShellScript ) ) {
 	if (session_status() == PHP_SESSION_NONE) {
 		session_start();
+		if (empty($_SESSION['csp_nonce'])) {
+			$_SESSION['csp_nonce'] = bin2hex(random_bytes(16));
+		}
+		$cspNonce = $_SESSION['csp_nonce'];
 	}
 }
 
@@ -90,23 +102,23 @@ if( !isset( $_SERVER['HTTP_USER_AGENT'] )) {
 
 // load the user
 global $gOverrideLoginFunction;
-$siteCookie = $userClass::getSiteCookieName();
+$siteCookie = RolePermUser::getSiteCookieName(); // $userClass::getSiteCookieName();
 
 if( !empty( $gOverrideLoginFunction )) {
-	$gBitUser = new $userClass();
+	$gBitUser = new RolePermUser(); // $userClass();
 	$gBitUser->mUserId = $gOverrideLoginFunction();
 	if( $gBitUser->mUserId ) {
 		$gBitUser->load();
 		$gBitUser->loadPermissions();
 	}
 } elseif( !empty( $_COOKIE[$siteCookie] ) ) {
-	if( $gBitUser = $userClass::loadFromCache( $_COOKIE[$siteCookie] ) ) {
+	if( $gBitUser = RolePermUser::loadFromCache( $_COOKIE[$siteCookie] ) ) {
 //		var_dump( 'load from cache' ); die;
 	} else {
-		$gBitUser = new $userClass();
+		$gBitUser = new RolePermUser();
 		if( $gBitUser->mUserId = $gBitUser->getUserIdFromCookieHash( $_COOKIE[$siteCookie] ) ) {
 			// we have user with this cookie.
-			if( $gBitUser->load( TRUE ) ) {
+			if( $gBitUser->load( true ) ) {
 				// maybe do something...
 			}
 		}
@@ -115,15 +127,37 @@ if( !empty( $gOverrideLoginFunction )) {
 
 // if we still don't have a user loaded, we'll load the anonymous user
 if( empty( $gBitUser ) || !$gBitUser->isValid() ) {
-	if( !($gBitUser = $userClass::loadFromCache( ANONYMOUS_USER_ID ) ) ) {
-		$gBitUser = new $userClass( ANONYMOUS_USER_ID );
-		if( $gBitUser->load( TRUE ) ) {
+
+	if( !($gBitUser = RolePermUser::loadFromCache( ANONYMOUS_USER_ID ) ) ) { // $userClass::loadFromCache( ANONYMOUS_USER_ID ) ) ) {
+//		if( $gBitUser->load( true ) ) {
+$gBitUser = new RolePermUser();
 			// maybe do something...
-		}
+//		}
 	}
 }
 
-$gBitSmarty->assignByRef( 'gBitUser', $gBitUser );
+$gBitSmarty->assign( 'gBitUser', $gBitUser );
+// Set the custom header with the nonce value
+if ( !$gBitUser->isRegistered() ) {
+	header("X-CSP-Nonce: $cspNonce");
+	$cspDirectives = [
+		"default-src 'self'",
+		"script-src 'nonce-$cspNonce' 'sha256-S99CWnPGUJ/vgQ8bHZsDaLwIKm+1Hg9ub8jZLI6f1/Q=' 'sha256-0WXB7AMgcS+xLiiMpUHQ+DGvJWInYJxuWys653a29ZE=' 'sha256-fYs400oRz/dgBlT1c/azhsoAzEr0obW//5RKb2MJzuk=' 'sha256-KlIhJzKdUgEy3yPJtkvuP0s8o7CNc2dkogmuN6JDhbA=' 'sha256-hphOYdb9WX9dW4pYcQdXa8E450mGtzl7k4kSIg1GOIo=' 'sha256-aoMVRw2ucpPYBXLlubmE7JroRgIqnRaBsYqVEZDqCZU=' 'sha256-CbFXIncEh2zmvNahVKWLX5U8qZOCB+SLiq4tpvKPuo4=' 'strict-dynamic' 'unsafe-eval' 'unsafe-hashes'",
+		"style-src 'nonce-$cspNonce' 'sha256-kFAIUwypIt04FgLyVU63Lcmp2AQimPh/TdYjy04Flxs=' 'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY=' 'sha256-ZVjd2zfSTfAVh1y7eCcNk0SPGUQOP/H8vzrFJIVgg90=' 'sha256-J190NMj1lQxByFdlcNKRhhCCXiUM1r+jkSLWV+llFq4=' 'sha256-BtFkuTJeZaKF8Yq+TxnX0ul9r9PfZjZSFjnGN6WPlKQ=' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'sha256-CpBM5JSFkNGGsPTpBLlT8YZs6iLghHxhCZJdNMnfnh4=' 'sha256-4phJwN0tL/ygVcuaCAWhoustE+HJDZLW5UQI4eUFPp8=' 'sha256-t6oewASd7J1vBg5mQtX4hl8bg8FeegYFM3scKLIhYUc=' 'sha256-2aWu0TvBcgs1/KaHywJ+/We8HuVKvHa4bPG9n23fN/I=' 'sha256-VXDM/lJYdk4BpdCUg/naqDj8ti+GKs0SZ8AJLc3k698=' 'sha256-h7qfp6iahc2crFUNooykEE411IXaaXOFZ8OB4kpGOf0=' 'sha256-FePUZaUvmD7uZkSy3DB3sfgvxqcggJmPmYjzgcM99kE=' 'sha256-eJOzNHAPfvDe5PZ6L0Av6TgmAexyPnw5S0hjhN45Pcw=' 'sha256-Jwm2I09DTLCg5XlmwQaT8zstSSvvnZ9n17x8kw/TBkE=' 'sha256-bGnJD/Fo4m+tE/x+1fgn17TdW+k1UQUdXnACfIm4TJc=' 'sha256-hphOYdb9WX9dW4pYcQdXa8E450mGtzl7k4kSIg1GOIo=' 'sha256-efTp7owq9MrTdSJFt54KABbw/1rE1C3dDKXRcKPlvd8=' 'sha256-BdubG9A59XWzmga/PvxzdL4u6NLBQrM5iY/uDn6bfNE=' 'sha256-ONZhBkNvCH59f9kAxZ+OSq/jBOXIwIUzl3AHlIugZME=' 'unsafe-hashes'  'self'",
+		"img-src 'self' https://*.tile.openstreetmap.fr/osmfr/;",
+		"font-src 'self'",
+		"connect-src 'self'",
+		"object-src 'none'",
+		"base-uri 'none'",
+		"form-action 'self'",
+		"frame-ancestors 'none'",
+	];
+	$cspHeader = implode('; ', $cspDirectives);
+	// Set the CSP header with a placeholder for the nonce
+	header("Content-Security-Policy: $cspHeader");
+}
+
+$gBitSmarty->assign( 'gBitUser', $gBitUser );
 
 // If we are processing a login then do not generate the challenge
 // if we are in any other case then yes.
@@ -170,15 +204,13 @@ if( !empty( $theme )) {
 
 // register 'my' menu
 if( $gBitUser->isValid() && $gBitUser->isRegistered() ) {
-	$menuHash = array(
+	$menuHash = [
 		'package_name'  => USERS_PKG_NAME,
 		'index_url'     => ( $gBitSystem->isFeatureActive( 'users_preferences' ) ? $gBitSystem->getConfig( 'users_login_homepage', USERS_PKG_URL.'my.php' ) : '' ),
 		'menu_title'    => 'My '.$gBitSystem->getConfig( 'site_menu_title', $gBitSystem->getConfig( 'site_title', 'Site' )),
 		'menu_template' => 'bitpackage:users/menu_users.tpl',
-	);
+	];
 	$gBitSystem->registerAppMenu( $menuHash );
 }
 
-require_once( USERS_PKG_CLASS_PATH.'BaseAuth.php' );
-
-?>
+require_once USERS_PKG_CLASS_PATH.'BaseAuth.php';

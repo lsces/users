@@ -17,17 +17,17 @@ $check_req = (isset($_REQUEST["mc_unassign"])
            || isset($_REQUEST["mc_move"]));
 if (!$gBitUser->hasPermission( 'p_tidbits_configure_modules' ) && $check_req) {
 	$gBitSmarty->assign('msg', tra("You dont have permission to use this feature"));
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
 	die;
 }
 if ($site_user_assigned_modules != 'y' && $check_req) {
 	$gBitSmarty->assign('msg', tra("This feature is disabled").": site_user_assigned_modules");
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
 	die;
 }
 if ( !$gBitUser->isRegistered() && $check_req) {
 	$gBitSmarty->assign('msg', tra("You must log in to use this feature"));
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
 	die;
 }
 $url = $_SERVER["REQUEST_URI"];
@@ -49,7 +49,7 @@ if ($check_req) {
     // Remove module movemet paramaters from an URL
     // \todo What if 'mc_xxx' arg was not at the end? (if smbd fix URL by hands...)
     //       should I handle this very special (hack?) case?
-    $url = preg_replace('/(.*)(\?|&){1}(mc_up|mc_down|mc_move|mc_unassign)=[^&]*/','\1', $url);
+    $url = preg_replace('/(.*)(\?|&)[1](mc_up|mc_down|mc_move|mc_unassign)=[^&]*/','\1', $url);
 }
 // Fix locaton if parameter was removed...
 if ($url != $_SERVER["REQUEST_URI"]) header('location: '.$url);

@@ -261,10 +261,3 @@ function solvemedia_precheck_response ($privkey, $verifycode)
     return $adcopy_response;
 
 }
-
-
-/* Mailhide related code */
-/* [ deleted ] */
-
-?>
-
