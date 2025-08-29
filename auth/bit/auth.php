@@ -11,13 +11,16 @@
  * @package users
  * @subpackage auth
  */
+
+namespace Bitweaver\Users;
+
 class BitAuth extends BaseAuth {
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct('bit');
 	}
 
-	function validate($user,$pass,$challenge,$response) {
+	public function validate($user,$pass,$challenge,$response) {
 		parent::validate($user,$pass,$challenge,$response);
 		global $gBitSystem;
 		global $gBitDb;
@@ -85,20 +88,20 @@ class BitAuth extends BaseAuth {
 				$this->mInfo['user_id']=$userId;
 			}
 		}
-		return( $ret );
+		return $ret;
 	}
 
-	function canManageAuth() {
+	public function canManageAuth() {
 		return true;
 	}
 
-	function isSupported() {
+	public function isSupported() {
 		return true;
 	}
 
-	function createUser( &$pUserHash ) {
+	public function createUser( &$pUserHash ) {
 		//$authUserInfo = array( 'login' => $instance->mInfo['login'], 'password' => $instance->mInfo['password'], 'real_name' => $instance->mInfo['real_name'], 'email' => $instance->mInfo['email'] );
-		$u = new BitPermUser();
+		$u = new RolePermUser();
 
 		if( !$u->store( $pUserHash ) ) {
 			$this->mErrors = array_merge($this->mErrors,$u->mErrors);

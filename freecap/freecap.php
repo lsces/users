@@ -175,7 +175,7 @@ for($i=0 ; $i<sizeof($font_locations) ; $i++)
 	$handle = fopen($font_locations[$i],"r");
 	// read header of GD font, up to char width
 	$c_wid = fread($handle,12);
-	$font_widths[$i] = ord($c_wid{8})+ord($c_wid{9})+ord($c_wid{10})+ord($c_wid{11});
+	$font_widths[$i] = ord($c_wid[8])+ord($c_wid[9])+ord($c_wid[10])+ord($c_wid[11]);
 	fclose($handle);
 }
 
@@ -351,9 +351,9 @@ if($use_dict==1)
 		// don't allow to start with 'vowel'
 		if($rand_func(0,4)>=2 && $i!=0)
 		{
-			$word .= $vowels{$rand_func(0,strlen($vowels)-1)};
+			$word .= $vowels[$rand_func(0,strlen($vowels)-1)];
 		} else {
-			$word .= $consonants{$rand_func(0,strlen($consonants)-1)};
+			$word .= $consonants[$rand_func(0,strlen($consonants)-1)];
 		}
 	}
 }
@@ -594,7 +594,7 @@ for($i=0 ; $i<strlen($word) ; $i++)
 
 	$j = $rand_func(0,sizeof($font_locations)-1);
 	$font = ImageLoadFont($font_locations[$j]);
-	ImageString($im2, $font, $word_start_x+($font_widths[$j]*$i), $word_start_y, $word{$i}, $text_colour2);
+	ImageString($im2, $font, $word_start_x+($font_widths[$j]*$i), $word_start_y, $word[$i], $text_colour2);
 }
 // use last pixelwidth
 $font_pixelwidth = $font_widths[$j];
