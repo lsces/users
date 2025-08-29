@@ -8,12 +8,16 @@
  * @subpackage functions
  */
 
+namespace Bitweaver\Liberty;
+use Bitweaver\KernelTools;
+use Bitweaver\HttpStatusCodes;
+use Bitweaver\Users\BitHybridAuthManager;
+
 /**
  * required setup
  */
-include_once ("../kernel/includes/setup_inc.php");
+include_once "../kernel/includes/setup_inc.php";
 
-require_once( USERS_PKG_CLASS_PATH.'BitHybridAuthManager.php' );
 BitHybridAuthManager::loadSingleton();
 global $gBitHybridAuthManager;
 $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getEnabledProviders() );
@@ -28,7 +32,7 @@ if( !empty( $_REQUEST['returnto'] ) ) {
 }
 
 if( $gBitUser->isRegistered() ) {
-	bit_redirect( $gBitSystem->getConfig( 'users_login_homepage', $gBitSystem->getDefaultPage() ) );
+	KernelTools::bit_redirect( $gBitSystem->getConfig( 'users_login_homepage', $gBitSystem->getDefaultPage() ) );
 }
 
 if( !empty( $_REQUEST['error'] ) ) {
@@ -36,11 +40,10 @@ if( !empty( $_REQUEST['error'] ) ) {
 	$gBitSystem->setHttpStatus( HttpStatusCodes::HTTP_UNAUTHORIZED );
 }
 
-$languages = array();
+$languages = [];
 $languages = $gBitLanguage->listLanguages();
-$gBitSmarty->assignByRef( 'languages', $languages );
-$gBitSmarty->assignByRef( 'gBitLanguage', $gBitLanguage );
+$gBitSmarty->assign( 'languages', $languages );
+$gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
 $gBitSystem->display( 'bitpackage:users/signin.tpl', $gBitSystem->getConfig( 'site_title' ).' Login' , array( 'display_mode' => 'display' ));
-?>

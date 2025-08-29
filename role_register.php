@@ -11,20 +11,24 @@
 /**
  * required setup
  */
+namespace Bitweaver\Liberty;
+use Bitweaver\HttpStatusCodes;
+use Bitweaver\Users\BaseAuth;
+use Bitweaver\Wiki\BitPage;
+
 // Avoid user hell
 if( isset( $_REQUEST['tk'] ) ) {
 	unset( $_REQUEST['tk'] );
 }
 
-require_once( '../kernel/includes/setup_inc.php' );
-require_once( KERNEL_PKG_CLASS_PATH.'BitBase.php' );
-include_once( KERNEL_PKG_INCLUDE_PATH.'notification_lib.php' );
+require_once '../kernel/includes/setup_inc.php';
+
+include_once KERNEL_PKG_INCLUDE_PATH.'notification_lib.php';
+// no longer supported, needs update - spiderr require_once( USERS_PKG_INCLUDE_PATH.'recaptchalib.php' );
 
 $gBitSystem->verifyFeature( 'users_allow_register' );
 
 // Everything below here is needed for registration
-
-require_once( USERS_PKG_CLASS_PATH.'BaseAuth.php' );
 
 if( !empty( $_REQUEST['returnto'] ) ) {
 	$_SESSION['returnto'] = $_REQUEST['returnto'];
@@ -53,7 +57,7 @@ if( isset( $_REQUEST["register"] ) ) {
 			$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['role'] );
 			if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
 				$errors[] = "You can't use this role";
-				$gBitSmarty->assignByRef( 'errors', $errors );
+				$gBitSmarty->assign( 'errors', $errors );
 			} else {
 				$userId = $newUser->getUserId();
 				$gBitUser->addUserToRole( $userId, $_REQUEST['role'] );
@@ -79,7 +83,7 @@ if( isset( $_REQUEST["register"] ) ) {
 				$_COOKIE[$gBitUser->getSiteCookieName()] = session_id();
 			}
 			// login with email since login is not technically required in the form, as it can be auto generated during store
-			$afterRegDefault = $newUser->login( $reg['email'], $reg['password'], FALSE, FALSE );
+			$afterRegDefault = $newUser->login( $reg['email'], $reg['password'], false, false );
 			$url = $gBitSystem->getConfig( 'after_reg_url' )?BIT_ROOT_URI.$gBitSystem->getConfig( 'after_reg_url' ):$afterRegDefault;
 			// return to referring page
 			if( !empty( $_SESSION['returnto'] ) ) {
@@ -88,7 +92,7 @@ if( isset( $_REQUEST["register"] ) ) {
 			} elseif ( !empty( $_REQUEST['role'] ) && !empty( $roleInfo['after_registration_page'] ) ) {
 				if ( $newUser->verifyId( $roleInfo['after_registration_page'] ) ) {
 					$url = BIT_ROOT_URI."index.php?content_id=".$roleInfo['after_registration_page'];
-				} elseif( strpos( $roleInfo['after_registration_page'], '/' ) === FALSE ) {
+				} elseif( strpos( $roleInfo['after_registration_page'], '/' ) === false ) {
 					$url = BitPage::getDisplayUrlFromHash( $roleInfo['after_registration_page'] );
 				} else {
 					$url = $roleInfo['after_registration_page'];
@@ -99,10 +103,10 @@ if( isset( $_REQUEST["register"] ) ) {
 		}
 	} else {
 		$gBitSystem->setHttpStatus( HttpStatusCodes::HTTP_BAD_REQUEST );
-		$gBitSmarty->assignByRef( 'errors', $newUser->mErrors );
+		$gBitSmarty->assign( 'errors', $newUser->mErrors );
 	}
 
-	$gBitSmarty->assignByRef( 'reg', $reg );
+	$gBitSmarty->assign( 'reg', $reg );
 
 } else {
 	if( $gBitSystem->isFeatureActive( 'custom_user_fields' ) ) {
@@ -124,13 +128,13 @@ if( isset( $_REQUEST["register"] ) ) {
 	}
 }
 
-$languages = array();
+$languages = [];
 $languages = $gBitLanguage->listLanguages();
-$gBitSmarty->assignByRef( 'languages', $languages );
-$gBitSmarty->assignByRef( 'gBitLanguage', $gBitLanguage );
+$gBitSmarty->assign( 'languages', $languages );
+$gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
 // Get flags here
-$flags = array();
+$flags = [];
 $h = opendir( USERS_PKG_PATH.'icons/flags/' );
 while( $file = readdir( $h )) {
 	if( strstr( $file, ".gif" )) {
@@ -147,25 +151,25 @@ $listHash = array(
 	'sort_mode' => array( 'is_default_asc', 'role_desc_asc' ),
 );
 $roleList = $gBitUser->getAllRoles( $listHash );
-$gBitSmarty->assignByRef( 'roleList', $roleList );
+$gBitSmarty->assign( 'roleList', $roleList );
 
 // include preferences settings from other packages - these will be included as individual tabs
-$packages = array();
+$packages = [];
 foreach( $gBitSystem->mPackages as $package ) {
 	if( $gBitSystem->isPackageActive( $package['name'] )) {
 		$php_file = $package['path'].'user_register_inc.php';
 		$tpl_file = $package['path'].'templates/user_register_inc.tpl';
 		if( file_exists( $tpl_file )) {
 			if( file_exists( $php_file ))  {
-				require( $php_file );
+				require $php_file;
 			}
-			$p=array();
+			$p=[];
 			$p['template'] = $tpl_file;
 			$packages[] = $p;
 		}
 	}
 }
-$gBitSmarty->assignByRef('packages',$packages );
+$gBitSmarty->assign('packages',$packages );
 
 if( !empty( $_REQUEST['error'] ) ) {
 	$gBitSmarty->assign( 'error', $_REQUEST['error'] );
@@ -174,4 +178,3 @@ if( !empty( $_REQUEST['error'] ) ) {
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
 $gBitSystem->display('bitpackage:users/role_register.tpl', 'Register' , array( 'display_mode' => 'display' ));
-?>

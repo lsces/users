@@ -1,4 +1,6 @@
 <?php
+
+use Bitweaver\KernelTools;
 /**
  * register new user
  *
@@ -12,24 +14,26 @@
  * required setup
  */
 // Avoid user hell
+use Bitweaver\BitBase;
+use Bitweaver\HttpStatusCodes;
+use Bitweaver\Users\BitHybridAuthManager;
+
 if( isset( $_REQUEST['tk'] ) ) {
 	unset( $_REQUEST['tk'] );
 }
+require_once '../kernel/includes/setup_inc.php';
 
-require_once( '../kernel/includes/setup_inc.php' );
-require_once( KERNEL_PKG_CLASS_PATH.'BitBase.php' );
-include_once( KERNEL_PKG_INCLUDE_PATH.'notification_lib.php' );
+include_once KERNEL_PKG_INCLUDE_PATH . 'notification_lib.php';
 
 $gBitSystem->verifyFeature( 'users_allow_register' );
 
-require_once( USERS_PKG_CLASS_PATH.'BitHybridAuthManager.php' );
 BitHybridAuthManager::loadSingleton();
 global $gBitHybridAuthManager;
 $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getEnabledProviders() );
 
 // Everything below here is needed for registration
 
-require_once( USERS_PKG_CLASS_PATH.'BaseAuth.php' );
+use Bitweaver\Users\BaseAuth;
 
 if( !empty( $_REQUEST['returnto'] ) ) {
 	$_SESSION['returnto'] = $_REQUEST['returnto'];
@@ -41,20 +45,20 @@ if( !empty( $_REQUEST['returnto'] ) ) {
 }
 
 if( $gBitUser->isRegistered() ) {
-	bit_redirect( $gBitSystem->getDefaultPage() );
+	KernelTools::bit_redirect( $gBitSystem->getDefaultPage() );
 }
 if( isset( $_REQUEST["register"] ) ) {
 
-	$registerHash = $_REQUEST;
+	$pRegisterHash = $_REQUEST;
 
-	include( USERS_PKG_INCLUDE_PATH.'register_inc.php' );
+	include USERS_PKG_INCLUDE_PATH . 'register_inc.php';
 
-	$gBitSmarty->assignByRef( 'reg', $registerHash );
+	$gBitSmarty->assign( 'reg', $pRegisterHash );
 
 } else {
 	if( $gBitSystem->isFeatureActive( 'custom_user_fields' ) ) {
 		$fields= explode( ',', $gBitSystem->getConfig( 'custom_user_fields' )  );
-		trim_array( $fields );
+		KernelTools::trim_array( $fields );
 		$gBitSmarty->assign('customFields', $fields);
 	}
 
@@ -71,13 +75,13 @@ if( isset( $_REQUEST["register"] ) ) {
 	}
 }
 
-$languages = array();
+$languages = [];
 $languages = $gBitLanguage->listLanguages();
-$gBitSmarty->assignByRef( 'languages', $languages );
-$gBitSmarty->assignByRef( 'gBitLanguage', $gBitLanguage );
+$gBitSmarty->assign( 'languages', $languages );
+$gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
 // Get flags here
-$flags = array();
+$flags = [];
 $h = opendir( USERS_PKG_PATH.'icons/flags/' );
 while( $file = readdir( $h )) {
 	if( strstr( $file, ".gif" )) {
@@ -94,25 +98,25 @@ $listHash = array(
 	'sort_mode' => array( 'is_default_asc', 'group_desc_asc' ),
 );
 $groupList = $gBitUser->getAllGroups( $listHash );
-$gBitSmarty->assignByRef( 'groupList', $groupList );
+$gBitSmarty->assign( 'groupList', $groupList );
 
 // include preferences settings from other packages - these will be included as individual tabs
-$packages = array();
+$packages = [];
 foreach( $gBitSystem->mPackages as $package ) {
 	if( $gBitSystem->isPackageActive( $package['name'] )) {
 		$php_file = $package['path'].'user_register_inc.php';
 		$tpl_file = $package['path'].'templates/user_register_inc.tpl';
 		if( file_exists( $tpl_file )) {
 			if( file_exists( $php_file ))  {
-				require( $php_file );
+				require $php_file;
 			}
-			$p=array();
+			$p=[];
 			$p['template'] = $tpl_file;
 			$packages[] = $p;
 		}
 	}
 }
-$gBitSmarty->assignByRef('packages',$packages );
+$gBitSmarty->assign('packages',$packages );
 
 if( !empty( $_REQUEST['error'] ) ) {
 	$gBitSmarty->assign( 'error', $_REQUEST['error'] );
@@ -121,4 +125,3 @@ if( !empty( $_REQUEST['error'] ) ) {
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
 $gBitSystem->display('bitpackage:users/register.tpl', 'Register' , array( 'display_mode' => 'display' ));
-?>

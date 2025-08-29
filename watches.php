@@ -15,7 +15,7 @@ include_once( '../kernel/includes/setup_inc.php' );
 $user = $gBitUser->mUserId;
 if (!$user) {
 	$gBitSmarty->assign('msg', tra("You must log in to use this feature"));
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
 	die;
 }
 
@@ -41,5 +41,5 @@ if (!isset($_REQUEST['event']))
 $watches = $gBitUser->getWatches( $_REQUEST['event'] );
 $gBitSmarty->assign('watches', $watches);
 
-$gBitSystem->display( 'bitpackage:users/user_watches.tpl', NULL, array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/user_watches.tpl', null, array( 'display_mode' => 'display' ));
 ?>

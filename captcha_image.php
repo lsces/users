@@ -11,11 +11,11 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 // dimensions
-$width  = @BitBase::verifyId( $_REQUEST['width'] ) ? $_REQUEST['width'] : 140;
-$height = @BitBase::verifyId( $_REQUEST['height'] ) ? $_REQUEST['height'] : 35;
+$width  = BitBase::verifyId( $_REQUEST['width'] ) ? $_REQUEST['width'] : 140;
+$height = BitBase::verifyId( $_REQUEST['height'] ) ? $_REQUEST['height'] : 35;
 
 $img = @imagecreate( $width, $height ) or die( "The GD image library doesn't seem to be available or doesn't have JPG support." );
 
@@ -49,4 +49,3 @@ if( $gd["PNG Support"] ) {
 	header( "Content-type: image/jpeg" );
 	imagejpeg( $img );
 }
-?>

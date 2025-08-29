@@ -14,36 +14,37 @@ $gEditMode = 'layout';
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
+use Bitweaver\KernelTools;
 
 $gBitSystem->fatalError( 'This page is not functional and will be fixed asap.' );
 
 $gBitSystem->verifyPermission('p_tidbits_configure_modules');
 
 if( !$gBitUser->canCustomizeLayout() && !$gBitUser->canCustomizeTheme() ) {
-	$gBitSmarty->assign('msg', tra("This feature is disabled").": user layout");
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSmarty->assign('msg', KernelTools::tra("This feature is disabled").": user layout");
+	$gBitSystem->display( 'error.tpl' , null, [ 'display_mode' => 'display' ] );
 	die;
 }
 
 if (!$gBitUser->isRegistered()) {
-	$gBitSmarty->assign('msg', tra("Permission denied: You are not logged in"));
-	$gBitSystem->display( 'error.tpl' , NULL, array( 'display_mode' => 'display' ));
+	$gBitSmarty->assign('msg', KernelTools::tra("Permission denied: You are not logged in"));
+	$gBitSystem->display( 'error.tpl' , null, [ 'display_mode' => 'display' ] );
 	die;
 }
 
-include_once(USERS_PKG_INCLUDE_PATH.'lookup_user_inc.php');
+include_once USERS_PKG_INCLUDE_PATH.'lookup_user_inc.php';
 
 if ($gQueryUser->mUserId != $gBitUser->mUserId && !$gBitUser->object_has_permission($gBitUser->mUserId, $gQueryUser->mInfo['content_id'], 'bituser', 'p_users_admin')) {
-	$gBitSmarty->assign('msg', tra('You do not have permission to edit this user\'s theme'));
-	$gBitSystem->display('error.tpl', NULL, array( 'display_mode' => 'display' ));
+	$gBitSmarty->assign('msg', KernelTools::tra('You do not have permission to edit this user\'s theme'));
+	$gBitSystem->display('error.tpl', null, [ 'display_mode' => 'display' ] );
 	die;
 }
 
 $_REQUEST['fLayout'] = HOMEPAGE_LAYOUT; //we hardcode to a single layout for all users.... for now >:-)
 if (isset($_REQUEST['fSubmitSetTheme'] ) ) {
 	if( $gBitUser->canCustomizeTheme() ) {
-		$gQueryUser->storePreference( 'theme', !empty( $_REQUEST["style"] ) ? $_REQUEST["style"] : NULL );
+		$gQueryUser->storePreference( 'theme', !empty( $_REQUEST["style"] ) ? $_REQUEST["style"] : null );
 		$assignStyle = $_REQUEST["style"];
 	}
 } elseif (isset($_REQUEST['fSubmitSetHeading'] ) ) {
@@ -56,7 +57,7 @@ if (isset($_REQUEST['fSubmitSetTheme'] ) ) {
 	$fAssign['user_id'] = $gQueryUser->mUserId;
 	$fAssign['layout'] = $_REQUEST['fLayout'];
 	$gBitThemes->storeLayout( $fAssign );
-	$gBitSmarty->assignByRef( 'fAssign', $fAssign );
+	$gBitSmarty->assign( 'fAssign', $fAssign );
 } elseif (isset($_REQUEST["fMove"])) {
 
 	if( isset( $_REQUEST["fMove"] ) && isset( $_REQUEST["fModule"] ) ) {
@@ -79,16 +80,16 @@ if (isset($_REQUEST['fSubmitSetTheme'] ) ) {
 		}
 	}
 }
-$orders = array();
+$orders = [];
 for ($i = 1; $i < 20; $i++) {
 	$orders[] = $i;
 }
-$gBitSmarty->assignByRef('orders', $orders);
+$gBitSmarty->assign('orders', $orders);
 $gBitSmarty->assign( 'homeHeaderData', $gQueryUser->getPreference( 'homepage_header' ) );
 // get styles
 if( $gBitUser->canCustomizeTheme() ) {
-	$styles = $gBitThemes->getStyles( NULL, TRUE, TRUE );
-	$gBitSmarty->assignByRef( 'styles', $styles );
+	$styles = $gBitThemes->getStyles( null, true, true );
+	$gBitSmarty->assign( 'styles', $styles );
 	if(!isset($_REQUEST["style"])){
 		$assignStyle = $gQueryUser->getPreference( 'theme' );
 	}
@@ -100,15 +101,13 @@ if (count($assignables) > 0) {
 } else {
 	$gBitSmarty->assign('canassign', 'n');
 }
-$modules = $gBitSystem->getLayout( $gQueryUser->mUserId, HOMEPAGE_LAYOUT, FALSE );
+$modules = $gBitSystem->getLayout( $gQueryUser->mUserId, HOMEPAGE_LAYOUT, false );
 $gBitThemes->generateModuleNames( $modules );
 //print_r($modules);
-$gBitSmarty->assignByRef('assignables', $assignables);
-$layoutAreas = array( 'left'=>'l', 'center'=>'c', 'right'=>'r' );
-$gBitSmarty->assignByRef( 'layoutAreas', $layoutAreas );
-$gBitSmarty->assignByRef('modules', $modules);
+$gBitSmarty->assign('assignables', $assignables);
+$layoutAreas = [ 'left'=>'l', 'center'=>'c', 'right'=>'r' ];
+$gBitSmarty->assign( 'layoutAreas', $layoutAreas );
+$gBitSmarty->assign('modules', $modules);
 //print_r($modules);
 
-$gBitSystem->display( 'bitpackage:users/user_assigned_modules.tpl', 'Edit Layout', array( 'display_mode' => 'display' ));
-
-?>
+$gBitSystem->display( 'bitpackage:users/user_assigned_modules.tpl', 'Edit Layout', [ 'display_mode' => 'display' ] );

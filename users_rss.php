@@ -5,24 +5,26 @@
  * @subpackage functions
  */
 
+
+ 
 /**
  * Initialization
  */
 // ensure that we use absolute URLs everywhere
-$_REQUEST['uri_mode'] = TRUE;
-require_once( "../kernel/includes/setup_inc.php" );
+$_REQUEST['uri_mode'] = true;
+require_once "../kernel/includes/setup_inc.php";
 
 $gBitSystem->verifyPackage( 'rss' );
 $gBitSystem->verifyFeature( 'users_rss' );
 
-require_once( RSS_PKG_INCLUDE_PATH.'rss_inc.php' );
+require_once RSS_PKG_INCLUDE_PATH.'rss_inc.php';
 
 $rss->title = $gBitSystem->getConfig( 'users_rss_title', $gBitSystem->getConfig( 'site_title' ).' - '.tra( 'Registrations' ) );
 $rss->description = $gBitSystem->getConfig( 'users_rss_description', $gBitSystem->getConfig( 'site_title' ).' - '.tra( 'RSS Feed' ) );
 
 // check permission to view users pages
 if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
-	require_once( RSS_PKG_PATH."rss_error.php" );
+	require_once RSS_PKG_PATH."rss_error.php";
 } else {
 	// check if we want to use the cache file - users with users_admin permission use a different cache file
 	$cacheFile = TEMP_PKG_PATH.RSS_PKG_NAME.'/'.USERS_PKG_NAME.'/'.$cacheFileTail;
@@ -57,7 +59,6 @@ if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
 		if( $gBitUser->hasPermission( 'p_users_admin' ) ) {
 			$item->description .= tra( "Email Address" ).': <a href="mailto:'.$feed['email'].'">'.$feed['email'].'</a><br />';
 		}
-		$gBitSmarty->loadPlugin( 'smarty_modifier_bit_short_datetime' );
 		$item->description .= tra( "Member Since" ).": ".smarty_modifier_bit_short_datetime( $feed['registration_date'] ).'<br />';
 
 		$item->date = ( int )$feed['registration_date'];
@@ -65,7 +66,7 @@ if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
 		$item->author = $_SERVER['HTTP_HOST'];
 
 		$item->descriptionTruncSize = $gBitSystem->getConfig( 'rssfeed_truncate', 5000 );
-		$item->descriptionHtmlSyndicated = FALSE;
+		$item->descriptionHtmlSyndicated = false;
 
 		// pass the item on to the rss feed creator
 		$rss->addItem( $item );

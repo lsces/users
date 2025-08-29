@@ -11,7 +11,7 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 if( !$gBitUser->isRegistered() ) {
 	Header( 'Location: '.USERS_PKG_URL.'signin.php' );
@@ -46,7 +46,7 @@ if( $gBitSystem->isFeatureActive( 'display_users_content_list' ) ) {
 	$numPages = ceil( $contentListHash['cant'] / $gBitSystem->getConfig( 'max_records' ) );
 	$gBitSmarty->assign( 'numPages', $numPages );
 
-	//$gBitSmarty->assignByRef('offset', $offset);
+	//$gBitSmarty->assign('offset', $offset);
 	$gBitSmarty->assign( 'contentSelect', $contentSelect );
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 	$gBitSmarty->assign( 'contentList', $contentList );

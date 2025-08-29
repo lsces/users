@@ -11,7 +11,7 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 global $gBitUser, $gBitSystem;
 
@@ -26,7 +26,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 
 if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 	if( !empty( $_REQUEST['group_id'] ) ) {
-		$allPerms = $gBitUser->getGroupPermissions( array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : NULL ));
+		$allPerms = $gBitUser->getGroupPermissions( array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null ));
 		// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
 		$listHash = array( 'sort_mode' => 'group_name_asc' );
 		$groupList = $gBitUser->getAllGroups( $listHash );
@@ -96,7 +96,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		$gBitUser->getList($searchParams);
 		$foundUsers = $searchParams['data'];
 		$mid = 'bitpackage:users/my_group_edit.tpl';
-		$gBitSmarty->assignByRef('foundUsers', $foundUsers);
+		$gBitSmarty->assign('foundUsers', $foundUsers);
 	} elseif (!empty($_REQUEST['assignuser'])) {
 		if( !empty($_REQUEST['group_id'] ) ) {
 			if ($_REQUEST['group_id'] != -1 && $groupList[$_REQUEST['group_id']]['user_id'] == $gBitUser->mUserId) {
@@ -121,9 +121,9 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		}
 		$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group_id'] );
 		$groupUsers = $gBitUser->getGroupUsers( $_REQUEST['group_id'] );
-		$gBitSmarty->assignByRef('groupUsers', $groupUsers);
-		$gBitSmarty->assignByRef('groupInfo', $groupInfo);
-		$gBitSmarty->assignByRef( 'allPerms', $allPerms );
+		$gBitSmarty->assign('groupUsers', $groupUsers);
+		$gBitSmarty->assign('groupInfo', $groupInfo);
+		$gBitSmarty->assign( 'allPerms', $allPerms );
 		$gBitSystem->setBrowserTitle( 'Admininster Group: '.$groupInfo['group_name'].' '.(isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : '') );
 		$mid = 'bitpackage:users/my_group_edit.tpl';
 	}
@@ -151,7 +151,7 @@ if ( ( !empty( $_REQUEST['add_public_group'] ) || !empty( $_REQUEST['remove_publ
 	if ( !empty( $_REQUEST['add_public_group'] ) && !empty( $groupInfo['after_registration_page'] ) ) {
 		if ( $gBitUser->verifyId( $groupInfo['after_registration_page'] ) ) {
 			$url = BIT_ROOT_URL."index.php?content_id=".$groupInfo['after_registration_page'];
-		} elseif( strpos( $groupInfo['after_registration_page'], '/' ) === FALSE ) {
+		} elseif( strpos( $groupInfo['after_registration_page'], '/' ) === false ) {
 			$url = BitPage::getDisplayUrlFromHash( $groupInfo['after_registration_page'] );
 		} else {
 			$url = $groupInfo['after_registration_page'];
@@ -161,8 +161,8 @@ if ( ( !empty( $_REQUEST['add_public_group'] ) || !empty( $_REQUEST['remove_publ
 }
 
 /* Load up public groups and check if the user can join or leave them */
-$systemGroups = $gBitUser->getGroups( $gBitUser->mUserId, TRUE );
-$gBitSmarty->assignByRef( 'systemGroups', $systemGroups);
+$systemGroups = $gBitUser->getGroups( $gBitUser->mUserId, true );
+$gBitSmarty->assign( 'systemGroups', $systemGroups);
 $listHash = array(
 	'is_public'=>'y',
 	'sort_mode' => array( 'is_default_asc', 'group_desc_asc' ),
@@ -187,7 +187,7 @@ if( count( $publicGroups )) {
 			break;
 		}
 	}
-	$gBitSmarty->assignByRef( 'publicGroups', $publicGroups );
+	$gBitSmarty->assign( 'publicGroups', $publicGroups );
 	if (isset($canRemovePublic)) {
 		$gBitSmarty->assign( 'canRemovePublic' , 'y');
 	}
@@ -207,5 +207,5 @@ if (empty($mid)) {
 }
 
 // Display the template for group administration
-$gBitSystem->display( $mid , NULL, array( 'display_mode' => 'display' ));
+$gBitSystem->display( $mid , null, array( 'display_mode' => 'display' ));
 ?>

@@ -11,7 +11,7 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 //ini_set('include_path','.;pear/');
 //include('foobar.php');
 /*
@@ -30,5 +30,5 @@ print_r($b);
 */
 $gBitSystem->verifyFeature( 'users_custom_home' );
 // Display the template
-$gBitSystem->display( 'bitpackage:users/custom_home_2.tpl', NULL, array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/custom_home_2.tpl', null, array( 'display_mode' => 'display' ));
 ?>

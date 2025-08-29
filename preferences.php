@@ -1,4 +1,8 @@
 <?php
+namespace Bitweaver\Users;
+use Bitweaver\KernelTools;
+use function Bitweaver\Users\scramble_email;
+
 /**
  * user preferences
  *
@@ -11,26 +15,26 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 // User preferences screen
 $gBitSystem->verifyFeature( 'users_preferences' );
 
 $gBitUser->verifyRegistered();
 
-$feedback = array();
+$feedback = [];
 
 // set up the user we're editing
 if( !empty( $_REQUEST["view_user"] ) && $_REQUEST["view_user"] <> $gBitUser->mUserId ) {
 	$gBitSystem->verifyPermission( 'p_users_admin' );
-	$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
+	$userClass = '\Bitweaver\Users\\'.$gBitSystem->getConfig( 'user_class', (defined('ROLE_MODEL') ) ?  'RolePermUser' : 'BitPermUser' );
 	$editUser = new $userClass( $_REQUEST["view_user"] );
-	$editUser->load( TRUE );
+	$editUser->load( true );
 	$gBitSmarty->assign('view_user', $_REQUEST["view_user"]);
 	$watches = $editUser->getWatches();
 	$gBitSmarty->assign('watches', $watches );
 } else {
-	$gBitUser->load( TRUE );
+	$gBitUser->load( true );
 	$editUser = &$gBitUser;
 }
 
@@ -41,11 +45,11 @@ $parsedUrl = parse_url( $_SERVER["REQUEST_URI"] );
 
 // settings only applicable when the wiki package is active
 if( $gBitSystem->isPackageActive( 'wiki' )) {
-	include_once( WIKI_PKG_CLASS_PATH.'BitPage.php' );
+	include_once WIKI_PKG_CLASS_PATH . 'BitPage.php';
 	$parsedUrl1 = str_replace( USERS_PKG_URL."user_preferences", WIKI_PKG_URL."edit", $parsedUrl["path"] );
 	$parsedUrl2 = str_replace( USERS_PKG_URL."user_preferences", WIKI_PKG_URL."index", $parsedUrl["path"] );
-	$gBitSmarty->assign( 'url_edit', httpPrefix(). $parsedUrl1 );
-	$gBitSmarty->assign( 'url_visit', httpPrefix(). $parsedUrl2 );
+	$gBitSmarty->assign( 'url_edit', KernelTools::httpPrefix(). $parsedUrl1 );
+	$gBitSmarty->assign( 'url_visit', KernelTools::httpPrefix(). $parsedUrl2 );
 }
 
 // custom user fields
@@ -58,7 +62,7 @@ if( $gBitSystem->isFeatureActive( 'custom_user_fields' )) {
 $includeFiles = $gBitSystem->getIncludeFiles( 'user_preferences_inc.php', 'user_preferences_inc.tpl' );
 foreach( $includeFiles as $file ) {
 	if( !empty( $file['php'] ) && is_file( $file['php'] ) ) {
-		require_once( $file['php'] );
+		require_once $file['php'];
 	}
 }
 $gBitSmarty->assign( 'includFiles', $includeFiles );
@@ -73,12 +77,12 @@ if( $gBitSystem->getConfig( 'users_themes' ) == 'y' ) {
 		if( !empty( $_REQUEST['style'] ) && $_REQUEST['style'] != $gBitSystem->getConfig( 'style' ) ) {
 			$editUser->storePreference( 'theme', $_REQUEST["style"] );
 		} else {
-			$editUser->storePreference( 'theme', NULL );
+			$editUser->storePreference( 'theme', null );
 		}
 		$assignStyle = $_REQUEST["style"];
 	}
-	$styles = $gBitThemes->getStyles( NULL, TRUE, TRUE );
-	$gBitSmarty->assignByRef( 'styles', $styles );
+	$styles = $gBitThemes->getStyles( null, true, true );
+	$gBitSmarty->assign( 'styles', $styles );
 
 	if( !isset( $_REQUEST["style"] )) {
 		$assignStyle = $editUser->getPreference( 'theme' );
@@ -92,20 +96,20 @@ if( isset( $_REQUEST["prefs"] )) {
 		$feedback['error'] = $editUser->mErrors;
 	} else {
 		// preferences
-		$prefs = array(
-			'users_homepage'        => NULL,
-			'site_display_utc'	=> 'Local',
+		$prefs = [
+			'users_homepage'        => null,
+			'site_display_utc'      => 'Local',
 			'site_display_timezone' => 'UTC',
-			'users_country'         => NULL,
+			'users_country'         => null,
 			'users_information'     => 'public',
 			'users_email_display'   => 'n',
-		);
+		];
 
 		if( $_REQUEST['site_display_utc'] != 'Fixed' ) {
 			unset( $_REQUEST['site_display_timezone'] );
-			$editUser->storePreference( 'site_display_timezone', NULL, USERS_PKG_NAME );
+			$editUser->storePreference( 'site_display_timezone', null );
 		} else {
-			$editUser->storePreference( 'site_display_timezone', $_REQUEST['site_display_timezone'], USERS_PKG_NAME );
+			$editUser->storePreference( 'site_display_timezone', $_REQUEST['site_display_timezone'] );
 		}
 
 		// we don't have to store http:// in the db
@@ -117,25 +121,25 @@ if( isset( $_REQUEST["prefs"] )) {
 
 		foreach( $prefs as $pref => $default ) {
 			if( !empty( $_REQUEST[$pref] ) && $_REQUEST[$pref] != $default ) {
-				$editUser->storePreference( $pref, $_REQUEST[$pref], USERS_PKG_NAME );
+				$editUser->storePreference( $pref, $_REQUEST[$pref] );
 			} else {
-				$editUser->storePreference( $pref, NULL, USERS_PKG_NAME );
+				$editUser->storePreference( $pref, null );
 			}
 		}
 
 		if( $gBitSystem->isFeatureActive( 'users_change_language' )) {
-			$editUser->storePreference( 'bitlanguage', ( $_REQUEST['bitlanguage'] != $gBitLanguage->mLanguage ) ? $_REQUEST['bitlanguage'] : NULL, LANGUAGES_PKG_NAME );
+			$editUser->storePreference( 'bitlanguage', ( $_REQUEST['bitlanguage'] != $gBitLanguage->mLanguage ) ? $_REQUEST['bitlanguage'] : null );
 		}
 
 		/*/ toggles
-		$toggles = array(
+		$toggles = []
 		);
 
 		foreach( $toggles as $toggle => $package ) {
 			if( isset( $_REQUEST[$toggle] )) {
 				$editUser->storePreference( $toggle, 'y', $package );
 			} else {
-				$editUser->storePreference( $toggle, NULL, $package );
+				$editUser->storePreference( $toggle, null, $package );
 			}
 		}
 		*/
@@ -144,16 +148,16 @@ if( isset( $_REQUEST["prefs"] )) {
 		if( isset( $customFields ) && is_array( $customFields )) {
 			foreach( $customFields as $f ) {
 				if( isset( $_REQUEST['CUSTOM'][$f] )) {
-					$editUser->storePreference( trim( $f ), trim( $_REQUEST['CUSTOM'][$f] ), USERS_PKG_NAME );
+					$editUser->storePreference( trim( $f ), trim( $_REQUEST['CUSTOM'][$f] ) );
 				}
 			}
 		}
 
 		// we need to reload the page for all the included user preferences
 		if( isset( $_REQUEST['view_user'] )) {
-			bit_redirect ( USERS_PKG_URL."preferences.php?view_user=$editUser->mUserId" );
+			KernelTools::bit_redirect ( USERS_PKG_URL."preferences.php?view_user=$editUser->mUserId" );
 		} else {
-			bit_redirect ( USERS_PKG_URL."preferences.php" );
+			KernelTools::bit_redirect ( USERS_PKG_URL."preferences.php" );
 		}
 	}
 }
@@ -162,12 +166,12 @@ if( isset( $_REQUEST["prefs"] )) {
 if( isset( $_REQUEST['chgemail'] )) {
 	// check user's password
 	if( !$gBitUser->hasPermission( 'p_users_admin' ) && !$editUser->validate( $editUser->mUsername, $_REQUEST['pass'], '', '' )) {
-		$gBitSystem->fatalError( tra("Invalid password.  Your current password is required to change your email address." ));
+		$gBitSystem->fatalError( KernelTools::tra("Invalid password.  Your current password is required to change your email address." ));
 	}
 
 	$org_email = $editUser->getField( 'email' );
 	if( $editUser->changeUserEmail( $editUser->mUserId, $_REQUEST['email'] )) {
-		$feedback['success'] = tra( 'Your email address was updated successfully' );
+		$feedback['success'] = KernelTools::tra( 'Your email address was updated successfully' );
 
 		/* this file really needs a once over
 			we need to call services when various preferences are stored
@@ -186,45 +190,45 @@ if( isset( $_REQUEST['chgemail'] )) {
 // change user password
 if( isset( $_REQUEST["chgpswd"] )) {
 	if( $_REQUEST["pass1"] != $_REQUEST["pass2"] ) {
-		$gBitSystem->fatalError( tra("The passwords didn't match" ));
+		$gBitSystem->fatalError( KernelTools::tra("The passwords didn't match" ));
 	}
 	if( !$gBitUser->hasPermission( 'p_users_admin' ) && !$editUser->validate( $editUser->getField( 'email' ), $_REQUEST["old"], '', '' )) {
-		$gBitSystem->fatalError( tra( "Invalid old password" ));
+		$gBitSystem->fatalError( KernelTools::tra( "Invalid old password" ));
 	}
 	//Validate password here
 	$users_min_pass_length = $gBitSystem->getConfig( 'users_min_pass_length', 4 );
 	if( strlen( $_REQUEST["pass1"] ) < $users_min_pass_length ) {
-		$gBitSystem->fatalError( tra( "Password should be at least" ).' '.$users_min_pass_length.' '.tra( "characters long" ));
+		$gBitSystem->fatalError( KernelTools::tra( "Password should be at least" ).' '.$users_min_pass_length.' '.KernelTools::tra( "characters long" ));
 	}
 	// Check this code
 	if( $gBitSystem->isFeatureActive( 'users_pass_chr_num' )) {
 		if (!preg_match_all("/[0-9]+/", $_REQUEST["pass1"], $parsedUrl ) || !preg_match_all("/[A-Za-z]+/", $_REQUEST["pass1"], $parsedUrl )) {
-			$gBitSystem->fatalError( tra( "Password must contain both letters and numbers" ));
+			$gBitSystem->fatalError( KernelTools::tra( "Password must contain both letters and numbers" ));
 		}
 	}
 	if( $editUser->storePassword( $_REQUEST["pass1"] )) {
-		$feedback['success'] = tra( 'The password was updated successfully' );
+		$feedback['success'] = KernelTools::tra( 'The password was updated successfully' );
 	}
 }
 
 
 // this should go in tidbits
 if( isset( $_REQUEST['tasksprefs'] )) {
-	$editUser->storePreference( 'tasks_max_records', $_REQUEST['tasks_max_records'], 'users' );
+	$editUser->storePreference( 'tasks_max_records', $_REQUEST['tasks_max_records'] );
 	if( isset( $_REQUEST['tasks_use_dates'] ) && $_REQUEST['tasks_use_dates'] == 'on' ) {
-		$editUser->storePreference( 'tasks_use_dates', 'y', 'users' );
+		$editUser->storePreference( 'tasks_use_dates', 'y' );
 	} else {
-		$editUser->storePreference( 'tasks_use_dates', 'n', 'users' );
+		$editUser->storePreference( 'tasks_use_dates', 'n' );
 	}
 }
 
 // get available languages
-$languages = array();
+$languages = [];
 $languages = $gBitLanguage->listLanguages();
-$gBitSmarty->assignByRef( 'languages', $languages );
+$gBitSmarty->assign( 'languages', $languages );
 
 // Get flags
-$flags = array();
+$flags = [];
 $h = opendir( USERS_PKG_PATH.'icons/flags/' );
 while( $file = readdir( $h )) {
 	if( strstr( $file, ".gif" )) {
@@ -243,7 +247,7 @@ $gBitSmarty->assign( 'feedback', $feedback );
 
 /* This should come from BitDate->get_timezone_list but that seems to rely on a global from PEAR that does not exist. */
 if ( version_compare( phpversion(), "5.2.0", ">=" ) ) {
-	$user_timezones = DateTimeZone::listIdentifiers();
+	$user_timezones = \DateTimeZone::listIdentifiers();
 } else {
 	for($i=-12;$i<=12;$i++) {
 		$user_timezones[$i * 60 * 60] = $i; // Stored offset needs to be in seconds.
@@ -252,17 +256,17 @@ if ( version_compare( phpversion(), "5.2.0", ">=" ) ) {
 $gBitSmarty->assign( 'userTimezones', $user_timezones);
 
 // email scrambling methods
-$scramblingMethods = array( "n", "strtr", "unicode", "x" );
-$gBitSmarty->assignByRef( 'scramblingMethods', $scramblingMethods );
-$scramblingEmails = array(
-	tra( "no" ),
+$scramblingMethods = [ "n", "strtr", "unicode", "x" ];
+$gBitSmarty->assign( 'scramblingMethods', $scramblingMethods );
+$scramblingEmails = [
+	KernelTools::tra( "no" ),
 	scramble_email( $editUser->mInfo['email'], 'strtr' ),
-	scramble_email( $editUser->mInfo['email'], 'unicode' )."-".tra( "unicode" ),
-	scramble_email( $editUser->mInfo['email'], 'x' )
-);
-$gBitSmarty->assignByRef( 'scramblingEmails', $scramblingEmails );
+	scramble_email( $editUser->mInfo['email'], 'unicode' ) . "-" . KernelTools::tra( "unicode" ),
+	scramble_email( $editUser->mInfo['email'], 'x' ),
+];
+$gBitSmarty->assign( 'scramblingEmails', $scramblingEmails );
 
 // edit services
 $editUser->invokeServices( 'content_edit_function' );
-$gBitSystem->display( 'bitpackage:users/user_preferences.tpl', 'Edit User Preferences' , array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/user_preferences.tpl', 'Edit User Preferences' , [ 'display_mode' => 'display' ]);
 

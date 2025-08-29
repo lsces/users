@@ -10,10 +10,10 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 $statusCode = 205;
-$error = TRUE;
+$error = true;
 $msg = "";
 
 if( $gBitUser->isRegistered() ){
@@ -39,7 +39,7 @@ if( $gBitUser->isRegistered() ){
 				}
 				$gBitSmarty->assign( 'bookmarkState', $bookmarkState );
 				$gBitSmarty->assign( 'contentId', $_REQUEST['content_id'] );
-				$error = FALSE;
+				$error = false;
 			}else{
 				$statusCode = 401;
 				$msg = tra( 'You can not bookmark this type of content, bookmarking denied' );

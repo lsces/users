@@ -1,4 +1,6 @@
 <?php
+use Bitweaver\KernelTools;
+
 /**
  * change password
  *
@@ -11,7 +13,8 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
+
 if( !isset( $_REQUEST['login'] )) {
 	$_REQUEST['login'] = '';
 }
@@ -30,19 +33,19 @@ $gBitSmarty->assign( 'oldpass', $_REQUEST["oldpass"] );
 $gBitSmarty->assign( 'provpass', $_REQUEST["provpass"] );
 
 $userInfo = $gBitUser->getUserInfo( array( 'user_id' => $_REQUEST['user_id'] ));
-$gBitSmarty->assignByRef( 'userInfo', $userInfo );
+$gBitSmarty->assign( 'userInfo', $userInfo );
 
 if( isset( $_REQUEST["change"] )) {
 
 	if( $_REQUEST["pass"] == $_REQUEST["oldpass"] ) {
-		$gBitSystem->fatalError( tra( "You can not use the same password again" ));
+		$gBitSystem->fatalError( KernelTools::tra( "You can not use the same password again" ));
 	}
 
 	if( $passswordError = $gBitUser->verifyPasswordFormat( $_REQUEST["pass"], $_REQUEST["pass2"] )) {
-		$gBitSystem->fatalError( tra( $passswordError ));
+		$gBitSystem->fatalError( KernelTools::tra( $passswordError ));
 	}
 
-	$validated = FALSE;
+	$validated = false;
 	if( !empty( $_REQUEST["provpass"] ) ) {
 		if( $validated = $gBitUser->confirmRegistration( $userInfo['user_id'], $_REQUEST["provpass"] ) ) {
 			if( $gBitSystem->isFeatureActive( 'send_welcome_email' ) ) {
@@ -54,24 +57,22 @@ if( isset( $_REQUEST["change"] )) {
 				$gBitSmarty->assign( 'mailPassword',$_REQUEST['pass'] );
 				$gBitSmarty->assign( 'mailEmail',$validated['email'] );
 				$mail_data = $gBitSmarty->fetch('bitpackage:users/welcome_mail.tpl');
-				mail($validated["email"], tra( 'Welcome to' ).' '.$siteName,$mail_data,"From: ".$gBitSystem->getConfig('site_sender_email')."\r\nContent-type: text/plain;charset=utf-8\r\n");
+				mail($validated["email"], KernelTools::tra( 'Welcome to' ).' '.$siteName,$mail_data,"From: ".$gBitSystem->getConfig('site_sender_email')."\r\nContent-type: text/plain;charset=utf-8\r\n");
 			}
 		} else	{
-				$gBitSystem->fatalError( tra("Password reset request is invalid or has expired") );
+				$gBitSystem->fatalError( KernelTools::tra("Password reset request is invalid or has expired") );
 		}
 	} elseif( !( $validated = $gBitUser->validate( $userInfo['email'], $_REQUEST["oldpass"], '', '' )) ) {
-		$gBitSystem->fatalError( tra("Invalid old password") );
+		$gBitSystem->fatalError( KernelTools::tra("Invalid old password") );
 	}
 
 	if( $validated ) {
-		$gBitUser->storePassword( $_REQUEST["pass"], (!empty( $userInfo['login'] )?$userInfo['login']:$userInfo['email']) );
-		$url = $gBitUser->login( (!empty( $userInfo['login'] )?$userInfo['login']:$userInfo['email']), $_REQUEST["pass"] );
+		$gBitUser->storePassword( $_REQUEST["pass"], !empty( $userInfo['login'] ) ? $userInfo['login'] : $userInfo['email'] );
+		$url = $gBitUser->login( !empty( $userInfo['login'] ) ? $userInfo['login'] : $userInfo['email'], $_REQUEST["pass"] );
 	}
 
-	bit_redirect( $url );
+	KernelTools::bit_redirect( $url );
 }
 
 // Display the template
 $gBitSystem->display( 'bitpackage:users/change_password.tpl', 'Change Password' , array( 'display_mode' => 'display' ));
-
-?>

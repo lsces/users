@@ -11,19 +11,20 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
+require_once '../kernel/includes/setup_inc.php';
 
 // User preferences screen
 $gBitSystem->verifyFeature( 'users_preferences' );
 
 if( !$gBitUser->isRegistered() ) {
-	$gBitSystem->fatalError( tra( "You are not logged in" ));
+	$gBitSystem->fatalError( KernelTools::tra( "You are not logged in" ));
 }
 
-include_once( USERS_PKG_INCLUDE_PATH.'lookup_user_inc.php' );
+include_once USERS_PKG_INCLUDE_PATH . 'lookup_user_inc.php';
 
 if( $gQueryUser->mUserId != $gBitUser->mUserId && !$gBitUser->hasPermission( 'p_users_admin' ) ) {
-	$gBitSystem->fatalError( tra( "You do not have permission to edit this user's images" ));
+	$gBitSystem->fatalError( KernelTools::tra( "You do not have permission to edit this user's images" ));
 }
 
 $_REQUEST["user_id"] = $gQueryUser->mUserId;
@@ -31,7 +32,7 @@ $_REQUEST["user_id"] = $gQueryUser->mUserId;
 // Upload avatar is processed here
 if( !empty( $_REQUEST['store'] )) {
 	$gQueryUser->storeImages( $_REQUEST );
-	bit_redirect( $gQueryUser->getDisplayUrl( $gQueryUser->mInfo['login'] ));
+	KernelTools::bit_redirect( $gQueryUser->getDisplayUrl( $gQueryUser->mInfo['login'] ));
 } elseif( !empty( $_REQUEST['delete_portrait'] )) {
 	$gQueryUser->purgePortrait();
 	$gQueryUser->load();
@@ -45,7 +46,6 @@ if( !empty( $_REQUEST['store'] )) {
 
 // For some reason, we have to reassign here to make our changes to gBitUser->mInfo present in smarty.
 // dunno why, but this fixes the bug. XOXO spiderr
-$gBitSmarty->assignByRef( 'gQueryUser', $gQueryUser );
+$gBitSmarty->assign( 'gQueryUser', $gQueryUser );
 
-$gBitSystem->display( 'bitpackage:users/my_images.tpl', tra( 'Personal Images' ), array( 'display_mode' => 'display' ));
-?>
+$gBitSystem->display( 'bitpackage:users/my_images.tpl', KernelTools::tra( 'Personal Images' ), array( 'display_mode' => 'display' ));

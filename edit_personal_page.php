@@ -11,7 +11,7 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 $gBitUser->verifyRegistered();
 
@@ -51,18 +51,18 @@ if(isset($_REQUEST["preview"])) {
 	$gBitUser->mInfo['parsed_data'] = $parsed;
 	/* SPELLCHECKING INITIAL ATTEMPT */
 	//This nice function does all the job!
-	$gBitSmarty->assignByRef( 'pageInfo', $gBitUser->mInfo );
+	$gBitSmarty->assign( 'pageInfo', $gBitUser->mInfo );
 	$gBitUser->invokeServices( 'content_preview_function' );
 }
 else {
 	$gBitUser->invokeServices( 'content_edit_function' );
 }
 
-$gBitSmarty->assignByRef( 'pageInfo', $gBitUser->mInfo );
-$gBitSmarty->assignByRef( 'gContent', $gBitUser );
+$gBitSmarty->assign( 'pageInfo', $gBitUser->mInfo );
+$gBitSmarty->assign( 'gContent', $gBitUser );
 
 $gBitSmarty->assign( 'show_page_bar', 'y' );
 $gBitSystem->setConfig( 'wiki_description', 'n' );
 
-$gBitSystem->display( 'bitpackage:users/edit_personal_page.tpl', NULL, array( 'display_mode' => 'edit' ) );
+$gBitSystem->display( 'bitpackage:users/edit_personal_page.tpl', null, array( 'display_mode' => 'edit' ) );
 ?>
