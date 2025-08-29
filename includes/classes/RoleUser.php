@@ -16,8 +16,16 @@
 /**
  * required setup
  */
-require_once( LIBERTY_PKG_CLASS_PATH.'LibertyMime.php' );
-require_once( USERS_PKG_INCLUDE_PATH.'includes/users_lib.php' );
+namespace Bitweaver\Users;
+use Bitweaver\BitBase;
+use Bitweaver\BitSystem;
+use Bitweaver\DateTime;
+use Bitweaver\Liberty\LibertyBase;
+use Bitweaver\Liberty\LibertyContent;
+use Bitweaver\KernelTools;
+
+require_once LIBERTY_PKG_INCLUDE_PATH.'liberty_lib.php';
+require_once USERS_PKG_INCLUDE_PATH.'users_lib.php';
 
 define( 'AVATAR_TYPE_CENTRALIZED', 'c' );
 define( 'AVATAR_TYPE_USER_DB', 'u' );
@@ -42,40 +50,43 @@ define( "ACCOUNT_DISABLED", -6 );
  * @package  users
  * @subpackage  BitUser
  */
-class BitUser extends LibertyMime {
+class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	public $mUserId;
 	public $mUsername;
 	public $mRoles;
 	public $mTicket;
 	public $mAuth;
+	public $cUserRoles;
+	public $pExpungeContent = 'none';
 
 	/**
 	 * Constructor - will automatically load all relevant data if passed a user string
 	 *
 	 * @access public
 	 * @author Christian Fowler <spider@viovio.com>
-	 * @return returnString
+	 * @return // returnString
 	 */
-	function __construct( $pUserId=NULL, $pContentId=NULL ) {
+	public function __construct( $pUserId=null, $pContentId=null ) {
 		parent::__construct();
 		$this->mContentTypeGuid = BITUSER_CONTENT_TYPE_GUID;
 		$this->registerContentType(
-			BITUSER_CONTENT_TYPE_GUID, array(
+			BITUSER_CONTENT_TYPE_GUID, [
 				'content_type_guid'   => BITUSER_CONTENT_TYPE_GUID,
 				'content_name'        => 'User Information',
 				'content_name_plural' => 'User Information',
-				'handler_class'       => 'BitUser',
+				'handler_class'       => 'RoleUser',
 				'handler_package'     => 'users',
 				'handler_file'        => 'RoleUser.php',
-				'maintainer_url'      => 'http://www.bitweaver.org'
-			)
+				'maintainer_url'      => 'http://www.bitweaver.org',
+			]
 		);
-		$this->mUserId = ( @$this->verifyId( $pUserId ) ? $pUserId : NULL);
+		$this->mUserId = @$this->verifyId( $pUserId ) ? $pUserId : null;
 		$this->mContentId = $pContentId;
+		$this->pExpungeContent = 'none';
 	}
 
 	public function __sleep() {
-		return array_merge( parent::__sleep(), array( 'mUserId', 'mUsername', 'mRoles', 'mTicket', 'mAuth' ) );
+		return array_merge( parent::__sleep(), [ 'mUserId', 'mUsername', 'mRoles', 'mTicket', 'mAuth' ] );
 	}
 
 	public function getCacheKey() {
@@ -94,7 +105,7 @@ class BitUser extends LibertyMime {
 
 	/**
 	 * Determines if a user object is cacheable. Out of paranoia, admin's are never cached.
-	 * @return boolean if object can be cached
+	 * @return bool if object can be cached
 	 */
 	public function isCacheableObject() {
 		global $gBitSystem;
@@ -105,7 +116,7 @@ class BitUser extends LibertyMime {
 	 * Validate inbound sort_mode parameter
 	 * @return array of fields which are valid sorts
 	 */
-	public static function getSortModeFields() {
+	public static function getSortModeFields(): array {
 		$fields = parent::getSortModeFields();
 		$fields[] = 'map_position';
 		return $fields;
@@ -114,29 +125,29 @@ class BitUser extends LibertyMime {
 	/**
 	 * load - loads all settings & preferences for this user
 	 *
-	 * @param boolean $pFull Load additional user data like
-	 * @param string $pUserName User login name
+	 *		- boolean $pFull Load additional user data like
+	 *		- string $pUserName User login name
 	 * @access public
 	 * @author Chrstian Fowler <spider@steelsun.com>
-	 * @return returnString
+	 * @return bool returnString
 	 */
-	function load( $pFull=TRUE, $pUserName=NULL ) {
+	public function load( ...$extraParams ): bool {
 		global $gBitSystem;
-		$this->mInfo = NULL;
+		$this->mInfo = null;
 		if( isset( $this->mUserId ) ) {
 			$whereSql = "WHERE uu.`user_id`=?";
-			$bindVars = array( $this->mUserId );
+			$bindVars = [ $this->mUserId ];
 		} elseif( isset( $this->mContentId ) ) {
 			$whereSql = "WHERE uu.`content_id`=?";
-			$bindVars = array( $this->mContentId );
-		} elseif( !empty( $pUserName ) ) {
+			$bindVars = [ $this->mContentId ];
+		} elseif( !empty( $extraParams[1] ) ) {
 			$whereSql = "WHERE uu.`login`=?";
-			$bindVars = array( $pUserName );
+			$bindVars = [ $extraParams[1] ];
 		}
 		if( isset( $whereSql ) ) {
 			$fullSelect = '';
 			$fullJoin = '';
-			if( $pFull ) {
+			if( !empty( $extraParams[0] ) && $extraParams[0] ) {
 				$fullSelect = ' , lc.* ';
 				$fullJoin = " LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( uu.`content_id`=lc.`content_id` )";
 				$this->getServicesSql( 'content_load_sql_function', $fullSelect, $fullJoin, $whereSql, $bindVars );
@@ -163,9 +174,19 @@ class BitUser extends LibertyMime {
 				$this->mInfo['valid']         = @$this->verifyId( $this->mInfo['uu_user_id'] );
 				$this->mInfo['user_id']       = $this->mInfo['uu_user_id'];
 				$this->mInfo['is_registered'] = $this->isRegistered();
-				foreach( array( 'portrait', 'avatar', 'logo' ) as $img ) {
-					$this->mInfo[$img.'_path']   = $this->getSourceFile( array( 'user_id'=>$this->getField( 'user_id' ), 'package'=>liberty_mime_get_storage_sub_dir_name( array( 'mime_type' => $this->getField( $img.'_mime_type' ), 'name' =>  $this->getField( $img.'_file_name' ) ) ), 'file_name' => basename( $this->mInfo[$img.'_file_name'] ), 'sub_dir' =>  $this->getField( $img.'_attachment_id' ), 'mime_type' => $this->getField( $img.'_mime_type' ) ) );
-					$this->mInfo[$img.'_url']    = liberty_fetch_thumbnail_url( array( 'source_file'=>$this->mInfo[$img.'_path'], 'size' => 'small', 'mime_image' => FALSE ));
+				foreach( [ 'portrait', 'avatar', 'logo' ] as $img ) {
+				    $this->mInfo[$img.'_path'] = $this->getSourceFile( [ 
+						'user_id'=>$this->getField( 'user_id' ),
+						'package'=>\Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name([ 
+							'mime_type' => $this->getField( $img.'_mime_type' ),
+							'name' =>  $this->getField( $img.'_file_name' ) ] ),
+						'file_name' => basename( $this->mInfo[$img.'_file_name'] ?? '' ),
+						'sub_dir' =>  $this->getField( $img.'_attachment_id' ),
+						'mime_type' => $this->getField( $img.'_mime_type' ) ] );
+					$this->mInfo[$img.'_url'] = \Bitweaver\Liberty\liberty_fetch_thumbnail_url( [
+						'source_file'=>$this->mInfo[$img.'_path'],
+						'size' => 'small',
+						'mime_image' => false ] );
 				}
 
 				// break the real name into first and last name using the last space as the beginning of the last name
@@ -187,26 +208,24 @@ class BitUser extends LibertyMime {
 
 				$this->loadPreferences();
 				// Load attachments
-				LibertyMime::load();
+				\Bitweaver\Liberty\LibertyMime::load();
 				if( $this->getPreference( 'users_country' ) ) {
 					$this->setPreference( 'flag', $this->getPreference( 'users_country' ) );
 					$this->setPreference( 'users_country', str_replace( '_', ' ', $this->getPreference( 'users_country' ) ) );
 				}
-				if( $pFull ) {
+				if( !empty($extraParams[0]) && $extraParams[0] ) {
 					$this->mInfo['real_name'] = trim( $this->mInfo['real_name'] );
-					$this->mInfo['display_name'] = (
-						( !empty( $this->mInfo['real_name'] ) ? $this->mInfo['real_name'] :
+					$this->mInfo['display_name'] = !empty( $this->mInfo['real_name'] ) ? $this->mInfo['real_name'] :
 						( !empty( $this->mUsername) ? $this->mUsername :
 						( !empty( $this->mInfo['email'] ) ? substr( $this->mInfo['email'], 0, strpos( $this->mInfo['email'],'@' )) :
-						$this->mUserId )))
-					);
+						$this->mUserId ));
 					//print("displayName: ".$this->mInfo['display_name']);
 					$this->defaults();
-					$this->mInfo['publicEmail'] = scramble_email( $this->mInfo['email'], ( $this->getPreference( 'users_email_display' ) ? $this->getPreference( 'users_email_display' ) : NULL ) );
+					$this->mInfo['publicEmail'] = scramble_email( $this->mInfo['email'], $this->getPreference( 'users_email_display' ) ? $this->getPreference( 'users_email_display' ) : null );
 				}
 				$this->mTicket = substr( md5( session_id() . $this->mUserId ), 0, 20 );
 			} else {
-				$this->mUserId = NULL;
+				$this->mUserId = null;
 			}
 		}
 		if( !$gBitSystem->isFeatureActive( 'i18n_browser_languages' ) ) {
@@ -220,7 +239,7 @@ class BitUser extends LibertyMime {
 				$gBitLanguage->mLanguage = $_SESSION['bitlanguage'];
 			}
 		}
-		return( $this->isValid() );
+		return $this->isValid();
 	}
 
 	/**
@@ -229,7 +248,7 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return void
 	 */
-	function defaults() {
+	public function defaults(): void {
 		global $gBitSystem, $gBitThemes, $gBitLanguage;
 		if( !$this->getPreference( 'users_information' ) ) {
 			$this->setPreference( 'users_information', 'public' );
@@ -260,25 +279,25 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pParamHash Data to be verified
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function verify( &$pParamHash ) {
+	public function verify( array &$pParamHash ): bool {
 		global $gBitSystem;
 
-		trim_array( $pParamHash );
+		KernelTools::trim_array( $pParamHash );
 
 		// DO NOT REMOVE - to allow specific setting of the user_id during the first store.
 		// used by ROOT_USER_ID or ANONYMOUS_USER_ID during install.
-		if( @$this->verifyId( $pParamHash['user_id'] ) ) {
+		if( @$this->verifyId( $pParamHash['user_id'] ?? '' ) ) {
 			$pParamHash['user_store']['user_id'] = $pParamHash['user_id'];
 		}
 		// require login
 		if( !empty( $pParamHash['login'] ) && $pParamHash['login'] != $this->getField( 'login' ) ) {
 			$pParamHash['login'] = strip_tags($pParamHash['login']);
-			if( $this->userExists( array( 'login' => $pParamHash['login'] ) ) ) {
+			if( $this->userExists( [ 'login' => $pParamHash['login'] ] ) ) {
 				$this->mErrors['login'] = 'The username "'.$pParamHash['login'].'" is already in use';
 			} elseif( preg_match( '/[^A-Za-z0-9_.-]/', $pParamHash["login"] ) ) {
-				$this->mErrors['login'] = tra( "Your username can only contain numbers, characters, underscores and hyphens." );
+				$this->mErrors['login'] = KernelTools::tra( "Your username can only contain numbers, characters, underscores and hyphens." );
 			} else {
 				// LOWER CASE all logins
 				$pParamHash['login'] = strtolower( $pParamHash['login'] );
@@ -303,7 +322,7 @@ class BitUser extends LibertyMime {
 			// LOWER CASE all emails
 			$pParamHash['email'] = strtolower( $pParamHash['email'] );
 			if( $emailResult = $this->verifyEmail( $pParamHash['email'] , $this->mErrors) ) {
-				$pParamHash['verified_email'] = ($emailResult === true);
+				$pParamHash['verified_email'] = $emailResult === true;
 			}
 		}
 		// check some new user requirements
@@ -312,12 +331,12 @@ class BitUser extends LibertyMime {
 				// choose a login based on the username in the email
 				if( empty($pParamHash['email']) ){
 					// obviously if they didnt enter an email address we cant help them out
-					$this->mErrors['email'] = tra( 'You must enter your email address' );
+					$this->mErrors['email'] = KernelTools::tra( 'You must enter your email address' );
 				}else{
 					$loginBase = preg_replace( '/[^A-Za-z0-9_]/', '', substr( $pParamHash['email'], 0, strpos( $pParamHash['email'], '@' ) ) );
 					$login = $loginBase;
 					do {
-						if( $loginTaken = $this->userExists( array( 'login' => $login ) ) ) {
+						if( $loginTaken = $this->userExists( [ 'login' => $login ] ) ) {
 							$login = $loginBase.rand(100,999);
 						}
 					} while( $loginTaken );
@@ -332,14 +351,14 @@ class BitUser extends LibertyMime {
 			if( !empty( $pParamHash['email'] ) && empty($this->mErrors['email']) ) {
 				$pParamHash['user_store']['email'] = substr( $pParamHash['email'], 0, 200 ) ;
 			}elseif( empty($pParamHash['email']) ){
-				$this->mErrors['email'] = tra( 'You must enter your email address' );
+				$this->mErrors['email'] = KernelTools::tra( 'You must enter your email address' );
 			}
 
 			if( $gBitSystem->isFeatureActive( 'users_validate_user' ) ) {
 				$pParamHash['user_store']['provpass'] = md5(BitSystem::genPass());
 				$pParamHash['pass_due'] = 0;
 			} elseif( empty( $pParamHash['password'] ) ) {
-				$this->mErrors['password'] = tra( 'Your password should be at least '.$gBitSystem->getConfig( 'users_min_pass_length', 4 ).' characters long' );
+				$this->mErrors['password'] = KernelTools::tra( 'Your password should be at least '.$gBitSystem->getConfig( 'users_min_pass_length', 4 ).' characters long' );
 			}
 		} elseif( $this->isValid() ) {
 			// Prevent losing user info on save
@@ -350,7 +369,7 @@ class BitUser extends LibertyMime {
 
 		if( isset( $pParamHash['password'] ) ) {
             if( isset( $pParamHash["password2"] ) && $pParamHash["password"] != $pParamHash["password2"] ) {
-                $passwordErrors['password2'] = tra("The passwords didn't match");
+                $passwordErrors['password2'] = KernelTools::tra("The passwords didn't match");
             }
 			if( ( !$this->isValid() || isset( $pParamHash['password'] ) ) && $error = $this->verifyPasswordFormat( $pParamHash['password'] ) ) {
 				$passwordErrors['password'] = $error;
@@ -366,10 +385,10 @@ class BitUser extends LibertyMime {
 				// if no pass_due and no user_pass_due value user will never have to update the password
 				if( empty( $pParamHash['pass_due'] ) && $gBitSystem->getConfig('users_pass_due') ) {
 					// renew password according to config value
-					$pParamHash['user_store']['pass_due'] = $now + (60 * 60 * 24 * $gBitSystem->getConfig('users_pass_due') );
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $gBitSystem->getConfig('users_pass_due');
 				} elseif( !empty( $pParamHash['pass_due'] ) ) {
 					// renew password only next half year ;)
-					$pParamHash['user_store']['pass_due'] = $now + (60 * 60 * 24 * $pParamHash['pass_due']);
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $pParamHash['pass_due'];
 				}
 				if( $gBitSystem->isFeatureActive( 'users_clear_passwords' ) || !empty( $pParamHash['user_store']['provpass'] ) ) {
 					$pParamHash['user_store']['user_password'] = $pParamHash['password'];
@@ -382,7 +401,7 @@ class BitUser extends LibertyMime {
 			parent::verify( $pParamHash );
 		}
 
-		return ( count($this->mErrors) == 0 );
+		return count($this->mErrors) == 0;
 	}
 
 	/**
@@ -403,7 +422,7 @@ class BitUser extends LibertyMime {
 		}
 
 		if( $gBitSystem->isFeatureActive( 'users_register_recaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
-			require_once( USERS_PKG_INCLUDE_PATH.'recaptchalib.php' );
+			require_once USERS_PKG_INCLUDE_PATH.'recaptchalib.php';
 			if( !empty( $pParamHash["recaptcha_challenge_field"] ) && !empty( $pParamHash["recaptcha_response_field"] ) ) {
 				$resp = recaptcha_check_answer ( $gBitSystem->getConfig( 'users_register_recaptcha_secret_key' ), $_SERVER["REMOTE_ADDR"], $pParamHash["recaptcha_challenge_field"], $pParamHash["recaptcha_response_field"] );
 				if( !$resp->is_valid ) {
@@ -414,29 +433,29 @@ class BitUser extends LibertyMime {
 			}
 		}
 
-		if( $gBitSystem->isFeatureActive( 'users_register_cfcaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
-			require_once( USERS_PKG_INCLUDE_PATH.'solvemedialib.php' );
+		if( $gBitSystem->isFeatureActive( 'users_register_smcaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
+			require_once USERS_PKG_INCLUDE_PATH.'solvemedialib.php';
 			if( !empty( $pParamHash['adcopy_challenge'] ) && !empty( $pParamHash['adcopy_response'] ) ) {
 				$solvemediaResponse = solvemedia_check_answer($gBitSystem->getConfig( 'users_register_smcaptcha_v_key' ), $_SERVER["REMOTE_ADDR"], $pParamHash["adcopy_challenge"], $pParamHash["adcopy_response"], $gBitSystem->getConfig( 'users_register_smcaptcha_h_key' ) );
 				if( !$solvemediaResponse->is_valid ) {
-					$this->mErrors['cfcaptcha'] = $solvemediaResponse->error;
+					$this->mErrors['smcaptcha'] = $solvemediaResponse->error;
 				}
 			} else {
-				$this->mErrors['cfcaptcha'] = 'Wrong Answer';
+				$this->mErrors['smcaptcha'] = 'Wrong Answer';
 			}
 		}
 
-		return ( count($this->mErrors) == 0 );
+		return count($this->mErrors) == 0;
 	}
 
 	/**
 	 * preRegisterVerify
 	 *
 	 * A collection of values to verify before a user can register
-	 * Separated from BitUser::verify so that import verification can
+	 * Separated from RoleUser::verify so that import verification can
 	 * be processed with less rigor than user submitted requests
 	 */
-	function preRegisterVerify( &$pParamHash ) {
+	function preRegisterVerify( $pParamHash ) {
 		global $gBitSystem;
 
 		$this->answerCaptcha( $pParamHash );
@@ -447,42 +466,42 @@ class BitUser extends LibertyMime {
 				$this->mErrors['passcode'] = 'Wrong passcode! You need to know the passcode to register at this site';
 			}
 		}
-		return ( count($this->mErrors) == 0 );
+		return count($this->mErrors) == 0;
 	}
 
 	/**
 	 * verifyPasswordFormat
 	 *
-	 * @param array $pPassword
-	 * @param array $pPassword2
+	 * @param string $pPassword
+	 * @param string $pPassword2
 	 * @access public
-	 * @return FALSE on success, Error string on failure
+	 * @return string|bool false on success, Error string on failure
 	 */
-	function verifyPasswordFormat( $pPassword, $pPassword2=NULL ) {
+	function verifyPasswordFormat( $pPassword, $pPassword2=null ) {
 		global $gBitSystem;
 
 		$minPassword = $gBitSystem->getConfig( 'users_min_pass_length', 4 );
 		if( strlen( $pPassword ) < $minPassword ) {
-			return ( tra( 'Your password should be at least '.$minPassword.' characters long' ));
+			return KernelTools::tra( 'Your password should be at least '.$minPassword.' characters long' );
 		}
 		if( !empty( $pPassword2 ) && $pPassword != $pPassword2 ) {
-			return( tra( 'The passwords do not match' ));
+			return KernelTools::tra( 'The passwords do not match' );
 		}
 		if( $gBitSystem->isFeatureActive( 'users_pass_chr_num' ) && ( !preg_match_all( "/[0-9]+/",$pPassword,$foo ) || !preg_match_all( "/[A-Za-z]+/",$pPassword,$foo ))) {
-			return ( tra( 'Password must contain both letters and numbers' ));
+			return KernelTools::tra( 'Password must contain both letters and numbers' );
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	/**
 	 * getSmtpResponse
 	 *
-	 * @param array $pConnect
+	 * @param resource $pConnect
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return string on success, false on failure - mErrors will contain reason for failure
 	 */
-	function getSmtpResponse( &$pConnect ) {
+	function getSmtpResponse( $pConnect ): string {
 		$out = "";
 		while( 1 ) {
 			$work = fgets( $pConnect, 1024 );
@@ -497,31 +516,31 @@ class BitUser extends LibertyMime {
 	/**
 	 * verifyEmail
 	 *
-	 * @param array $pEmail
-	 * @return TRUE on success, FALSE on failure, or -1 if verifyMX had a connection failure - mErrors will contain reason for failure
+	 * @param string $pEmail
+	 * @return bool true on success, false on failure, or -1 if verifyMX had a connection failure - mErrors will contain reason for failure
 	 */
 	public function verifyEmail( $pEmail , &$pErrors ) {
 		global $gBitSystem;
 
 		// check for existing user first, so root@localhost doesn't get attempted to re-register
-		if( !empty( $this ) && is_object( $this ) && $this->userExists( array( 'email' => $pEmail ) ) ) {
+		if( !empty( $this ) && is_object( $this ) && $this->userExists( [ 'email' => $pEmail ] ) ) {
 			$pErrors['email'] = 'The email address "'.$pEmail.'" has already been registered.';
 		// during install we have some <user>@localhost as email address. we won't cause problems on those
 		} elseif( $pEmail == 'root@localhost' || $pEmail == 'guest@localhost' ) {
 			// nothing to do
-		} elseif( !validate_email_syntax( $pEmail ) ) {
+		} elseif( !KernelTools::validate_email_syntax( $pEmail ) ) {
 			$pErrors['email'] = 'The email address "'.$pEmail.'" is invalid.';
 		} elseif( $gBitSystem->isFeatureActive( 'users_validate_email' ) ) {
-			$mxErrors;
+			$mxErrors = [];
 			$ret = $this->verifyMX( $pEmail, $mxErrors ) ;
 			if ($ret === false)	{
-				bit_error_log('INVALID EMAIL : '.$pEmail.' by '. $_SERVER['REMOTE_ADDR'] .' for '. $mxErrors['email']);
+				\Bitweaver\bit_error_log('INVALID EMAIL : '.$pEmail.' by '. $_SERVER['REMOTE_ADDR'] .' for '. $mxErrors['email']);
 				$pErrors = array_merge( $pErrors, $mxErrors );
 			}
 		}
 
 		if( !isset( $ret ) ) {
-			$ret = ( count( $pErrors ) == 0 )  ;
+			$ret = count( $pErrors ) == 0;
 		}
 
 		return $ret;
@@ -531,7 +550,7 @@ class BitUser extends LibertyMime {
 	 * verifyAnonEmail
 	 *
 	 * @param array $pEmail
-	 * @return TRUE on success, FALSE on failure, or -1 if verifyMX had a connection failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure, or -1 if verifyMX had a connection failure - mErrors will contain reason for failure
 	 */
 	public static function verifyAnonEmail( $pEmail , &$pErrors ) {
 		global $gBitSystem;
@@ -539,12 +558,12 @@ class BitUser extends LibertyMime {
 		// check for existing user first, so root@localhost doesn't get attempted to re-register
 		if( $pEmail == 'root@localhost' || $pEmail == 'guest@localhost' ) {
 			// nothing to do
-		} elseif( !validate_email_syntax( $pEmail ) ) {
+		} elseif( !KernelTools::validate_email_syntax( $pEmail ) ) {
 			$pErrors['email'] = 'The email address "'.$pEmail.'" is invalid.';
 		}
 
 		if( !isset( $ret ) ) {
-			$ret = ( count( $pErrors ) == 0 )  ;
+			$ret = count( $pErrors ) == 0  ;
 		}
 
 		return $ret;
@@ -553,10 +572,10 @@ class BitUser extends LibertyMime {
 	/**
 	 * verifyMX
 	 *
-	 * @param array $pEmail
-	 * @param array $pValidate
+	 * @param string $pEmail
+	 * @param bool $pValidate
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function verifyMX( $pEmail, &$pErrors ) {
 
@@ -565,16 +584,16 @@ class BitUser extends LibertyMime {
 		$HTTP_HOST=$_SERVER['SERVER_NAME'];
 		$ret = false;
 
-		if( validate_email_syntax( $pEmail ) ){
+		if( KernelTools::validate_email_syntax( $pEmail ) ){
 			list ( $Username, $domain ) = preg_split ("/@/",$pEmail);
 			//checkdnsrr will check to see if there are any MX records for the domain
-			if( !is_windows() and checkdnsrr ( $domain, "MX" ) )  {
-				bitdebug( "Confirmation : MX record for {$domain} exists." );
+			if( !KernelTools::is_windows() and checkdnsrr ( $domain, "MX" ) )  {
+				\Bitweaver\bitdebug( "Confirmation : MX record for {$domain} exists." );
 
-				$MXWeights = array();
+				$MXWeights = [];
 
 				getmxrr ( $domain, $MXHost, $MXWeights );
-				$hosts = array();
+				$hosts = [];
 
 				//create an array that combines the MXWeights with their associated hosts
 				for( $i = 0; $i < count( $MXHost ); $i++ ) {
@@ -592,7 +611,7 @@ class BitUser extends LibertyMime {
 						// Success in fsockopen
 
 						if( $Connect ) {
-							bitdebug( "Connection succeeded to {$host} SMTP." );
+							\Bitweaver\bitdebug( "Connection succeeded to {$host} SMTP." );
 
 
 							stream_set_timeout( $Connect, 30 );
@@ -604,31 +623,31 @@ class BitUser extends LibertyMime {
 								if( $gBitSystem->hasValidSenderEmail() ) {
 									$senderEmail = $gBitSystem->getConfig( 'site_sender_email' );
 									fputs( $Connect, "HELO $HTTP_HOST\r\n" );
-									bitdebug( "Run : HELO $HTTP_HOST" );
+									\Bitweaver\bitdebug( "Run : HELO $HTTP_HOST" );
 									// Receive server's answering cord.
 									$out = $this->getSmtpResponse( $Connect );
 
 									// Inform sender's address to server.
 									fputs ( $Connect, "MAIL FROM: <{$senderEmail}>\r\n" );
-									bitdebug( "Run : MAIL FROM: &lt;{$senderEmail}&gt;" );
+									\Bitweaver\bitdebug( "Run : MAIL FROM: &lt;{$senderEmail}&gt;" );
 									// Receive server's answering cord.
 									$from = $this->getSmtpResponse( $Connect );
 
 									// Inform listener's address to server.
 									fputs ( $Connect, "RCPT TO: <{$pEmail}>\r\n" );
-									bitdebug( "Run : RCPT TO: &lt;{$pEmail}&gt;" );
+									\Bitweaver\bitdebug( "Run : RCPT TO: &lt;{$pEmail}&gt;" );
 									// Receive server's answering cord.
 									$to = $this->getSmtpResponse( $Connect );
 
 									// Finish connection.
 									fputs( $Connect, "QUIT\r\n" );
-									bitdebug( "Run : QUIT" );
+									\Bitweaver\bitdebug( "Run : QUIT" );
 									fclose( $Connect );
 
 									//Checks if we received a 250 OK from the server. If we did not, the server is telling us that this address is not a valid mailbox.
 									if( !preg_match ( "/^250/", $from ) || ( !preg_match ( "/^250/", $to ) && !preg_match( "/Please use your ISP relay/", $to ))) {
 										$pErrors['email']   = $pEmail." is not recognized by the mail server. Try double checking the address for typos." ;
-										bit_error_log("INVALID EMAIL : ".$pEmail." SMTP FROM : ".$from." SMTP TO: ".$to);
+										\Bitweaver\bit_error_log("INVALID EMAIL : ".$pEmail." SMTP FROM : ".$from." SMTP TO: ".$to);
 										$ret = false;
 										break; //break out of foreach and fall through to the end of function
 									}else{
@@ -638,11 +657,11 @@ class BitUser extends LibertyMime {
 								}
 							} elseif( preg_match ( "/^420/", $out ) ) {
 								// Yahoo has a bad, bad habit of issuing 420's
-								bit_error_log("UNKNOWN EMAIL : ".$pEmail." SMTP response: ".$out);
+								\Bitweaver\bit_error_log("UNKNOWN EMAIL : ".$pEmail." SMTP response: ".$out);
 								$ret = true;
 							} else {
 								$pErrors['email'] = 'Connection rejected by MX server';
-								bit_error_log("INVALID EMAIL : ".$pEmail." SMTP response: ".$out);
+								\Bitweaver\bit_error_log("INVALID EMAIL : ".$pEmail." SMTP response: ".$out);
 								$ret = false;
 							}
 						} else {
@@ -673,13 +692,13 @@ class BitUser extends LibertyMime {
 	 *
 	 * @access public
 	 * @author Christian Fowler<spider@viovio.com>
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function register( &$pParamHash, $pNotifyRegistrant=TRUE ) {
+	public function register( &$pParamHash, $pNotifyRegistrant=true ): bool {
 		global $notificationlib, $gBitSmarty, $gBitSystem;
-		$ret = FALSE;
+		$ret = false;
 		if( !empty( $_FILES['user_portrait_file'] ) && empty( $_FILES['user_avatar_file'] ) ) {
-			$pParamHash['user_auto_avatar'] = TRUE;
+			$pParamHash['user_auto_avatar'] = true;
 		}
 		if( $this->verify( $pParamHash )) {
 			for( $i = 0; $i < BaseAuth::getAuthMethodCount(); $i++ ) {
@@ -690,7 +709,7 @@ class BitUser extends LibertyMime {
 						break;
 					} else {
 						$this->mErrors = array_merge( $this->mErrors, $instance->mErrors );
-						return FALSE;
+						return false;
 					}
 				}
 			}
@@ -700,11 +719,11 @@ class BitUser extends LibertyMime {
 			}
 
 			$this->mLogs['register'] = 'New user registered.';
-			$ret = TRUE;
+			$ret = true;
 
-			$this->load( FALSE, $pParamHash['login'] );
+			$this->load( false, $pParamHash['login'] );
 
-			require_once( KERNEL_PKG_INCLUDE_PATH.'notification_lib.php' );
+			require_once KERNEL_PKG_INCLUDE_PATH.'notification_lib.php';
 			$notificationlib->post_new_user_event( $pParamHash['login'] );
 
 			// set local time zone as default when registering
@@ -734,15 +753,15 @@ class BitUser extends LibertyMime {
 					$apass = $pParamHash['user_store']['provpass'];
 					$foo  = parse_url( $_SERVER["REQUEST_URI"] );
 					$foo1 = str_replace( "register", "confirm", $foo["path"] );
-					$machine = httpPrefix().$foo1;
+					$machine = KernelTools::httpPrefix().$foo1;
 
 					// Send the mail
-					$gBitSmarty->assign( 'msg',tra( 'You will receive an email with information to login for the first time into this site' ));
+					$gBitSmarty->assign( 'msg',KernelTools::tra( 'You will receive an email with information to login for the first time into this site' ));
 					$gBitSmarty->assign( 'mail_machine',$machine );
 					$gBitSmarty->assign( 'mailUserId',$this->mUserId );
 					$gBitSmarty->assign( 'mailProvPass',$apass );
 					$mail_data = $gBitSmarty->fetch( 'bitpackage:users/user_validation_mail.tpl' );
-					mail( $pParamHash["email"], $siteName.' - '.tra( 'Your registration information' ), $mail_data, "From: ".$gBitSystem->getConfig('site_sender_email')."\nContent-type: text/plain;charset=utf-8\n" );
+					mail( $pParamHash["email"], $siteName.' - '.KernelTools::tra( 'Your registration information' ), $mail_data, "From: ".$gBitSystem->getConfig('site_sender_email')."\nContent-type: text/plain;charset=utf-8\n" );
 					$gBitSmarty->assign( 'showmsg', 'y' );
 
 					$this->mLogs['confirm'] = 'Validation email sent.';
@@ -751,7 +770,7 @@ class BitUser extends LibertyMime {
 					$gBitSmarty->assign( 'mailPassword',$pParamHash['password'] );
 					$gBitSmarty->assign( 'mailEmail',$pParamHash['email'] );
 					$mail_data = $gBitSmarty->fetch( 'bitpackage:users/welcome_mail.tpl' );
-					mail( $pParamHash["email"], tra( 'Welcome to' ).' '.$siteName, $mail_data, "From: ".$gBitSystem->getConfig( 'site_sender_email' )."\nContent-type: text/plain;charset=utf-8\n" );
+					mail( $pParamHash["email"], KernelTools::tra( 'Welcome to' ).' '.$siteName, $mail_data, "From: ".$gBitSystem->getConfig( 'site_sender_email' )."\nContent-type: text/plain;charset=utf-8\n" );
 
 					$this->mLogs['welcome'] = 'Welcome email sent.';
 				}
@@ -759,25 +778,25 @@ class BitUser extends LibertyMime {
 			$logHash['action_log']['title'] = $pParamHash['login'];
 			$this->storeActionLog( $logHash );
 		}
-		return( $ret );
+		return $ret;
 	}
 
 	/**
 	 * verifyCaptcha
 	 *
-	 * @param array $pCaptcha
+	 * @param string $pCaptcha
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function verifyCaptcha( $pCaptcha = NULL ) {
-		if( $this->hasPermission( 'p_users_bypass_captcha' ) || ( !empty( $_SESSION['captcha_verified'] ) && $_SESSION['captcha_verified'] === TRUE ) ) {
-			return TRUE;
+	public function verifyCaptcha( $pCaptcha = null ) {
+		if( $this->hasPermission( 'p_users_bypass_captcha' ) || ( !empty( $_SESSION['captcha_verified'] ) && $_SESSION['captcha_verified'] === true ) ) {
+			return true;
 		} else {
 			if( empty( $pCaptcha ) || empty( $_SESSION['captcha'] ) || $_SESSION['captcha'] != md5( $pCaptcha ) ) {
-				return FALSE;
+				return false;
 			} else {
-				$_SESSION['captcha_verified'] = TRUE;
-				return TRUE;
+				$_SESSION['captcha_verified'] = true;
+				return true;
 			}
 		}
 	}
@@ -787,10 +806,9 @@ class BitUser extends LibertyMime {
 	 * store
 	 *
 	 * @param array $pParamHash
-	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function store( &$pParamHash ) {
+	public function store( array &$pParamHash): bool {
 		if( $this->verify( $pParamHash ) ) {
 			$this->StartTrans();
 			$pParamHash['content_type_guid'] = BITUSER_CONTENT_TYPE_GUID;
@@ -811,21 +829,21 @@ class BitUser extends LibertyMime {
 			// Prevent liberty from assuming ANONYMOUS_USER_ID while storing
 			$pParamHash['user_id'] = $this->mUserId;
 			// Don't let LA snarf these now so we can do extra things.
-			$pParamHash['_files_override'] = array();
-			if( LibertyMime::store( $pParamHash ) ) {
+			$pParamHash['_files_override'] = [];
+			if( \Bitweaver\Liberty\LibertyMime::store( $pParamHash ) ) {
 
 				if( empty( $this->mInfo['content_id'] ) || ($pParamHash['content_id'] != $this->mInfo['content_id']) ) {
 					$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `content_id`=? WHERE `user_id`=?";
-					$result = $this->mDb->query( $query, array( $pParamHash['content_id'], $this->mUserId ) );
+					$result = $this->mDb->query( $query, [ $pParamHash['content_id'], $this->mUserId ] );
 					$this->mInfo['content_id'] = $pParamHash['content_id'];
 				}
 			}
 
 			$this->CompleteTrans();
 
-			$this->load( TRUE );
+			$this->load( true );
 		}
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
@@ -833,13 +851,13 @@ class BitUser extends LibertyMime {
 	 * This is a admin specific function
 	 *
 	 * @param $pParamHash an array with user data
-	 * @return TRUE if import succeed
+	 * @return bool true if import succeed
 	 **/
 	function importUser( &$pParamHash ) {
 		global $gBitUser;
 
 		if( ! $gBitUser->hasPermission( 'p_users_admin' ) ) {
-			return FALSE;
+			return false;
 		}
 		if( $this->verifyUserImport( $pParamHash ) ) {
 			$this->StartTrans();
@@ -871,7 +889,7 @@ class BitUser extends LibertyMime {
 			if( LibertyContent::store( $pParamHash )) {
 				if( empty( $this->mInfo['content_id'] ) || $pParamHash['content_id'] != $this->mInfo['content_id'] )  {
 					$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `content_id`=? WHERE `user_id`=?";
-					$result = $this->mDb->query( $query, array( $pParamHash['content_id'], $this->mUserId ) );
+					$result = $this->mDb->query( $query, [ $pParamHash['content_id'], $this->mUserId ] );
 					$this->mInfo['content_id'] = $pParamHash['content_id'];
 				}
 			}
@@ -881,9 +899,9 @@ class BitUser extends LibertyMime {
 			// store any uploaded images
 			$this->storeImages( $pParamHash );
 
-			$this->load( TRUE );
+			$this->load( true );
 		}
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
@@ -892,28 +910,28 @@ class BitUser extends LibertyMime {
 	 * This is a admin specific function
 	 *
 	 * @param $pParamHash an array with user data
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 **/
 	function verifyUserImport( &$pParamHash ) {
 		global $gBitSystem, $gBitUser;
 
 		if( ! $gBitUser->hasPermission( 'p_users_admin' ) ) {
-			return FALSE;
+			return false;
 		}
 
-		trim_array( $pParamHash );
+		KernelTools::trim_array( $pParamHash );
 
 		// perhaps someone is importing users and *knows* what they are doing
 		if( @$this->verifyId( $pParamHash['user_id'] ) ) {
 			// only import user_id if it doesn't exist or overwrite is set.
-			if( !$this->userExists( array( 'user_id' => $pParamHash['user_id'] ) ) || !empty( $_REQUEST['overwrite'] ) ) {
+			if( !$this->userExists( [ 'user_id' => $pParamHash['user_id'] ] ) || !empty( $_REQUEST['overwrite'] ) ) {
 				$pParamHash['user_store']['user_id'] = $pParamHash['user_id'];
 			} else {
 				unset( $pParamHash['user_id'] );
 			}
 		}
 		if( !empty( $pParamHash['login'] ) ) {
-			$ret = $this->userExists( array( 'login' => $pParamHash['login'] ) );
+			$ret = $this->userExists( [ 'login' => $pParamHash['login'] ] );
 			if( !empty( $ret ) ) {
 				// On batch import admin can overwrite existing user, so don't error if set
 				// however, prevent overwrite of a mix of user records
@@ -924,7 +942,7 @@ class BitUser extends LibertyMime {
 					$this->mErrors['login'] = 'The username "'.$pParamHash['login'].'" is already in use';
 				}
 			} elseif( preg_match( '/[^A-Za-z0-9_.-]/', $pParamHash["login"] ) ) {
-				$this->mErrors['login'] = tra( "Your username can only contain numbers, characters, underscores and hyphens." );
+				$this->mErrors['login'] = KernelTools::tra( "Your username can only contain numbers, characters, underscores and hyphens." );
 			}
 
 			if( !isset($this->mErrors['login']) ) {
@@ -941,8 +959,8 @@ class BitUser extends LibertyMime {
 		if( !empty( $pParamHash['email'] ) ) {
 			// LOWER CASE all emails admin_verify_email
 			$pParamHash['email'] = strtolower( $pParamHash['email'] );
-			if( validate_email_syntax( $pParamHash['email'] ) ) {
-				$ret = $this->userExists( array( 'email' => $pParamHash['email'] ) );
+			if( KernelTools::validate_email_syntax( $pParamHash['email'] ) ) {
+				$ret = $this->userExists( [ 'email' => $pParamHash['email'] ] );
 				if( !empty($ret) ) {
 					if( !empty( $_REQUEST['overwrite'] ) && (!isset($pParamHash['user_store']['user_id']) || $pParamHash['user_store']['user_id'] == $ret ) ) {
 						$pParamHash['user_id'] = $ret;
@@ -952,7 +970,7 @@ class BitUser extends LibertyMime {
 					}
 				}
 				if( !empty( $_REQUEST['admin_verify_email'] ) ) {
-					if( !$this->verifyMX( $pParamHash['email'] ) ) {
+					if( !$this->verifyMX( (string) $pParamHash['email'], $mxErrors ) ) {
 						$this->mErrors['email'] = 'Cannot find a valid mail server';
 					}
 				}
@@ -963,13 +981,13 @@ class BitUser extends LibertyMime {
 				$this->mErrors['email'] = 'The email address "'.$pParamHash['email'].'" has an invalid syntax.';
 			}
 		} else {
-			$this->mErrors['email'] = tra( 'You must enter your email address' );
+			$this->mErrors['email'] = KernelTools::tra( 'You must enter your email address' );
 		}
 
 		// check some new user requirements
 		if( !$this->isRegistered() ) {
 			if( isset($pParamHash['user_store']['user_id']) && !empty( $_REQUEST['overwrite'] ) ) {
-				$this->mUserId = $this->userExists( array( 'user_id' => $pParamHash['user_store']['user_id'] ) );
+				$this->mUserId = $this->userExists( [ 'user_id' => $pParamHash['user_store']['user_id'] ] );
 			}
 			if( empty( $pParamHash['registration_date'] ) ) {
 				$pParamHash['registration_date'] = date( "U" );
@@ -979,9 +997,9 @@ class BitUser extends LibertyMime {
 			if( !empty($pParamHash['hash'] ) ) {
 				unset( $pParamHash['password'] );
 				if($gBitSystem->isFeatureActive( 'users_clear_passwords' ) ) {
-					$this->mErrors['password'] = tra( 'You cannot import a password hash when setting to stor password in plan text is set.' );
+					$this->mErrors['password'] = KernelTools::tra( 'You cannot import a password hash when setting to stor password in plan text is set.' );
 				} elseif( strlen( $pParamHash['hash'] ) <> 32 ) {
-					$this->mErrors['password'] = tra( 'When importing a MD5 password hash it needto have a length of 32 bytes.' );
+					$this->mErrors['password'] = KernelTools::tra( 'When importing a MD5 password hash it needto have a length of 32 bytes.' );
 				}
 			} else {
 				if( !empty( $_REQUEST['admin_verify_user'] ) ) {
@@ -1012,43 +1030,39 @@ class BitUser extends LibertyMime {
 				$pParamHash['user_store']['hash'] = md5( $pParamHash['password'] );
 				$now = $gBitSystem->getUTCTime();
 				if( !isset( $pParamHash['pass_due'] ) && $gBitSystem->getConfig('users_pass_due') ) {
-					$pParamHash['user_store']['pass_due'] = $now + (60 * 60 * 24 * $gBitSystem->getConfig('users_pass_due') );
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $gBitSystem->getConfig('users_pass_due');
 				} elseif( isset( $pParamHash['pass_due'] ) ) {
 					// renew password only next half year ;)
-					$pParamHash['user_store']['pass_due'] = $now + (60 * 60 * 24 * $pParamHash['pass_due']);
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $pParamHash['pass_due'];
 				}
-				if( $gBitSystem->isFeatureActive( 'users_clear_passwords' ) ) {
-					$pParamHash['user_store']['user_password'] = $pParamHash['password'];
-				} else {
-					$pParamHash['user_store']['user_password'] = '';
+				$pParamHash['user_store']['user_password'] = ($gBitSystem->isFeatureActive( 'users_clear_passwords' )) ? $pParamHash['password'] : ''; 
+				if ( !empty( $pParamHash['hash'] )) $pParamHash['user_store']['hash'] = $pParamHash['hash'];
+				$now = $gBitSystem->getUTCTime();
+				if( !isset( $pParamHash['pass_due'] ) && $gBitSystem->getConfig( 'users_pass_due' )) {
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $gBitSystem->getConfig( 'users_pass_due' );
+				} elseif( isset( $pParamHash['pass_due'] ) ) {
+					// renew password only next half year ;)
+					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $pParamHash['pass_due'];
 				}
-			}
-		} elseif( !empty( $pParamHash['hash'] )) {
-			$pParamHash['user_store']['hash'] = $pParamHash['hash'];
-			$now = $gBitSystem->getUTCTime();
-			if( !isset( $pParamHash['pass_due'] ) && $gBitSystem->getConfig( 'users_pass_due' )) {
-				$pParamHash['user_store']['pass_due'] = $now + ( 60 * 60 * 24 * $gBitSystem->getConfig( 'users_pass_due' ));
-			} elseif( isset( $pParamHash['pass_due'] ) ) {
-				// renew password only next half year ;)
-				$pParamHash['user_store']['pass_due'] = $now + ( 60 * 60 * 24 * $pParamHash['pass_due'] );
 			}
 		}
-		return ( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
 	 * expunge removes user and associated private data
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool
+	 * $this->$pExpungeContent no longer passed in function for compatability with base expunge
 	 */
-	function expunge( $pExpungeContent = NULL ) {
+	public function expunge(): bool {
 		global $gBitSystem;
 		$this->StartTrans();
 
-		if( !empty( $pExpungeContent ) ) {
-			if( $pExpungeContent == 'all' ) {
-				if( $userContent = $this->mDb->getAssoc( "SELECT content_id, content_type_guid FROM `".BIT_DB_PREFIX."liberty_content` WHERE `user_id`=? AND `content_type_guid` != 'bituser'", array( $this->mUserId ) ) ) {
+		if( $this->pExpungeContent != 'none' ) {
+			if( $this->pExpungeContent == 'all' ) {
+				if( $userContent = $this->mDb->getAssoc( "SELECT content_id, content_type_guid FROM `".BIT_DB_PREFIX."liberty_content` WHERE `user_id`=? AND `content_type_guid` != 'bituser'", [ $this->mUserId ] ) ) {
 					foreach( $userContent as $contentId=>$contentTypeGuid ) {
 						if( $delContent = LibertyBase::getLibertyObject( $contentId, $contentTypeGuid ) ) {
 							$delContent->expunge();
@@ -1063,15 +1077,15 @@ class BitUser extends LibertyMime {
 			$this->purgeImage( 'portrait' );
 			$this->purgeImage( 'logo' );
 			$this->invokeServices( 'users_expunge_function' );
-			$userTables = array(
+			$userTables = [
 				'users_cnxn',
 				'users_watches',
 				'users_favorites_map',
 				'users_users',
-			);
+			];
 			foreach( $userTables as $table ) {
 				$query = "DELETE FROM `".BIT_DB_PREFIX.$table."` WHERE `user_id` = ?";
-				$result = $this->mDb->query( $query, array( $this->mUserId ) );
+				$result = $this->mDb->query( $query, [ $this->mUserId ] );
 			}
 
 			parent::expunge();
@@ -1080,20 +1094,20 @@ class BitUser extends LibertyMime {
 			$this->mLogs['user_del'] = 'User deleted';
 			$this->storeActionLog( $logHash );
 			$this->CompleteTrans();
-			return TRUE;
 		} else {
 			$this->mDb->RollbackTrans();
-			$gBitSystem->fatalError( tra( 'The anonymous user cannot be deleted' ) );
+			$gBitSystem->fatalError( KernelTools::tra( 'The anonymous user cannot be deleted' ) );
 		}
+		return true;
 	}
 
 	// {{{ ==================== Sessions and logging in and out methods ====================
 	/**
 	 * updateSession
 	 *
-	 * @param array $pSessionId
+	 * @param string $pSessionId
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function updateSession( $pSessionId ) {
 		global $gLightWeightScan;
@@ -1103,7 +1117,7 @@ class BitUser extends LibertyMime {
 		$update['current_view'] = $_SERVER['SCRIPT_NAME'];
 
 		if( empty( $gLightWeightScan ) ) {
-			$row = $this->mDb->getRow( "SELECT `last_get`, `connect_time`, `get_count`, `user_agent`, `current_view` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie`=? ", array( $pSessionId ) );
+			$row = $this->mDb->getRow( "SELECT `last_get`, `connect_time`, `get_count`, `user_agent`, `current_view` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie`=? ", [ $pSessionId ] );
 			if( $gBitUser->isRegistered() ) {
 				$update['user_id'] = $gBitUser->mUserId;
 			}
@@ -1115,7 +1129,7 @@ class BitUser extends LibertyMime {
 					$update['user_agent'] = (string)substr( $_SERVER['HTTP_USER_AGENT'], 0, 128 );
 				}
 				$update['get_count'] = $row['get_count'] + 1;
-				$ret = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_cnxn', $update, array( 'cookie' => $pSessionId ) );
+				$ret = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_cnxn', $update, [ 'cookie' => $pSessionId ] );
 			} else {
 				if( $this->isRegistered() ) {
 					$update['user_id'] = $this->mUserId;
@@ -1132,9 +1146,9 @@ class BitUser extends LibertyMime {
 			// This needs moving to an event that is known to happen
 			if( date( 'H' ) == '03' && date( 'i' ) > 0 &&  date( 'i' ) < 2 ) {
 				// Default to 30 days history
-				$oldy = $update['last_get'] - ($gBitSystem->getConfig( 'users_cnxn_history_days', 30 ) * 24 * 60 * 60);
+				$oldy = $update['last_get'] - $gBitSystem->getConfig( 'users_cnxn_history_days', 30 ) * 24 * 60 * 60;
 				$query = "DELETE from `".BIT_DB_PREFIX."users_cnxn` where `connect_time` < ?";
-				$result = $this->mDb->query($query, array($oldy));
+				$result = $this->mDb->query($query, [ $oldy ]);
 			}
 		}
 		return true;
@@ -1145,14 +1159,14 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pActive
 	 * @access public
-	 * @return count of sessions
+	 * @return int count of sessions
 	 */
-	function countSessions( $pActive = FALSE ) {
+	function countSessions( $pActive = false ) {
 		$query = "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_cnxn`";
 		if( $pActive ) {
-			$query .=" WHERE `cookie` IS NOT NULL";
+			$query .=" WHERE `cookie` IS NOT null";
 		}
-		return $this->mDb->getOne( $query,array() );
+		return $this->mDb->getOne( $query,[] );
 	}
 
 	/**
@@ -1161,32 +1175,32 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return void
 	 */
-	function logout() {
+	public function logout() {
 		// This must come first
 		$this->clearFromCache();
 
-		$this->sendSessionCookie( FALSE );
+		$this->sendSessionCookie( false );
 
 		session_destroy();
-		$this->mUserId = NULL;
+		$this->mUserId = null;
 		// ensure Guest default page is loaded if required
 		$this->mInfo['default_role_id'] = -1;
 	}
 
-	function sendSessionCookie( $pCookie=TRUE ) {
+	public function sendSessionCookie( $pCookie=true ) {
 		global $gBitSystem;
 
 		$siteCookie = static::getSiteCookieName();
 		$cookieTime = 0;
 		$cookiePath = BIT_ROOT_URL;
-		$cookieDomain = '';
+		$cookieDomain = parse_url(BIT_ROOT_URL, PHP_URL_HOST);
 
-		if( $pCookie === TRUE ) {
+		if( $pCookie === true ) {
 			$pCookie = session_id();
-		} elseif( $pCookie==FALSE ) {
+		} elseif( $pCookie==false ) {
 			$pCookie = ''; // unset the cookie, eg logout
 			if( !empty( $_COOKIE[$siteCookie] ) ) {
-				$this->mDb->query( "UPDATE `".BIT_DB_PREFIX."users_cnxn` SET `cookie`=NULL WHERE `cookie`=?", array( $_COOKIE[$siteCookie] ) );
+				$this->mDb->query( "UPDATE `".BIT_DB_PREFIX."users_cnxn` SET `cookie`=null WHERE `cookie`=?", [ $_COOKIE[$siteCookie] ] );
 				unset( $_COOKIE[$siteCookie] );
 			}
 		}
@@ -1196,10 +1210,17 @@ class BitUser extends LibertyMime {
 			if( $gBitSystem->isFeatureActive( 'users_remember_me' ) && isset( $_REQUEST['rme'] ) && $_REQUEST['rme'] == 'on' ) {
 				$cookieTime = (int)( time() + (int)$gBitSystem->getConfig( 'users_remember_time', 86400 ));
 				$cookiePath = $gBitSystem->getConfig( 'cookie_path', $cookiePath );
-				$cookieDomain = $gBitSystem->getConfig( 'cookie_domain', $cookieDomain );
+				$cookieDomain = $gBitSystem->getConfig( 'cookie_domain', $cookieDomain, parse_url(BIT_ROOT_URL, PHP_URL_HOST) );
 			}
 		}
-		setcookie( $siteCookie, $pCookie, $cookieTime , $cookiePath, $cookieDomain );
+		setcookie( $siteCookie, $pCookie, [
+						'expires' => $cookieTime,
+						'path' => $cookiePath,
+						'domain' => $cookieDomain,
+						'secure' => true,
+						'httponly' => true,
+						'samesite' => 'Strict'
+					] );
 		$_COOKIE[$siteCookie] = $pCookie;
 	}
 
@@ -1207,7 +1228,7 @@ class BitUser extends LibertyMime {
 		global $gBitSystem;
 
 		$cookie_site = strtolower( preg_replace( "/[^a-zA-Z0-9]/", "", $gBitSystem->getConfig( 'site_title', 'bitweaver' )));
-		return( 'bit-user-'.$cookie_site );
+		return 'bit-user-'.$cookie_site;
 	}
 
 	/**
@@ -1216,49 +1237,72 @@ class BitUser extends LibertyMime {
 	 * @param array $pFatalOnError
 	 * @param array $pForceCheck
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function verifyTicket( $pFatalOnError=TRUE, $pForceCheck=TRUE ) {
+	public function verifyTicket( $pFatalOnError=true, $pForceCheck=true ) {
 		global $gBitSystem, $gBitUser;
-		$ret = FALSE;
-		if( $pForceCheck == TRUE || !empty( $_REQUEST['tk'] ) ) {
+		$ret = false;
+		if( $pForceCheck == true || !empty( $_REQUEST['tk'] ) ) {
 			if( empty( $_REQUEST['tk'] ) || (!($ret = $_REQUEST['tk'] == $this->mTicket ) && $pFatalOnError) ) {
 				$userString = $gBitUser->isRegistered() ? "\nUSER ID: ".$gBitUser->mUserId.' ( '.$gBitUser->getField( 'email' ).' ) ' : '';
-				error_log( tra( "Security Violation" )."$userString ".$_SERVER['REMOTE_ADDR']."\nURI: $_SERVER[REQUEST_URI] \nREFERER: $_SERVER[HTTP_REFERER] " );
-				$gBitSystem->fatalError( tra( "Security Violation" ));
+				error_log( KernelTools::tra( "Security Violation" )."$userString ".$_SERVER['REMOTE_ADDR']."\nURI: $_SERVER[REQUEST_URI] \nREFERER: $_SERVER[HTTP_REFERER] " );
+				$gBitSystem->fatalError( KernelTools::tra( "Security Violation" ));
 			}
 		}
 		return $ret;
 	}
 	// }}}
 
+	public function getPostLoginUrl() {
+		global $gBitSystem;
+		$url = BIT_ROOT_URL;
+		if( $this->isRegistered() ) {
+			// set post-login url
+			// if group home is set for this user we get that
+			// default to general post-login
+			// @see \Bitweaver\BitSystem::getIndexPage
+			$indexType = 'my_page';
+			// getGroupHome is BitPermUser method
+			if( method_exists( $this, 'getGroupHome' ) &&
+				(( @$this->verifyId( $this->mInfo['default_group_id'] ) && ( $group_home = $this->getGroupHome( $this->mInfo['default_group_id'] ) ) ) ||
+				( $gBitSystem->getConfig( 'default_home_group' ) && ( $group_home = $this->getGroupHome( $gBitSystem->getConfig( 'default_home_group' ) ) ) )) ){
+				$indexType = 'group_home';
+			}
+
+			$url = isset($_SESSION['loginfrom']) ? $_SESSION['loginfrom'] : $gBitSystem->getIndexPage( $indexType );
+			unset( $_SESSION['loginfrom'] );
+		}
+		return $url;
+	}
+	
 	// {{{ ==================== Banning ====================
 	/**
 	 * ban sets the user account status to -201 suspended
 	 *
 	 * @access public
-	 * @return TRUE on success, Display error message on failure
+	 * @return bool true on success, Display error message on failure
 	 */
-	function ban(){
+	public function ban(){
 		global $gBitSystem;
 		if( $this->mUserId == ANONYMOUS_USER_ID || $this->mUserId == ROOT_USER_ID || $this->isAdmin()) {
-			$gBitSystem->fatalError( tra( 'You cannot ban the user' )." ".$this->mInfo['login'] );
+			$gBitSystem->fatalError( KernelTools::tra( 'You cannot ban the user' )." ".$this->mInfo['login'] );
 		} else {
 			$this->storeStatus( -201 );
-			return TRUE;
+			return true;
 		}
+		return false;
 	}
 
 	/**
 	 * ban unban the user
 	 *
 	 * @access public
-	 * @return TRUE on success
+	 * @return bool true on success
 	 */
-	function unban(){
+	public function unban(){
 		global $gBitSystem;
 		$this->storeStatus( 50 );
-		return TRUE;
+		return true;
 	}
 	// }}}
 
@@ -1267,9 +1311,9 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pLength Length of final password
 	 * @access public
-	 * @return password
+	 * @return string password
 	 */
-	function genPass( $pLength=NULL ) {
+	public function genPass( $pLength=null ) {
 		global $gBitSystem;
 		$vocales = "AaEeIiOoUu13580";
 		$consonantes = "BbCcDdFfGgHhJjKkLlMmNnPpQqRrSsTtVvWwXxYyZz24679";
@@ -1279,9 +1323,9 @@ class BitUser extends LibertyMime {
 		}
 		for( $i = 0; $i < $pLength; $i++ ) {
 			if( $i % 2 ) {
-				$ret .= $vocales{rand( 0, strlen( $vocales ) - 1 )};
+				$ret .= $vocales[rand( 0, strlen( $vocales ) - 1 )];
 			} else {
-				$ret .= $consonantes{rand( 0, strlen( $consonantes ) - 1 )};
+				$ret .= $consonantes[rand( 0, strlen( $consonantes ) - 1 )];
 			}
 		}
 		return $ret;
@@ -1291,23 +1335,23 @@ class BitUser extends LibertyMime {
 	 * generateChallenge
 	 *
 	 * @access public
-	 * @return md5 string
+	 * @return string md5 
 	 */
-	function generateChallenge() {
-		return( md5( BitSystem::genPass() ));
+	public function generateChallenge() {
+		return md5( BitSystem::genPass() );
 	}
 
 	/**
 	 * login
 	 *
-	 * @param array $pLogin
-	 * @param array $pPassword
-	 * @param array $pChallenge
-	 * @param array $pResponse
+	 * @param int $pLogin
+	 * @param string $pPassword
+	 * @param string $pChallenge
+	 * @param string $pResponse
 	 * @access public
-	 * @return URL the user should be sent to after login
+	 * @return string URL the user should be sent to after login
 	 */
-	function login( $pLogin, $pPassword, $pChallenge=NULL, $pResponse=NULL ) {
+	public function login( $pLogin, $pPassword, $pChallenge=null, $pResponse=null ) {
 		global $gBitSystem;
 		$isvalid = false;
 
@@ -1316,7 +1360,7 @@ class BitUser extends LibertyMime {
 		$this->StartTrans();
 		// Verify user is valid
 		if( $this->validate( $pLogin, $pPassword, $pChallenge, $pResponse )) {
-			$userInfo = $this->getUserInfo( array( $loginCol => $pLogin ));
+			$userInfo = $this->getUserInfo( [ $loginCol => $pLogin ]);
 
 			// If the password is valid but it is due then force the user to change the password by
 			// sending the user to the new password change screen without letting him use
@@ -1331,21 +1375,21 @@ class BitUser extends LibertyMime {
 				// User is valid and not due to change pass..
 				$this->mUserId = $userInfo['user_id'];
 				$this->load();
-				$this->loadPermissions( TRUE );
+				$this->loadPermissions( true );
 
 				// set post-login url
 				// if role home is set for this user we get that
 				// default to general post-login
-				// @see BitSystem::getIndexPage
+				// @see \Bitweaver\BitSystem::getIndexPage
 				$indexType = 'my_page';
 				// getHomeRole is RolePermUser method
 				if( method_exists( $this, 'getHomeRole' ) &&
 					(( @$this->verifyId( $this->mInfo['default_role_id'] ) && ( $role_home = $this->getHomeRole( $this->mInfo['default_role_id'] ) ) ) ||
-					( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getHomeRole( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
+					( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getRoleHome( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
 					$indexType = 'role_home';
 				}
 
-				$url = isset($_SESSION['loginfrom']) ? $_SESSION['loginfrom'] : $gBitSystem->getIndexPage( $indexType );
+				$url = $_SESSION['loginfrom'] ?? $gBitSystem->getIndexPage( $indexType );
 				unset( $_SESSION['loginfrom'] );
 
 				$sessionId = session_id();
@@ -1355,14 +1399,14 @@ class BitUser extends LibertyMime {
 		} else {
 			// before we give up lets see if the user exists and if the password is expired
 			$query = "select `email`, `user_id`, `user_password` from `".BIT_DB_PREFIX."users_users` where " . $this->mDb->convertBinary(). " $loginCol = ?";
-			$result = $this->mDb->getRow( $query, array( $pLogin ) );
+			$result = $this->mDb->getRow( $query, [ $pLogin ] );
 			if( !empty( $result['user_id'] ) && $this->isPasswordDue( $result['user_id'] ) ) {
 				// user needs email password reset so send it and let them know
 				$url = USERS_PKG_URL.'remind_password.php?remind=y&required=y&username='.$pLogin;
 			}else{
 				$this->mUserId = ANONYMOUS_USER_ID;
 				unset( $this->mInfo );
-				$this->mErrors['login'] = tra( 'Invalid username or password' );
+				$this->mErrors['login'] = KernelTools::tra( 'Invalid username or password' );
 				$url = USERS_PKG_URL.'signin.php?error=' . urlencode( $this->mErrors['login'] );
 			}
 		}
@@ -1388,25 +1432,25 @@ class BitUser extends LibertyMime {
 				$url = $prefix.$url;
 			}
 		}
-		return( $url );
+		return $url;
 	}
 
 	/**
 	 * validate
 	 *
-	 * @param array $pUser
-	 * @param array $pPass
-	 * @param array $pChallenge
-	 * @param array $pResponse
+	 * @param int $pUser
+	 * @param string $pPass
+	 * @param string $pChallenge
+	 * @param string $pResponse
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 * @todo rewrite this mess. this is horrible stuff. - xing - Thursday Oct 16, 2008   09:47:20 CEST
 	 */
-	function validate( $pUser, $pPass, $pChallenge, $pResponse ) {
+	public function validate( $pUser, $pPass, $pChallenge, $pResponse ) {
 		global $gBitSystem;
 		// these will help us keep tabs of what is going on
-		$authValid = $authPresent = FALSE;
-		$createAuth = ( $gBitSystem->getConfig( "users_create_user_auth", "n" ) == "y" );
+		$authValid = $authPresent = false;
+		$createAuth = $gBitSystem->getConfig( "users_create_user_auth", "n" ) == "y";
 
 		for( $i = 0; $i < BaseAuth::getAuthMethodCount(); $i++ ) {
 			$instance = BaseAuth::init( $i );
@@ -1415,14 +1459,14 @@ class BitUser extends LibertyMime {
 				switch( $result ) {
 					case USER_VALID:
 						unset($this->mErrors['login']);
-						$authPresent = TRUE;
-						$authValid = TRUE;
+						$authPresent = true;
+						$authValid = true;
 						break;
 					case PASSWORD_INCORRECT:
 						// this mErrors assignment is CRUCIAL so that bit auth fails properly. DO NOT FUCK WITH THIS unless you know what you are doing and have checked with me first. XOXOX - spiderr
 						// This might have broken other auth, but at this point, bw auth was TOTALLY busted. If you need to fix, please come find me.
 						$this->mErrors['login'] = 'Password incorrect';
-						$authPresent = TRUE;
+						$authPresent = true;
 						break;
 					case USER_NOT_FOUND:
 						break;
@@ -1438,36 +1482,36 @@ class BitUser extends LibertyMime {
 						$this->mUserId = $instance->mInfo['user_id'];
 
 					//Is the user already in the database:
-					} elseif( $this->mDb->getOne( "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_users` WHERE `login` = ?", array( $instance->mLogin )) > 0 ) {
+					} elseif ( $this->mDb->getOne( "SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_users` WHERE `login` = ?", [ $instance->mLogin ]) > 0 ) {
 						// Update Details
-						$authUserInfo = array(
+						$authUserInfo = [
 							'login'     => $instance->mInfo['login'],
 							'password'  => $instance->mInfo['password'],
 							'real_name' => $instance->mInfo['real_name'],
-							'email'     => $instance->mInfo['email']
-						);
-						$userInfo = $this->getUserInfo( array( 'login' => $pUser ));
+							'email'     => $instance->mInfo['email'],
+						];
+						$userInfo = $this->getUserInfo( [ 'login' => $pUser ]);
 						$this->mUserId = $userInfo['user_id'];
 						$this->store( $authUserInfo );
-						$this->mErrors = array();
+						$this->mErrors = [];
 
 					} else {
-						$authUserInfo = array(
+						$authUserInfo = [
 							'login'     => $instance->mInfo['login'],
 							'password'  => $instance->mInfo['password'],
 							'real_name' => $instance->mInfo['real_name'],
-							'email'     => $instance->mInfo['email']
-						);
+							'email'     => $instance->mInfo['email'],
+						];
 						// TODO somehow, mUserId gets set to -1 at this point - no idea how
-						// set to NULL to prevent overwriting Guest user - wolff_borg
-						$this->mUserId = NULL;
+						// set to null to prevent overwriting Guest user - wolff_borg
+						$this->mUserId = null;
 						$this->store( $authUserInfo );
 					}
 
 					if( $createAuth && $i > 0 ) {
 						// if the user was logged into this system and we should progate users down other auth methods
 						for( $j = $i; $i >= 0; $j-- ) {
-							$probMethodName = $gBitSystem->getConfig( "users_auth_method_$j", $default );
+							$probMethodName = $gBitSystem->getConfig( "users_auth_method_$j", $default ?? true );
 							if( !empty( $probMethodName )) {
 								$probInstance = BaseAuth::init( $probMethodName );
 								if( $probInstance && $probInstance->canManageAuth() ) {
@@ -1497,12 +1541,12 @@ class BitUser extends LibertyMime {
 		if( $this->mUserId != ANONYMOUS_USER_ID ) {
 			$this->load();
 			//on first time login we run the users registation service
-			if( $this->mInfo['last_login'] == NULL ) {
+			if( empty($this->mInfo['last_login']) ) {
 				$this->invokeServices( 'users_register_function' );
 			}
 			$this->updateLastLogin( $this->mUserId );
 		}
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
@@ -1510,15 +1554,15 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pUserId
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function updateLastLogin( $pUserId ) {
-		$ret = FALSE;
-		if( @$this->verifyId( $pUserId ) ) {
-			global $gBitSystem;
+	public static function updateLastLogin( $pUserId ) {
+		global $gBitSystem, $gBitDb;
+		$ret = false;
+		if( $gBitSystem->verifyId( $pUserId ) ) {
 			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `last_login` = `current_login`, `current_login` = ? WHERE `user_id` = ?";
-			$result = $this->mDb->query( $query, array( $gBitSystem->getUTCTime(), $pUserId ));
-			$ret = TRUE;
+			$result = $gBitDb->query( $query, [ $gBitSystem->getUTCTime(), $pUserId ]);
+			$ret = true;
 		}
 		return $ret;
 	}
@@ -1526,58 +1570,58 @@ class BitUser extends LibertyMime {
 	/**
 	 * confirmRegistration
 	 *
-	 * @param array $pUserId
-	 * @param array $pProvpass
+	 * @param integer $pUserId
+	 * @param string $pProvpass
 	 * @access public
-	 * @return registered user, empty array on failure
+	 * @return array registered user, empty array on failure
 	 */
-	function confirmRegistration( $pUserId, $pProvpass ) {
+	public function confirmRegistration( $pUserId, $pProvpass ) {
 		global $gBitSystem;
 		$query = "
 			SELECT `user_id`, `provpass`, `user_password`, `login`, `email` FROM `".BIT_DB_PREFIX."users_users`
-			WHERE `user_id`=? AND `provpass`=? AND ( `provpass_expires` IS NULL OR `provpass_expires` > ?)";
-		return( $this->mDb->getRow( $query, array( $pUserId, $pProvpass, $gBitSystem->getUTCTime() )));
+			WHERE `user_id`=? AND `provpass`=? AND ( `provpass_expires` IS null OR `provpass_expires` > ?)";
+		return $this->mDb->getRow( $query, [ $pUserId, $pProvpass, $gBitSystem->getUTCTime() ]);
 	}
 
 	/**
 	 * changeUserEmail
 	 *
-	 * @param array $pUserId
-	 * @param array $pEmail
+	 * @param integer $pUserId
+	 * @param string $pEmail
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function changeUserEmail( $pUserId, $pEmail ) {
-		if( !validate_email_syntax( $pEmail ) ) {
-			$this->mErrors['bad_mail'] = tra( "The email address provided does not have recognised valid syntax." );
-		} elseif( $this->userExists( array( 'email' => $pEmail ))) {
-			$this->mErrors['duplicate_mail'] = tra( "The email address you selected already exists." );
+	public function changeUserEmail( $pUserId, $pEmail ) {
+		if( !KernelTools::validate_email_syntax( $pEmail ) ) {
+			$this->mErrors['bad_mail'] = KernelTools::tra( "The email address provided does not have recognised valid syntax." );
+		} elseif( $this->userExists( [ 'email' => $pEmail ])) {
+			$this->mErrors['duplicate_mail'] = KernelTools::tra( "The email address you selected already exists." );
 		} else {
 			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `email`=? WHERE `user_id`=?";
-			$result = $this->mDb->query( $query, array( $pEmail, $pUserId ) );
+			$result = $this->mDb->query( $query, [ $pEmail, $pUserId ] );
 			$query = "UPDATE `".BIT_DB_PREFIX."users_watches` SET `email`=? WHERE `user_id`=?";
-			$result = $this->mDb->query( $query, array( $pEmail, $pUserId ) );
+			$result = $this->mDb->query( $query, [ $pEmail, $pUserId ] );
 
 			// update value in hash
 			$this->mInfo['email'] = $pEmail;
 		}
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
 	 * lookupHomepage
 	 *
-	 * @param array $iHomepage
+	 * @param string $iHomepage
 	 * @access public
-	 * @return user_id that can be used to point to users homepage
+	 * @return int user_id that can be used to point to users homepage
 	 */
-	function lookupHomepage( $iHomepage ) {
-		$ret = NULL;
+	public function lookupHomepage( $iHomepage ) {
+		$ret = null;
 		if( @$this->verifyId( $iHomepage )) {
 			// iHomepage is the user_id for the user...
 			$key = 'user_id';
 			// force to proper integer to get things like "007." to properly query
-			$iHomepage = (integer)$iHomepage;
+			$iHomepage = (integer) $iHomepage;
 		} elseif( substr( $iHomepage, 0, 7 ) == 'mailto:' ) {
 			// iHomepage is the email address of the user...
 			$key = 'email';
@@ -1585,7 +1629,7 @@ class BitUser extends LibertyMime {
 			// iHomepage is the 'login' of the user...
 			$key = 'login';
 		}
-		$tmpUser = $this->getUserInfo( array( $key => $iHomepage ));
+		$tmpUser = $this->getUserInfo( [ $key => $iHomepage ]);
 		if( @$this->verifyId( $tmpUser['user_id'] )) {
 			$ret = $tmpUser['user_id'];
 		}
@@ -1595,22 +1639,21 @@ class BitUser extends LibertyMime {
 	/**
 	 * getUserPreference
 	 *
-	 * @param array $pPrefName
-	 * @param array $pPrefDefault
-	 * @param array $pUserId
-	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @param string $pPrefName
+	 * @param string $pPrefDefault
+	 * @param int $pUserId
+	 * @return string|null
 	 */
-	static function getUserPreference( $pPrefName, $pPrefDefault, $pUserId ) {
+	public static function getUserPreference( string $pPrefName, string $pPrefDefault, int $pUserId ) {
 		// Alternate to LibertyContent::getPreference when all you have is a user_id and a pref_name, and you need a value...
 		global $gBitDb;
-		$ret = NULL;
+		$ret = null;
 
 		if( BitBase::verifyId( $pUserId ) ) {
 			$query = "
 				SELECT lcp.`pref_value` FROM `".BIT_DB_PREFIX."liberty_content_prefs` lcp INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON (lcp.`content_id`=uu.`content_id`)
 				WHERE uu.`user_id` = ? AND lcp.`pref_name` = ?";
-			if( !$ret = $gBitDb->getOne( $query, array( $pUserId, $pPrefName ))) {
+			if( !$ret = $gBitDb->getOne( $query, [ $pUserId, $pPrefName ])) {
 				$ret = $pPrefDefault;
 			}
 		}
@@ -1622,10 +1665,10 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pUserMixed hash key can be any column in users_users table e.g.: 'login', 'user_id', 'email', 'content_id'
 	 * @access public
-	 * @return user info on success, NULL on failure
+	 * @return array user info on success, null on failure
 	 */
-	function getUserInfo( $pUserMixed ) {
-		$ret = NULL;
+	public function getUserInfo( $pUserMixed ) {
+		$ret = null;
 		if( is_array( $pUserMixed ) ) {
 			if( $val =  current( $pUserMixed ) ) {
 				$key = $this->mDb->sanitizeColumnString( key( $pUserMixed ) );
@@ -1638,14 +1681,14 @@ class BitUser extends LibertyMime {
 					}
 				} elseif( is_numeric( $val ) ) {
 					$col = " uu.`".$key."` ";
-					$val = $val;
+//					$val = $val;
 				} else {
 					$col = "UPPER( uu.`".$key."` ) ";
 					$val = strtoupper( $val );
 				}
 				if( !empty( $col ) ) {
 					$query = "SELECT  uu.* FROM `".BIT_DB_PREFIX."users_users` uu LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON (lc.`content_id`=uu.`content_id`) WHERE $col = ?";
-					$ret = $this->mDb->getRow( $query, array( $val ), 600 );
+					$ret = $this->mDb->getRow( $query, [ $val ], 600 );
 				}
 			}
 		}
@@ -1653,16 +1696,32 @@ class BitUser extends LibertyMime {
 	}
 
 	/**
+	 * hasPermission check to see if a user has a given permission
+	 * 
+	 * @param string $pPerm Perm name
+	 * @return bool true if the user has a permission, false if they don't
+	 */
+	public function hasPermission( $pPerm ) {
+		$ret = false;
+		if( $this->isAdmin() ) {
+			$ret = true;
+		} elseif( $this->isValid() ) {
+			$ret = isset( $this->mPerms[$pPerm] );
+		}
+		return $ret;
+	}
+
+	/**
 	 * isUserPublic Determine if an arbitrary user can be viewed by non-permissioned users.
 	 *
-	 * @param array $pUserId user_id of user to query visibility, if NULL will use this object
+	 * @param int $pUserId user_id of user to query visibility, if null will use this object
 	 * @access public
-	 * @return boolean if user is publically visible
+	 * @return bool if user is publically visible
 	 */
-	function isUserPrivate( $pUserId=NULL ) {
-		$infoPref = NULL;
+	public function isUserPrivate( $pUserId=0 ) {
+		$infoPref = null;
 		if( BitBase::verifyId( $pUserId ) ) {
-			$infoPref = BitUser::getUserPreference( 'users_information', NULL, $pUserId );
+			$infoPref = RoleUser::getUserPreference( 'users_information', null, $pUserId );
 		} elseif( isset( $this ) && $this->isValid() ) {
 			$infoPref = $this->getPreference( 'users_information' );
 		}
@@ -1675,34 +1734,34 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pHash
 	 * @access public
-	 * @return user info
+	 * @return array user info
 	 */
-	function getUserIdFromCookieHash( $pHash ) {
+	public function getUserIdFromCookieHash( $pHash ) {
 		$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie` = ?";
-		return $this->mDb->getOne( $query, array( $pHash ));
+		return $this->mDb->getOne( $query, [ $pHash ]);
 	}
 
 	/**
 	 * isPasswordDue work out if a user has to change their password
 	 *
 	 * @access public
-	 * @return TRUE when the password is due, FALSE if it isn't, NULL when no due time is set
-	 * @note NULL password due means *no* expiration
+	 * @return bool true when the password is due, false if it isn't, null when no due time is set
+	 * @note null password due means *no* expiration
 	 */
-	function isPasswordDue( $pUserId = NULL ) {
+	public function isPasswordDue( $pUserId = null ) {
 		global $gBitSystem;
-		$ret = FALSE;
+		$ret = false;
 		if( empty( $pUserId) && $this->isRegistered() ) {
 			$pUserId = $this->mUserId;
 		}
 		if( !empty( $pUserId ) ){
-			// get user_id to avoid NULL and zero confusion
+			// get user_id to avoid null and zero confusion
 			$query = "
 				SELECT `user_id`, `pass_due`
 				FROM `".BIT_DB_PREFIX."users_users`
-				WHERE `pass_due` IS NOT NULL AND `user_id`=? ";
-			$due = $this->mDb->getRow( $query, array( $pUserId ) );
-			if( @$this->verifyId( $due['user_id'] ) && !empty( $due['pass_due'] ) ) {
+				WHERE `pass_due` IS NOT null AND `user_id`=? ";
+			$due = $this->mDb->getRow( $query, [ $pUserId ] );
+			if( !empty( $due['user_id'] ) && @$this->verifyId( $due['user_id'] ) && !empty( $due['pass_due'] ) ) {
 				$ret = $due['pass_due'] <= $gBitSystem->getUTCTime();
 			}
 		}
@@ -1712,14 +1771,14 @@ class BitUser extends LibertyMime {
 	/**
 	 * createTempPassword
 	 *
-	 * @param array $pLogin
-	 * @param array $pPass
+	 * @param string $pLogin
+	 * @param string $pPass
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return array of temporary passwords
 	 */
 	function createTempPassword( $pLogin, $pPass ) {
 		global $gBitSystem;
-		$ret = array( '', '' );
+		$ret = [ '', '' ];
 
 		if( empty( $pLogin ) ) {
 			$pLogin = $this->getField( 'email' );
@@ -1731,10 +1790,10 @@ class BitUser extends LibertyMime {
 			$loginCol = strpos( $pLogin, '@' ) ? 'email' : 'login';
 
 			#temp passwords good for 3 days -- prob should be an config option
-			$passDue = $gBitSystem->getUTCTime() + ( 60 * 60 * 24 * 3 );
+			$passDue = $gBitSystem->getUTCTime() + 60 * 60 * 24 * 3;
 			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `provpass` = ?, `provpass_expires` = ? WHERE `".$loginCol."` = ?";
-			$result = $this->mDb->query( $query, array( $provpass, $passDue, $pLogin ));
-			$ret = array( $pass, $provpass );
+			$result = $this->mDb->query( $query, [ $provpass, $passDue, $pLogin ]);
+			$ret = [ $pass, $provpass ];
 		}
 		return $ret;
 	}
@@ -1742,35 +1801,35 @@ class BitUser extends LibertyMime {
 	/**
 	 * storePassword
 	 *
-	 * @param array $pPass
-	 * @param array $pLogin
+	 * @param string $pPass
+	 * @param string $pLogin
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function storePassword( $pPass, $pLogin=NULL ) {
+	function storePassword( $pPass, $pLogin=null ) {
 		global $gBitSystem;
-		$ret = FALSE;
+		$ret = false;
 
 		if( empty( $pLogin ) ) {
 			$pLogin = $this->getField( 'email' );
 		}
 
 		if( !empty( $pLogin )) {
-			$ret = TRUE;
+			$ret = true;
 			$hash = md5( $pPass );
 			// if renew password config is set then set - otherwise set null to respect no pass due
-			$passDue = NULL;
+			$passDue = null;
 			if( $gBitSystem->getConfig('users_pass_due') ) {
 				$now = $gBitSystem->getUTCTime();;
 				// renew password according to config value
-				$passDue = $now + ( 60 * 60 * 24 * $gBitSystem->getConfig( 'users_pass_due' ));
+				$passDue = $now + 60 * 60 * 24 * $gBitSystem->getConfig( 'users_pass_due' );
 			}
 			if( !$gBitSystem->isFeatureActive( 'users_clear_passwords' )) {
-				$pPass = NULL;
+				$pPass = null;
 			}
 			$loginCol = strpos( $pLogin, '@' ) ? 'email' : 'login';
-			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `provpass`= NULL, `provpass_expires` = NULL,`hash`=? ,`user_password`=? ,`pass_due`=? WHERE `".$loginCol."`=?";
-			$result = $this->mDb->query( $query, array( $hash, $pPass, $passDue, $pLogin ));
+			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `provpass`= null, `provpass_expires` = null,`hash`=? ,`user_password`=? ,`pass_due`=? WHERE `".$loginCol."`=?";
+			$this->mDb->query( $query, [ $hash, $pPass, $passDue, $pLogin ]);
 		}
 		return $ret;
 	}
@@ -1783,7 +1842,7 @@ class BitUser extends LibertyMime {
 	 * @return array of users and what they have been up to
 	 */
 	function getUserActivity( &$pListHash ) {
-		$bindVars = array();
+		$bindVars = [];
 		if( empty( $pListHash['sort_mode'] ) ) {
 			$pListHash['sort_mode'] = 'last_get_desc';
 		}
@@ -1795,13 +1854,13 @@ class BitUser extends LibertyMime {
 			$bindVars[] = time() - $pListHash['last_get'];
 		}
 
-		if( @BitBase::verifyId( $pListHash['user_id'] ) ) {
+		if( BitBase::verifyId( $pListHash['user_id'] ?? 0 ) ) {
 			$whereSql .= ' AND uc.`user_id` = ? ';
 			$bindVars[] = $pListHash['user_id'];
 		}
 
 		if( !empty( $pListHash['ip'] ) ) {
-			$ips = split( ',', $pListHash['ip'] );
+			$ips = mb_split( ',', $pListHash['ip'] );
 			$whereSql .= ' AND ( ';
 			do {
 				$ip = array_pop( $ips );
@@ -1815,19 +1874,19 @@ class BitUser extends LibertyMime {
 		}
 
 		if( !empty( $pListHash['online'] ) ) {
-			$whereSql .= ' AND uc.`cookie` IS NOT NULL ';
+			$whereSql .= ' AND uc.`cookie` IS NOT null ';
 		}
 
 		$query = "
 			SELECT DISTINCT uc.`user_id`, `login`, `real_name`, `connect_time`, `ip`, `user_agent`, `last_get`, uu.`content_id`
 			FROM `".BIT_DB_PREFIX."users_cnxn` uc
 				INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON (uc.`user_id` = uu.`user_id`)
-			WHERE uc.`user_id` IS NOT NULL $whereSql
+			WHERE uc.`user_id` IS NOT null $whereSql
 			ORDER BY ".$this->mDb->convertSortmode( $pListHash['sort_mode'] );
 		$result = $this->mDb->query( $query, $bindVars, $pListHash['max_records'], $pListHash['offset'] );
-		$ret = array();
+		$ret = [];
 		while( $res = $result->fetchRow() ) {
-			$res['users_information'] = 	$this->getPreference( 'users_information', 'public', $res['content_id'] );
+			$res['users_information'] = $this->getPreference( 'users_information', 'public' );
 			$ret[] = $res;
 		}
 
@@ -1835,7 +1894,7 @@ class BitUser extends LibertyMime {
 			SELECT COUNT( uc.`user_id` )
 			FROM `".BIT_DB_PREFIX."users_cnxn` uc
 				INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON (uc.`user_id` = uu.`user_id`)
-			WHERE uc.`user_id` IS NOT NULL $whereSql";
+			WHERE uc.`user_id` IS NOT null $whereSql";
 		$pListHash['cant'] = $this->mDb->GetOne( $countSql, $bindVars );
 		$this->postGetList( $pListHash );
 		return $ret;
@@ -1846,10 +1905,10 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pLogin
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function getUserDomain( $pLogin ) {
-		$ret = array();
+		$ret = [];
 		if( $pLogin == $this->getField( 'login' ) && $this->getPreference( 'domain_style' ) ) {
 			$ret = $this->mInfo;
 			$ret['style'] = $this->getPreference( 'domain_style' );
@@ -1859,47 +1918,47 @@ class BitUser extends LibertyMime {
 				FROM `".BIT_DB_PREFIX."users_users` uu
 					INNER JOIN `".BIT_DB_PREFIX."liberty_content_prefs` lcp ON( uu.`content_id` = lcp.`content_id` )
 				WHERE uu.`login` = ? AND lcp.`pref_name` = ?";
-			$ret = $this->mDb->getRow( $sql,  array( $pLogin, 'domain_style' ) );
+			$ret = $this->mDb->getRow( $sql, [ $pLogin, 'domain_style' ] );
 		}
-		return( $ret );
+		return $ret;
 	}
 
 	/**
 	 * getDomain
 	 *
-	 * @param array $pContentId
+	 * @param integer $pContentId
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return array
 	 */
 	function getDomain( $pContentId ) {
-		$ret = array();
+		$ret = [];
 		if( $this->verifyId( $pContentId ) ) {
 			$ret['content_id'] = $pContentId;
-			$ret['style'] = $this->mDb->getOne( "SELECT `pref_value` FROM `".BIT_DB_PREFIX."liberty_content_prefs` WHERE `content_id`=? AND `pref_name`=?", array( $pContentId, 'domain_style' ));
+			$ret['style'] = $this->mDb->getOne( "SELECT `pref_value` FROM `".BIT_DB_PREFIX."liberty_content_prefs` WHERE `content_id`=? AND `pref_name`=?", [ $pContentId, 'domain_style' ]);
 		}
-		return( $ret );
+		return $ret;
 	}
 
 	/**
 	 * canCustomizeTheme check if a user can customise their theme
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function canCustomizeTheme() {
+	public function canCustomizeTheme() {
 		global $gBitSystem;
-		return( $this->hasPermission( 'p_tidbits_custom_home_theme' ) || $gBitSystem->getConfig( 'users_themes' ) == 'y' || $gBitSystem->getConfig( 'users_themes' ) == 'h' || $gBitSystem->getConfig( 'users_themes' ) == 'u' );
+		return $this->hasPermission( 'p_tidbits_custom_home_theme' ) || $gBitSystem->getConfig( 'users_themes' ) == 'y' || $gBitSystem->getConfig( 'users_themes' ) == 'h' || $gBitSystem->getConfig( 'users_themes' ) == 'u';
 	}
 
 	/**
 	 * canCustomizeLayout  check if a user can customise their layout
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function canCustomizeLayout() {
+	public function canCustomizeLayout() {
 		global $gBitSystem;
-		return( $this->hasPermission( 'p_tidbits_custom_home_layout' ) || $gBitSystem->getConfig( 'users_layouts' ) == 'y' || $gBitSystem->getConfig( 'users_layouts' ) == 'h' || $gBitSystem->getConfig( 'users_layouts' ) == 'u' );
+		return $this->hasPermission( 'p_tidbits_custom_home_layout' ) || $gBitSystem->getConfig( 'users_layouts' ) == 'y' || $gBitSystem->getConfig( 'users_layouts' ) == 'h' || $gBitSystem->getConfig( 'users_layouts' ) == 'u';
 	}
 
 
@@ -1911,9 +1970,9 @@ class BitUser extends LibertyMime {
 	 * @param string $pSize
 	 * @param array $pInfoHash
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function getThumbnailUrl( $pSize = 'small', $pInfoHash = NULL, $pSecondaryId = NULL, $pDefault=TRUE ) {
+	function getThumbnailUrl( string $pSize = 'small', ?array $pInfoHash = null, ?int $pSecondaryId = null, ?int $pDefault = null ): string|null {
 		$ret = '';
 		if( $pInfoHash ) {
 			// do some stuff if we are passed a hash-o-crap, not implemented currently
@@ -1932,7 +1991,7 @@ class BitUser extends LibertyMime {
 	 * @param array $pParamHash array of options
 	 * @param boolean $pParamHash['user_auto_avatar'] automatically create avatar from portrait
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return void
 	 */
 	function storeImages( $pParamHash ) {
 		if( isset( $_FILES['user_portrait_file'] ) && is_uploaded_file( $_FILES['user_portrait_file']['tmp_name'] ) && $_FILES['user_portrait_file']['size'] > 0 ) {
@@ -1967,11 +2026,11 @@ class BitUser extends LibertyMime {
 	 * storePortrait
 	 *
 	 * @param array $pStorageHash
-	 * @param array $pGenerateAvatar
+	 * @param bool $pGenerateAvatar
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function storePortrait( &$pStorageHash, $pGenerateAvatar = FALSE ) {
+	function storePortrait( &$pStorageHash, $pGenerateAvatar = false ) {
 		if( $this->isValid() && count( $pStorageHash )) {
 			// make a copy before the uploaded file disappears
 			if( $pGenerateAvatar ) {
@@ -1987,7 +2046,7 @@ class BitUser extends LibertyMime {
 			}
 		}
 
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
@@ -1995,10 +2054,10 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pStorageHash
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function storeAvatar( &$pStorageHash ) {
-		return( $this->storeUserImage( $pStorageHash, 'avatar' ));
+		return $this->storeUserImage( $pStorageHash, 'avatar' );
 	}
 
 	/**
@@ -2006,10 +2065,10 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pStorageHash
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function storeLogo( &$pStorageHash ) {
-		return( $this->storeUserImage( $pStorageHash, 'logo' ));
+		return $this->storeUserImage( $pStorageHash, 'logo' );
 	}
 
 	/**
@@ -2018,25 +2077,25 @@ class BitUser extends LibertyMime {
 	 * @param array $pStorageHash
 	 * @param string $pType
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function storeUserImage( &$pStorageHash, $pType = 'portrait' ) {
 		if( $this->isValid() && count( $pStorageHash ) ) {
 			// don't do the content thing
-			$pStorageHash['skip_content_store'] = TRUE;
+			$pStorageHash['skip_content_store'] = true;
 
 			// setup the hash for central storage functions
-			$pStorageHash['no_perm_check'] = TRUE;
+			$pStorageHash['no_perm_check'] = true;
 			$pStorageHash['_files_override'][$pType] = $pStorageHash['upload'];
 			$pStorageHash['_files_override'][$pType]['max_width']     = constant( strtoupper( $pType )."_MAX_DIM" );
 			$pStorageHash['_files_override'][$pType]['max_height']    = constant( strtoupper( $pType )."_MAX_DIM" );
-			$pStorageHash['_files_override'][$pType]['attachment_id'] = !empty( $this->mInfo["{$pType}_attachment_id"] ) ? $this->mInfo["{$pType}_attachment_id"] : NULL;
+			$pStorageHash['_files_override'][$pType]['attachment_id'] = !empty( $this->mInfo["{$pType}_attachment_id"] ) ? $this->mInfo["{$pType}_attachment_id"] : null;
 			$pStorageHash['_files_override'][$pType]['user_id']       = $this->mUserId;
-			if( LibertyMime::store( $pStorageHash )) {
+			if( \Bitweaver\Liberty\LibertyMime::store( $pStorageHash )) {
 				$file = $pStorageHash['upload_store']['files'][$pType];
 				if( empty( $this->mInfo["{$pType}_attachment_id"] ) || $this->mInfo["{$pType}_attachment_id"] != $file['attachment_id'] ) {
 					$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `{$pType}_attachment_id` = ? WHERE `user_id`=?";
-					$result = $this->mDb->query( $query, array( $file['attachment_id'], $this->mUserId ) );
+					$result = $this->mDb->query( $query, [ $file['attachment_id'], $this->mUserId ] );
 					$this->mInfo["{$pType}_attachment_id"] = $file['attachment_id'];
 					$pStorageHash["{$pType}_file_name"] = $file['upload']['dest_branch'];
 				}
@@ -2044,36 +2103,37 @@ class BitUser extends LibertyMime {
 				$this->mErrors["{$pType}_file"] = 'File '.$pStorageHash['upload_store']['files'][$pType]['name'].' could not be stored.';
 			}
 		}
-		return( count( $this->mErrors ) == 0 );
+		return count( $this->mErrors ) == 0;
 	}
 
 	/**
 	 * purgeImage
 	 *
-	 * @param array $pType
+	 * @param string $pType
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
 	function purgeImage( $pType ) {
 		if( $this->isValid() && @$this->verifyId( $this->mInfo[$pType.'_attachment_id'] ) ) {
 			$this->StartTrans();
-			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `".$pType."_attachment_id` = NULL WHERE `user_id`=?";
-			$result = $this->mDb->query( $query, array( $this->mUserId ) );
+			$query = "UPDATE `".BIT_DB_PREFIX."users_users` SET `".$pType."_attachment_id` = null WHERE `user_id`=?";
+			$result = $this->mDb->query( $query, [ $this->mUserId ] );
 			if( $this->expungeAttachment( $this->getField( $pType.'_attachment_id' ) ) ) {
 				unset( $this->mInfo[$pType.'_file_name'] );
 				unset( $this->mInfo[$pType.'_attachment_id'] );
 				unset( $this->mInfo[$pType.'_url'] );
 			}
 			$this->CompleteTrans();
-			return TRUE;
+			return true;
 		}
+		return false;
 	}
 
 	/**
 	 * purgePortrait
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
 	function purgePortrait() {
 		return $this->purgeImage( 'portrait' );
@@ -2084,7 +2144,7 @@ class BitUser extends LibertyMime {
 	 * purgeAvatar
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
 	function purgeAvatar() {
 		return $this->purgeImage( 'avatar' );
@@ -2095,7 +2155,7 @@ class BitUser extends LibertyMime {
 	 * purgeLogo
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
 	function purgeLogo() {
 		return $this->purgeImage( 'logo' );
@@ -2107,24 +2167,25 @@ class BitUser extends LibertyMime {
 	/**
 	 * storeWatch
 	 *
-	 * @param array $pEvent
-	 * @param array $pObject
-	 * @param array $pType
-	 * @param array $pTitle
-	 * @param array $pUrl
+	 * @param string $pEvent
+	 * @param string $pObject
+	 * @param string $pType
+	 * @param string $pTitle
+	 * @param string $pUrl
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function storeWatch( $pEvent, $pObject, $pType, $pTitle, $pUrl ) {
+	public function storeWatch( $pEvent, $pObject, $pType, $pTitle, $pUrl ) {
 		global $userlib;
 		if( $this->isValid() ) {
 			$hash = md5( uniqid( '.' ));
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_watches` WHERE `user_id`=? AND `event`=? AND `object`=?";
-			$this->mDb->query($query,array( $this->mUserId, $pEvent, $pObject ) );
+			$this->mDb->query( $query, [ $this->mUserId, $pEvent, $pObject ] );
 			$query = "INSERT INTO `".BIT_DB_PREFIX."users_watches`(`user_id` ,`event` ,`object` , `email`, `hash`, `watch_type`, `title`, `url`) VALUES(?,?,?,?,?,?,?,?)";
-			$this->mDb->query( $query, array( $this->mUserId, $pEvent, $pObject, $this->mInfo['email'], $hash, $pType, $pTitle, $pUrl ) );
-			return TRUE;
+			$this->mDb->query( $query, [ $this->mUserId, $pEvent, $pObject, $this->mInfo['email'], $hash, $pType, $pTitle, $pUrl ] );
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -2132,13 +2193,13 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param string $pEvent
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return array|null true on success, false on failure
 	 */
 	function getWatches( $pEvent = '' ) {
-		$ret = NULL;
+		$ret = null;
 		if( $this->isValid() ) {
 			$mid = '';
-			$bindvars=array( $this->mUserId );
+			$bindvars= [ $this->mUserId ];
 			if ($pEvent) {
 				$mid = " and `event`=? ";
 				$bindvars[]=$pEvent;
@@ -2146,7 +2207,7 @@ class BitUser extends LibertyMime {
 
 			$query = "select * from `".BIT_DB_PREFIX."users_watches` where `user_id`=? $mid";
 			$result = $this->mDb->query($query,$bindvars);
-			$ret = array();
+			$ret = [];
 
 			while ($res = $result->fetchRow()) {
 				$ret[] = $res;
@@ -2158,16 +2219,16 @@ class BitUser extends LibertyMime {
 	/**
 	 * getEventWatches
 	 *
-	 * @param array $pEvent
-	 * @param array $object
+	 * @param string $pEvent
+	 * @param string $object
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return array
 	 */
 	function getEventWatches( $pEvent, $pObject ) {
-		$ret = NULL;
+		$ret = [];
 		if( $this->isValid() ) {
 			$query = "SELECT * FROM `".BIT_DB_PREFIX."users_watches` WHERE `user_id`=? AND `event`=? AND `object`=?";
-			$result = $this->mDb->query($query,array( $this->mUserId, $pEvent, $pObject ) );
+			$result = $this->mDb->query($query, [ $this->mUserId, $pEvent, $pObject ] );
 			if ( $result->numRows() ) {
 				$ret = $result->fetchRow();
 			}
@@ -2178,13 +2239,13 @@ class BitUser extends LibertyMime {
 	/**
 	 * get_event_watches
 	 *
-	 * @param array $pEvent
-	 * @param array $pObject
+	 * @param string $pEvent
+	 * @param string $pObject
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return array
 	 */
-	function get_event_watches( $pEvent, $pObject ) {
-		$ret = array();
+	public function get_event_watches( $pEvent, $pObject ) {
+		$ret = [];
 
 		$query = "select * from `".BIT_DB_PREFIX."users_watches` tw INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( tw.`user_id`=uu.`user_id` )  where `event`=? and `object`=?";
 		$result = $this->mDb->query( $query,array( $pEvent,$pObject ));
@@ -2205,25 +2266,25 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pHash
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function remove_user_watch_by_hash( $pHash ) {
+	public function remove_user_watch_by_hash( $pHash ) {
 		$query = "DELETE FROM `".BIT_DB_PREFIX."users_watches` WHERE `hash`=?";
-		$this->mDb->query( $query,array( $pHash ));
+		return $this->mDb->query( $query, [ $pHash ]);
 	}
 
 	/**
 	 * expungeWatch
 	 *
-	 * @param array $pEvent
-	 * @param array $pObject
+	 * @param string $pEvent
+	 * @param string $pObject
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return void
 	 */
-	function expungeWatch( $pEvent, $pObject ) {
+	public function expungeWatch( $pEvent, $pObject ) {
 		if( $this->isValid() ) {
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_watches` WHERE `user_id`=? AND `event`=? AND `object`=?";
-			$this->mDb->query( $query, array( $this->mUserId, $pEvent, $pObject ));
+			$this->mDb->query( $query, [ $this->mUserId, $pEvent, $pObject ]);
 		}
 	}
 
@@ -2231,12 +2292,12 @@ class BitUser extends LibertyMime {
 	 * get_watches_events
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return array|bool true on success, false on failure
 	 */
-	function get_watches_events() {
+	public function get_watches_events() {
 		$query = "select distinct `event` from `".BIT_DB_PREFIX."users_watches`";
-		$result = $this->mDb->query($query,array());
-		$ret = array();
+		$result = $this->mDb->query($query,[]);
+		$ret = [];
 		while ($res = $result->fetchRow()) {
 			$ret[] = $res['event'];
 		}
@@ -2249,11 +2310,11 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pListHash
 	 * @access public
-	 * @return list of attachments
+	 * @return array list of attachments
 	 */
-	function getUserAttachments( &$pListHash ) {
+	public function getUserAttachments( &$pListHash ) {
 		$pListHash['user_id'] = $this->mUserId;
-		$mime = new LibertyMime();
+		$mime = new \Bitweaver\Liberty\LibertyMime();
 		return $mime->getAttachmentList( $pListHash );
 	}
 
@@ -2263,33 +2324,33 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pContentId
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
 	 */
-	function storeFavorite( $pContentId ) {
-		$ret = FALSE;
+	public function storeFavorite( $pContentId ) {
+		$ret = false;
 		if( $this->isValid() && $this->verifyId( $pContentId )) {
 			if( !$this->hasFavorite( $pContentId ) ){
-				$this->mDb->query( "INSERT INTO `".BIT_DB_PREFIX."users_favorites_map` ( `user_id`, `favorite_content_id` ) VALUES (?,?)", array( $this->mUserId, $pContentId ) );
+				$this->mDb->query( "INSERT INTO `".BIT_DB_PREFIX."users_favorites_map` ( `user_id`, `favorite_content_id` ) VALUES (?,?)", [ $this->mUserId, $pContentId ] );
 			}
-			$ret = TRUE;
+			$ret = true;
 		}
-		return( $ret );
+		return $ret;
 	}
 
-	function expungeFavorite( $pContentId ) {
-		$ret = FALSE;
+	public function expungeFavorite( $pContentId ) {
+		$ret = false;
 		if( $this->isValid() && $this->verifyId( $pContentId ) ) {
-			$this->mDb->query( "DELETE FROM `".BIT_DB_PREFIX."users_favorites_map` WHERE `user_id`=? AND `favorite_content_id`=?", array( $this->mUserId, $pContentId ) );
-			$ret = TRUE;
+			$this->mDb->query( "DELETE FROM `".BIT_DB_PREFIX."users_favorites_map` WHERE `user_id`=? AND `favorite_content_id`=?", [ $this->mUserId, $pContentId ] );
+			$ret = true;
 		}
-		return( $ret );
+		return $ret;
 	}
 
 	function hasFavorite( $pContentId ) {
-		$ret = FALSE;
-		$rslt = $this->mDb->getOne( "SELECT `favorite_content_id` FROM `".BIT_DB_PREFIX."users_favorites_map` WHERE `user_id`=? AND `favorite_content_id`=?", array( $this->mUserId, $pContentId ) );
-		if( !is_null( $rslt ) ){
-			$ret = TRUE;
+		$ret = false;
+		$rslt = $this->mDb->getOne( "SELECT `favorite_content_id` FROM `".BIT_DB_PREFIX."users_favorites_map` WHERE `user_id`=? AND `favorite_content_id`=?", [ $this->mUserId, $pContentId ] );
+		if($rslt !== null ){
+			$ret = true;
 		}
 		return $ret;
 	}
@@ -2298,12 +2359,12 @@ class BitUser extends LibertyMime {
 	 * getFavorites
 	 *
 	 * @see LibertyContent::getContentList
-	 * @return Array of content data
+	 * @return array of content data
 	 */
 	function getFavorites(){
-		$ret = NULL;
+		$ret = null;
 		if( $this->isRegistered() ){
-			$listHash['user_favs'] = TRUE;
+			$listHash['user_favs'] = true;
 			$listHash['order_table'] = 'ufm.';
 			$listHash['sort_mode'] = 'map_position_desc';
 			$ret = $this->getContentList( $listHash );
@@ -2316,10 +2377,10 @@ class BitUser extends LibertyMime {
 	 * getUserId
 	 *
 	 * @access public
-	 * @return user id of currently loaded user
+	 * @return int user id of currently loaded user
 	 */
 	function getUserId() {
-		return( $this->isValid() ? $this->mUserId : ANONYMOUS_USER_ID );
+		return $this->isValid() ? $this->mUserId : ANONYMOUS_USER_ID;
 	}
 
 	/**
@@ -2328,7 +2389,7 @@ class BitUser extends LibertyMime {
 	 * @param array $pUserName
 	 * @param array $pParamHash
 	 * @access public
-	 * @return URL to users homepage
+	 * @return string  URL to users homepage
 	 */
 	public static function getDisplayUrlFromHash( &$pParamHash ) {
 		if( function_exists( 'override_user_url' ) ) {
@@ -2341,10 +2402,10 @@ class BitUser extends LibertyMime {
 			if ($gBitSystem->isFeatureActive( 'pretty_urls' )
 			|| $gBitSystem->isFeatureActive( 'pretty_urls_extended' ) ) {
 				$ret =  USERS_PKG_URL . $rewrite_tag;
-				$ret .= urlencode( $pParamHash['login'] );
+				$ret .= urlencode( $pParamHash['login'] ?? '' );
 			} else {
 				$ret =  USERS_PKG_URL . 'index.php?home=';
-				$ret .= urlencode( $pParamHash['login'] );
+				$ret .= urlencode( $pParamHash['login'] ?? '' );
 			}
 		}
 		return $ret;
@@ -2356,10 +2417,10 @@ class BitUser extends LibertyMime {
 	 * @param array $pUserName
 	 * @param array $pDisplayHash
 	 * @access public
-	 * @return get a link to the the users homepage
+	 * @return string get a link to the the users homepage
 	 */
-	public function getDisplayLink( $pParamHash, $pLinkText=NULL, $pAnchor=NULL ) {
-		return BitUser::getDisplayNameFromHash( $pParamHash, TRUE );
+	public function getDisplayLink( $pParamHash, $pLinkText=null, $pAnchor=null ) {
+		return RoleUser::getDisplayNameFromHash( $pParamHash, true );
 	}
 
 	/**
@@ -2367,20 +2428,20 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pHash
 	 * @access public
-	 * @return get the users display name
+	 * @return string get the users display name
 	 */
-	public static function getTitleFromHash( &$pHash, $pDefault=TRUE ) {
-		return BitUser::getDisplayNameFromHash( $pHash, FALSE );
+	public static function getTitleFromHash( &$pHash, $pDefault=true ) {
+		return RoleUser::getDisplayNameFromHash( $pHash, false );
 	}
 
 	/**
 	 * Get user information for a particular user
 	 *
-	 * @param pUseLink return the information in the form of a url that links to the users information page
-	 * @param pHash todo - need explanation on how to use this...
-	 * @return display name or link to user information page
+	 * @param array pHash todo - need explanation on how to use this...
+	 * @param bool pUseLink return the information in the form of a url that links to the users information page
+	 * @return string display name or link to user information page
 	 **/
-	public static function getDisplayNameFromHash( $pUseLink=FALSE, $pHash ) {
+	public static function getDisplayNameFromHash( array $pHash, $pUseLink=false ): string {
 		global $gBitSystem, $gBitUser;
 		if( !empty( $pHash )) {
 			if( !empty( $pHash['real_name'] ) && $gBitSystem->getConfig( 'users_display_name', 'real_name' ) == 'real_name' ) {
@@ -2410,19 +2471,19 @@ class BitUser extends LibertyMime {
 			}
 
 			if( empty( $pHash['users_information'] ) && !empty( $pHash['login'] ) ) {
-				$pHash['users_information'] = $gBitSystem->mDb->getOne( "SELECT pref_value FROM liberty_content_prefs lcp INNER JOIN users_users uu ON (lcp.content_id=uu.content_id) WHERE uu.login=? AND pref_name='users_information'", array( $pHash['login'] ), 1, NULL, 86400 );
+				$pHash['users_information'] = $gBitSystem->mDb->getOne( "SELECT pref_value FROM liberty_content_prefs lcp INNER JOIN users_users uu ON (lcp.content_id=uu.content_id) WHERE uu.login=? AND pref_name='users_information'", [ $pHash['login'] ], 1, null, 86400 );
 			}
 
 			if( $pUseLink && $gBitUser->hasPermission( 'p_users_view_user_homepage' ) && (empty( $pHash['users_information'] ) || $pHash['users_information'] == 'public') ) {
-				$ret = '<a class="username" title="'.( !empty( $pHash['link_title'] ) ? $pHash['link_title'] : tra( 'Profile for' ).' '.htmlspecialchars( $displayName ))
-					.'" href="'.BitUser::getDisplayUrlFromHash( $pHash ).'">'
-					. htmlspecialchars( isset( $pHash['link_label'] ) ? $pHash['link_label'] : $displayName )
+				$ret = '<a class="username" title="'.( !empty( $pHash['link_title'] ) ? $pHash['link_title'] : KernelTools::tra( 'Profile for' ).' '.htmlspecialchars( $displayName ))
+					.'" href="'.RoleUser::getDisplayUrlFromHash( $pHash ).'">'
+					. htmlspecialchars( isset( $pHash['link_label'] ) ? $pHash['link_label'] : ( isset($displayName) ? $displayName : 'not set' ) )
 					.'</a>';
 			} else {
 				$ret = htmlspecialchars( $displayName );
 			}
 		} else {
-			$ret = tra( "Anonymous" );
+			$ret = KernelTools::tra( "Anonymous" );
 		}
 
 		return $ret;
@@ -2431,12 +2492,12 @@ class BitUser extends LibertyMime {
 	/**
 	 * Get user information for a particular user
 	 *
-	 * @param pUseLink return the information in the form of a url that links to the users information page
-	 * @param pHash todo - need explanation on how to use this...
-	 * @return display name or link to user information page
+	 * @param bool pUseLink return the information in the form of a url that links to the users information page
+	 * @param array pHash todo - need explanation on how to use this...
+	 * @return string display name or link to user information page
 	 **/
-	function getDisplayName( $pUseLink=FALSE, $pHash=NULL ) {
-		$ret = NULL;
+	public function getDisplayName( $pUseLink=false, $pHash=null ) {
+		$ret = null;
 		if( empty( $pHash ) && !empty( $this ) && !empty( $this->mInfo )) {
 			$pHash = &$this->mInfo;
 		}
@@ -2447,9 +2508,9 @@ class BitUser extends LibertyMime {
 	 * getRenderFile Returns include file that will
 	 *
 	 * @access public
-	 * @return the fully specified path to file to be included
+	 * @return string the fully specified path to file to be included
 	 */
-	function getRenderFile() {
+	public function getRenderFile() {
 		return USERS_PKG_INCLUDE_PATH.'display_bituser_inc.php';
 	}
 
@@ -2457,15 +2518,15 @@ class BitUser extends LibertyMime {
 	 * getSelectionList get a list of users that can be used in dropdown lists in forms to choose from
 	 *
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return array|bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	function getSelectionList() {
+	public function getSelectionList() {
 		$query = "
 			SELECT uu.`user_id`, uu.`login`, uu.`real_name`
 			FROM `".BIT_DB_PREFIX."users_users` uu
 			ORDER BY uu.`login`";
 		$result = $this->mDb->query( $query );
-		$ret = array();
+		$ret = [];
 		while( $res = $result->fetchRow()) {
 			$ret[$res['user_id']] = $res['login'].(( !empty( $res['real_name'] ) && $res['real_name'] != $res['login'] ) ? ' - '.$res['real_name'] : '' );
 		}
@@ -2480,7 +2541,7 @@ class BitUser extends LibertyMime {
 	 * @access public
 	 * @return array of users
 	 */
-	function getList( &$pParamHash ) {
+	public function getList( &$pParamHash ) {
 		global $gBitSystem, $gBitUser;
 		if( empty( $pParamHash['sort_mode'] )) {
 			$pParamHash['sort_mode'] = 'registration_date_desc';
@@ -2489,8 +2550,8 @@ class BitUser extends LibertyMime {
 		LibertyContent::prepGetList( $pParamHash );
 
 		$selectSql = $joinSql = $whereSql = '';
-		$bindVars = array( 'bituser' );
-		$this->getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars, NULL, $pParamHash );
+		$bindVars = [ 'bituser' ];
+		$this->getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars, null, $pParamHash );
 
 		// limit search to users with a specific language
 		if( !empty( $pParamHash['lang_code'] ) ) {
@@ -2501,7 +2562,7 @@ class BitUser extends LibertyMime {
 
 		if( !$gBitUser->hasPermission( 'p_users_admin' ) ) {
 			$joinSql .= " LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_prefs` lcp2 ON ( lcp2.`content_id`=uu.`content_id` AND lcp2.`pref_name`='users_information' )";
-			$whereSql .= " AND (lcp2.`pref_value` IS NULL OR lcp2.`pref_value`='public')";
+			$whereSql .= " AND (lcp2.`pref_value` IS null OR lcp2.`pref_value`='public')";
 		}
 
 		// limit search to users with a specific IP
@@ -2545,7 +2606,7 @@ class BitUser extends LibertyMime {
 			$selectSql .= ", sru.`referer_url`";
 			if( !empty( $pParamHash['referer'] ) ) {
 				if( $pParamHash['referer'] == 'none' ) {
-					$whereSql .= " AND `referer_url` IS NULL";
+					$whereSql .= " AND `referer_url` IS null";
 				} else {
 					$whereSql .= " AND `referer_url` LIKE ?";
 					$bindVars[] = '%'.strtolower( $pParamHash['find'] ).'%';
@@ -2565,11 +2626,11 @@ class BitUser extends LibertyMime {
 			WHERE lc.`content_type_guid` = ? $whereSql ORDER BY ".$this->mDb->convertSortmode( $pParamHash['sort_mode'] );
 		$result = $this->mDb->query( $query, $bindVars, $pParamHash['max_records'], $pParamHash['offset'] );
 
-		$ret = array();
+		$ret = [];
 		while( $res = $result->fetchRow() ) {
 			// Used for pulling out dead/empty/spam accounts
 			if( isset( $pParamHash['max_content_count'] ) && is_numeric( $pParamHash['max_content_count'] ) ) {
-				$contentCount = $this->mDb->getOne( "SELECT COUNT(*) FROM  `".BIT_DB_PREFIX."liberty_content` lc INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( lc.`user_id`=uu.`user_id` ) WHERE uu.`user_id`=? AND `content_type_guid` != 'bituser'", array( $res['user_id'] ) );
+				$contentCount = $this->mDb->getOne( "SELECT COUNT(*) FROM  `".BIT_DB_PREFIX."liberty_content` lc INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( lc.`user_id`=uu.`user_id` ) WHERE uu.`user_id`=? AND `content_type_guid` != 'bituser'", [ $res['user_id'] ] );
 				if( $contentCount >  $pParamHash['max_content_count'] ) {
 					continue;
 				}
@@ -2577,7 +2638,7 @@ class BitUser extends LibertyMime {
 
 			// Used for pulling out non-idle accounts or pigs
 			if( isset( $pParamHash['min_content_count'] ) && is_numeric( $pParamHash['min_content_count'] ) ) {
-				$contentCount = $this->mDb->getOne( "SELECT COUNT(*) FROM  `".BIT_DB_PREFIX."liberty_content` lc INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( lc.`user_id`=uu.`user_id` ) WHERE uu.`user_id`=? AND `content_type_guid` != 'bituser'", array( $res['user_id'] ) );
+				$contentCount = $this->mDb->getOne( "SELECT COUNT(*) FROM  `".BIT_DB_PREFIX."liberty_content` lc INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( lc.`user_id`=uu.`user_id` ) WHERE uu.`user_id`=? AND `content_type_guid` != 'bituser'", [ $res['user_id'] ] );
 				if( $contentCount <  $pParamHash['min_content_count'] ) {
 					continue;
 				}
@@ -2585,22 +2646,22 @@ class BitUser extends LibertyMime {
 
 			if( !empty( $res['referer_url'] )) {
 				if ( $gBitSystem->isPackageActive('stats') ) {
-					$res['short_referer_url'] = stats_referer_display_short($res['referer_url']);
+					$res['short_referer_url'] = \Bitweaver\Stats\stats_referer_display_short($res['referer_url']);
 				}
 			}
 			if( !empty( $res['avatar_file_name'] )) {
-				$res['avatar_url'] = $this->getSourceUrl( array( 'attachment_id'=>$res['avatar_attachment_id'], 'mime_type'=>$res['avatar_mime_type'], 'file_name'=>$res['avatar_file_name'] ) );
-				$res['thumbnail_url'] = liberty_fetch_thumbnail_url( array(
-					'source_file' => $this->getSourceFile( array( 'sub_dir'=>$res['avatar_attachment_id'], 'user_id' => $res['user_id'], 'file_name'=>$res['avatar_file_name'], 'mime_type'=>$res['avatar_mime_type'], 'package'=>liberty_mime_get_storage_sub_dir_name( array( 'mime_type'=>$res['avatar_mime_type'], 'name'=>$res['avatar_file_name'] ) ) ) ),
-					'file_name' => $res['avatar_url'],
+				$res['avatar_url'] = $this->getSourceUrl( [ 'attachment_id' => $res['avatar_attachment_id'], 'mime_type' => $res['avatar_mime_type'], 'file_name' => $res['avatar_file_name'] ] );
+				$res['thumbnail_url'] = \Bitweaver\Liberty\liberty_fetch_thumbnail_url( [
+					'source_file' => $this->getSourceFile( [ 'sub_dir' => $res['avatar_attachment_id'], 'user_id' => $res['user_id'], 'file_name' => $res['avatar_file_name'], 'mime_type' => $res['avatar_mime_type'], 'package' => \Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name( [ 'mime_type' => $res['avatar_mime_type'], 'name' => $res['avatar_file_name'] ] ) ] ),
+					'file_name'   => $res['avatar_url'],
 					// TODO: Make this a preference
-					'size'         => 'avatar'
-				));
+					'size'        => 'avatar',
+				]);
 			}
 			$res["roles"] = $this->getRoles( $res['user_id'] );
 			$ret[$res['user_id']] = $res;
 		}
-		$retval = array();
+		$retval = [];
 
 		$query = "
 			SELECT COUNT(*) FROM `".BIT_DB_PREFIX."users_users` uu
@@ -2616,24 +2677,24 @@ class BitUser extends LibertyMime {
 	/**
 	 * getRoles
 	 *
-	 * @param array $pUserId
-	 * @param array $pForceRefresh
+	 * @param int $pUserId
+	 * @param bool $pForceRefresh
 	 * @access public
-	 * @return TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 * @return int|array|bool false on failure - mErrors will contain reason for failure
 	 */
-	function getRoles( $pUserId=NULL, $pForceRefresh = FALSE ) {
+	public function getRoles( int $pUserId = 0, bool $pForceRefresh = false ) {
 		$pUserId = !empty( $pUserId ) ? $pUserId : $this->mUserId;
 		if( !isset( $this->cUserRoles[$pUserId] ) || $pForceRefresh ) {
 			$query = "
 				SELECT ur.`role_id`, ur.`role_name`, ur.`user_id` as role_owner_user_id
 				FROM `".BIT_DB_PREFIX."users_roles_map` urm INNER JOIN `".BIT_DB_PREFIX."users_roles` ur ON (ur.`role_id`=urm.`role_id`)
 				WHERE urm.`user_id`=? OR urm.`role_id`=".ANONYMOUS_TEAM_ID;
-			$ret = $this->mDb->getAssoc( $query, array(( int )$pUserId ));
+			$ret = $this->mDb->getAssoc( $query, [ (int) $pUserId ]);
 			if( $ret ) {
 				foreach( array_keys( $ret ) as $roleId ) {
-					$res = array();
+					$res = [];
 					foreach( $res as $key=>$val) {
-						$ret[$key] = array( 'role_name' => $val );
+						$ret[$key] = [ 'role_name' => $val ];
 					}
 				}
 			}
@@ -2649,44 +2710,44 @@ class BitUser extends LibertyMime {
 	 * isValid
 	 *
 	 * @access public
-	 * @return TRUE if user is loaded
+	 * @return bool true if user is loaded
 	 */
-	function isValid() {
-		return ( $this->verifyId( $this->mUserId ) );
+	public function isValid() {
+		return $this->verifyId( $this->mUserId );
 	}
 
 	/**
 	 * isAdmin "PURE VIRTUAL BASE FUNCTION";
 	 *
 	 * @access public
-	 * @return FALSE
+	 * @return false
 	 */
-	function isAdmin() {
-		return FALSE;
+	public function isAdmin() {
+		return false;
 	}
 
 	/**
 	 * isRegistered
 	 *
 	 * @access public
-	 * @return TRUE if user is registered, FALSE otherwise
+	 * @return bool true if user is registered, false otherwise
 	 */
-	function isRegistered() {
-		return ( $this->mUserId > ANONYMOUS_USER_ID );
+	public function isRegistered() {
+		return $this->mUserId > ANONYMOUS_USER_ID;
 	}
 
 	/**
 	 * verifyRegistered
 	 *
 	 * @access public
-	 * @return TRUE if user is registered, otherwise a login dialog is displayed
+	 * @return bool true if user is registered, otherwise a login dialog is displayed
 	 */
-	function verifyRegistered( $pMsg = "" ) {
+	public function verifyRegistered( $pMsg = "" ) {
 		global $gBitSystem;
 		if( !$this->isRegistered() ) {
 			$gBitSystem->fatalPermission( "", $pMsg );
 		}
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -2694,19 +2755,16 @@ class BitUser extends LibertyMime {
 	 *
 	 * @param array $pUserMixed
 	 * @access public
-	 * @return TRUE on success, FALSE on failure
+	 * @return bool true on success, false on failure
+	 * TODO Tidy check query!
 	 */
-	function userExists( $pUserMixed ) {
-		$ret = FALSE;
+	public function userExists( $pUserMixed ) {
+		$ret = false;
 		if ( is_array( $pUserMixed ) ) {
 			if( $cur = current( $pUserMixed ) ) {
-				if( is_numeric( $cur ) ) {
-					$conditionSql = " `".key( $pUserMixed )."` ";
-				} else {
-					$conditionSql = " UPPER(`".key( $pUserMixed )."`)";
-				}
-				$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE $conditionSql = ?";
-				$ret = $this->mDb->getOne( $query, array( strtoupper( $cur ) ) );
+				$conditionSql = (is_numeric( $cur )) ? " `".key( $pUserMixed )."` " : " UPPER(`".key( $pUserMixed )."`)";
+				$query = "SELECT user_id FROM  `".BIT_DB_PREFIX."users`".$conditionSql;
+				$ret = $this->mDb->getOne( $query, [ strtoupper( $cur ) ] );
 			}
 		}
 		return $ret;
@@ -2716,21 +2774,21 @@ class BitUser extends LibertyMime {
 	 * Create an export hash from the data
 	 *
 	 * @access public
-	 * @return export data
+	 * @return array  export data
 	 */
-	function exportHash() {
+	public function exportHash() {
 		global $gBitSystem;
-		$ret = array();
+		$ret = [];
 		if( $this->isValid() ) {
-			$ret = array(
+			$ret = [
 				'user_id' 		=> $this->mUserId,
 				'content_id' 	=> $this->mContentId,
 				'real_name' 	=> $this->getField( 'real_name' ),
 				'email'	 		=> $this->getField( 'email' ),
 				'uri'        	=> $this->getDisplayUri(),
-				'registration_date' 	=> date( DateTime::W3C, $this->getField('registration_date') ),
-				'last_login' => date( DateTime::W3C, $this->getField('last_login') ),
-			);
+				'registration_date' 	=> date( \DateTime::W3C, $this->getField('registration_date') ),
+				'last_login' => date( \DateTime::W3C, $this->getField('last_login') ),
+			];
 			$ret['content_count'] = get_user_content_count( $this->mUserId );
 			if( $gBitSystem->isPackageActive( 'stats' ) ) {
 				$ret['referer'] = $this->mDb->getOne( "SELECT sru.`referer_url` FROM `".BIT_DB_PREFIX."stats_referer_urls` sru INNER JOIN `".BIT_DB_PREFIX."stats_referer_users_map` srum ON (srum.`referer_url_id`=sru.`referer_url_id`) WHERE `user_id`=?", $this->mUserId );
@@ -2758,7 +2816,7 @@ class BitUser extends LibertyMime {
 				$pReturn['user_id'] = $pInput['user_id'];
 			}
 		}
-		if( @BitBase::verifyId( $pInput['role_id'] ) ) {
+		if( BitBase::verifyId( $pInput['role_id'] ?? 0 ) ) {
 			$pReturn['role_id'] = $pInput['role_id'];
 		}
 		return;
@@ -2777,25 +2835,25 @@ class BitUser extends LibertyMime {
 function get_user_content_count( $pUserId ) {
 	global $gBitDb;
 	if( BitBase::verifyId( $pUserId ) ) {
-		return $gBitDb->getOne( "SELECT COUNT(`content_id`) FROM `".BIT_DB_PREFIX."liberty_content` lc WHERE lc.`content_type_guid`!='bituser' AND lc.`user_id`=?", array( $pUserId ) );
+		return $gBitDb->getOne( "SELECT COUNT(`content_id`) FROM `".BIT_DB_PREFIX."liberty_content` lc WHERE lc.`content_type_guid`!='bituser' AND lc.`user_id`=?", [ $pUserId ] );
 	}
 }
 
 
 // {{{ ==================== Services ====================
-function users_favs_content_list_sql( &$pObject, $pParamHash=NULL ){
-    $ret = array();
+function users_favs_content_list_sql( $pObject, $pParamHash=null ){
+    $ret = [];
 	if( !empty( $pParamHash['user_favs'] ) ){
 		// $ret['select_sql'] = "";
 		$ret['join_sql'] = " INNER JOIN `".BIT_DB_PREFIX."users_favorites_map` ufm ON ( ufm.`favorite_content_id`=lc.`content_id` )";
 		$ret['where_sql'] = " AND ufm.`user_id` = ?";
-		$ret['bind_vars'][] = $pObject->mUserId;
+		$ret['bind_vars'][] = !empty($pObject->mUserId) ? $pObject->mUserId : 0;
 	}
 	return $ret;
 }
 
-function users_collection_sql( &$pObject, $pParamHash=NULL ){
-    $ret = array();
+function users_collection_sql( $pObject, $pParamHash=null ){
+    $ret = [];
 	if( !empty( $pParamHash['role_id'] ) and BitBase::verifyId( $pParamHash['role_id'] ) ){
 		// $ret['select_sql'] = "";
 		$ret['join_sql'] = " INNER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON (ugm.`user_id`=uu.`user_id`)";
@@ -2804,6 +2862,3 @@ function users_collection_sql( &$pObject, $pParamHash=NULL ){
 	}
 	return $ret;
 }
-// }}}
-
-/* vim: :set fdm=marker : */

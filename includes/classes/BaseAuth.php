@@ -5,6 +5,8 @@
  * @package users
  */
 
+namespace Bitweaver\Users;
+
 /**
  * Class that manages the base autentication method
  *
@@ -16,9 +18,9 @@ class BaseAuth {
 	public $mConfig;
 	public $mInfo;
 	public $mCfg;
-	public $mErrors =array();
+	public $mErrors =[];
 
-	function __construct($pAuthId) {
+	public function __construct($pAuthId) {
 		global $gBitSystem;
 		$this->mCfg = BaseAuth::getAuthMethod($pAuthId);
 		$this->mCfg['auth_id'] = $pAuthId;
@@ -26,14 +28,14 @@ class BaseAuth {
 			$var_id = substr($op_id,strrpos($op_id,"_")+1);
 			$var = $gBitSystem->getConfig($op_id, $op['default']);
 			if ($op['type']=="checkbox") {
-				$var = ($var== "y");
+				$var = $var== "y";
 			}
 			$this->mConfig[$var_id]=$var;
 		}
 	}
 
 	public static function &getAuthMethods() {
-		static $authMethod = array();
+		static $authMethod = [];
 		static $scaned = false;
 		if (!$scaned) {
 			$scaned = true;
@@ -60,11 +62,11 @@ class BaseAuth {
 		if( is_dir( $authDir ) && $authScan = scandir( $authDir ) ) {
 			foreach( $authScan as $plugDir ) {
 				if( $plugDir != 'CVS' && substr($plugDir,0,1)!='.' && is_dir( $authDir.$plugDir ) ) {
-					BaseAuth::register( $plugDir,array(
-						'name' => strtoupper( $plugDir ).' Auth',
-						'file' => $authDir.$plugDir.'/auth.php',
-						'class' => ucfirst( $plugDir ).'Auth',
-					) );
+					BaseAuth::register( $plugDir, [
+						'name'  => strtoupper( $plugDir ) . ' Auth',
+						'file'  => $authDir . $plugDir . '/auth.php',
+						'class' => '\\Bitweaver\\Users\\' . ucfirst( $plugDir ) . 'Auth',
+					] );
 				}
 			}
 		}
@@ -101,7 +103,7 @@ class BaseAuth {
 
 	public static function authError($str) {
 		$warning = '<div class="error">'.$str.'</div>';
-		print( $warning );
+		print $warning;
 	}
 
 	public static function getAuthMethodCount() {
@@ -110,38 +112,38 @@ class BaseAuth {
 		return count($methods);
 	}
 
-	function validate($user,$pass,$challenge,$response) {
+	public function validate($user,$pass,$challenge,$response) {
 		if (!$this->isSupported()) return false;
 		$this->mLogin = $user;
 		$this->mInfo['login']=$user;
 		$this->mInfo['password']=$pass;
 	}
 
-	function getUserData() {
+	public function getUserData() {
 		return $this->mInfo;
 	}
 
-	function isSupported() {
+	public function isSupported() {
 		$this->mErrors[] = "BaseAuth is not an authentcation method";
 		return false;
 	}
 
-	function createUser(&$userattr) {
+	public function createUser(&$userattr) {
 		$this->mErrors[] = "BaseAuth is not an authentcation method";
 		return false;
 	}
 
-	function getSettings() {
-		return array();
+	public function getSettings() {
+		return [];
 	}
 
-	function canManageAuth() {
+	public function canManageAuth() {
 		$this->mErrors[] = "BaseAuth is not an authentcation method";
 		return false;
 	}
 
-	function getRegistrationFields() {
-		return array();
+	public function getRegistrationFields() {
+		return [];
 	}
 
 	public static function isActive($package) {
@@ -175,7 +177,7 @@ class BaseAuth {
 		} elseif (!empty($pAuthMixed)) {
 			$authPlugin=BaseAuth::getAuthMethod( $pAuthMixed );
 			if (file_exists( $authPlugin['file'] )) {
-				require_once( $authPlugin['file'] );
+//				require_once $authPlugin['file'];
 				$cl = $authPlugin['class'];
 				$instance = new $cl();
 				if( $instance->isSupported() ) {
@@ -188,7 +190,7 @@ class BaseAuth {
 
 	public static function getConfig() {
 		global $gBitSystem;
-		$authSettings = array();
+		$authSettings = [];
 		foreach( BaseAuth::getAuthMethods() as $meth_name => $method ) {
 			$instance = BaseAuth::init($meth_name) ;
 			if ($instance) {
@@ -211,7 +213,7 @@ class BaseAuth {
 			}
 		}
 		if (!empty($_REQUEST["loginprefs"])) {
-			$used =array();
+			$used =[];
 			for ($i=0,$j=0;$i<count($authSettings['avail']);$i++,$j++) {
 				$gBitSystem->storeConfig( "users_auth_method_$i",null, USERS_PKG_NAME );
 				if (empty($_REQUEST["users_auth_method_$i"])) {
@@ -238,8 +240,7 @@ class BaseAuth {
 		if (($gBitSystem->getConfig('users_allow_register','y')=='y')&&!$canManageAuth) {
 			$authSettings['err']['bit_reg']="Registration is enabled but there are no Auth Methods that support this, Registration won't work!";
 		}
-		$method['active']=BaseAuth::isActive($meth_name);
+		$method['active']=BaseAuth::isActive($authSettings['avail'][$meth_name] ?? 'BitAuth');
 		return $authSettings;
 	}
 }
-?>
