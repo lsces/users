@@ -1,14 +1,16 @@
 <?php
-require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
+use Bitweaver\Liberty\LibertyContent;
+require_once '../../kernel/includes/setup_inc.php';
 $gBitSystem->verifyPermission( 'p_admin' );
 
-$feedback = array();
+$feedback = [];
 
 // get a list of all roles and their permissions
-$listHash = array(
-	'only_root_roles' => TRUE,
-	'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc'
-);
+$listHash = [
+	'only_root_roles' => true,
+	'sort_mode'       => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc'
+];
 $allRoles = $gBitUser->getAllRoles( $listHash );
 $allPerms = $gBitUser->getRolePermissions( $_REQUEST );
 
@@ -25,14 +27,14 @@ if( !empty( $_REQUEST['save'] )) {
 		}
 	}
 
-	$feedback['success'] = tra( "The permissions were successfully added to the requested roles." );
+	$feedback['success'] = KernelTools::tra( "The permissions were successfully added to the requested roles." );
 	// we need to update the roles list
 	$allRoles = $gBitUser->getAllRoles( $listHash );
 }
 
 // Check to see if we have unassigned permissions
 if(( $unassignedPerms = $gBitUser->getUnassignedPerms() )) {
-	$feedback['warning'] = tra( 'You have some permissions that are not assigned to any role. You need to assign these to at least one role each.' );
+	$feedback['warning'] = KernelTools::tra( 'You have some permissions that are not assigned to any role. You need to assign these to at least one role each.' );
 	$gBitSmarty->assign( 'unassignedPerms', $unassignedPerms );
 }
 
@@ -40,7 +42,7 @@ $gBitSmarty->assign( 'allPerms', $allPerms );
 $gBitSmarty->assign( 'allRoles', $allRoles );
 $gBitSmarty->assign( 'permPackages', $gBitUser->getPermissionPackages() );
 $gBitSmarty->assign( 'feedback', $feedback );
+$gBitSmarty->assign( 'bitTk', $gBitUser->mTicket );
 $gBitSmarty->assign( 'contentWithPermissions', LibertyContent::getContentWithPermissionsList() );
 
-$gBitSystem->display( 'bitpackage:users/admin_role_permissions.tpl', tra( 'Permission Maintenance' ), array( 'display_mode' => 'admin' ));
-?>
+$gBitSystem->display( 'bitpackage:users/admin_role_permissions.tpl', KernelTools::tra( 'Permission Maintenance' ), [ 'display_mode' => 'admin' ]);

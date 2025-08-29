@@ -15,7 +15,7 @@ if (!$gBitUser->userExists( array( 'user_id' => $_REQUEST["assign_user"] ) ) ) {
 }
 
 $assignUser = new RolePermUser( $_REQUEST["assign_user"] );
-$assignUser->load( TRUE );
+$assignUser->load( true );
 
 if( $assignUser->isAdmin() && !$gBitUser->isAdmin() ) {
 	$gBitSystem->fatalError( tra( 'You cannot modify a system administrator.' ));
@@ -34,7 +34,7 @@ if( isset( $_REQUEST["action"] ) ) {
 	$assignUser->storeUserDefaultRole( $assignUser->mUserId, $_REQUEST['default_role'] );
 	$assignUser->load();
 }
-$gBitSmarty->assignByRef( 'assignUser', $assignUser );
+$gBitSmarty->assign( 'assignUser', $assignUser );
 
 $listHash = array( 'sort_mode' => 'role_name_asc' );
 $gBitSmarty->assign('roles', $gBitUser->getAllRoles( $listHash ));
@@ -42,5 +42,5 @@ $gBitSmarty->assign('roles', $gBitUser->getAllRoles( $listHash ));
 $gBitSystem->setBrowserTitle( 'Edit User: '.$assignUser->mUsername );
 
 // Display the template
-$gBitSystem->display( 'bitpackage:users/admin_assign_role_user.tpl', NULL, array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/admin_assign_role_user.tpl', null, array( 'display_mode' => 'admin' ));
 ?>

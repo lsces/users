@@ -8,7 +8,7 @@ require_once( '../../kernel/includes/setup_inc.php' );
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
-$feedback = array();
+$feedback = [];
 
 if( isset( $_REQUEST["batchimport"])) {
 	// check if it's a batch upload
@@ -89,15 +89,23 @@ if( isset( $_REQUEST["batchimport"])) {
 		$gBitSmarty->assign( 'added', $added );
 		if( @is_array( $discarded ) ) {
 			$gBitSmarty->assign( 'discarded', count( $discarded ) );
-			$gBitSmarty->assignByRef( 'discardlist', $discarded );
+			$gBitSmarty->assign( 'discardlist', $discarded );
 		}
 	}
 }
 
-// get default group and pass it to tpl
-foreach( $gBitUser->getDefaultGroup() as $defaultGroupId => $defaultGroupName ) {
-	$gBitSmarty->assign('defaultGroupId', $defaultGroupId );
-	$gBitSmarty->assign('defaultGroupName', $defaultGroupName );
+if ( defined( 'ROLE_MODEL' ) ) {
+	// get default role and pass it to tpl
+	foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
+		$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
+		$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
+	}
+} else {
+	// get default group and pass it to tpl
+	foreach( $gBitUser->getDefaultGroup() as $defaultGroupId => $defaultGroupName ) {
+		$gBitSmarty->assign('defaultGroupId', $defaultGroupId );
+		$gBitSmarty->assign('defaultGroupName', $defaultGroupName );
+	}
 }
 
 // Display the template

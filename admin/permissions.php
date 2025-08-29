@@ -2,11 +2,11 @@
 require_once( '../../kernel/includes/setup_inc.php' );
 $gBitSystem->verifyPermission( 'p_admin' );
 
-$feedback = array();
+$feedback = [];
 
 // get a list of all groups and their permissions
 $listHash = array(
-	'only_root_groups' => TRUE,
+	'only_root_groups' => true,
 	'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc'
 );
 $allGroups = $gBitUser->getAllGroups( $listHash );

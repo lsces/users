@@ -11,5 +11,3 @@ if (isset($_REQUEST["userfilesprefs"])) {
 	$gBitSmarty->assign('uf_use_dir', $_REQUEST["uf_use_dir"]);
 	$gBitSmarty->assign('users_userfiles_quota', $_REQUEST['users_userfiles_quota']);
 }
-
-?>

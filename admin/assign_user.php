@@ -15,8 +15,8 @@ if (!$gBitUser->userExists( array( 'user_id' => $_REQUEST["assign_user"] ) ) ) {
 }
 
 $assignUser = new BitPermUser( $_REQUEST["assign_user"] );
-$assignUser->setCacheableObject( FALSE );
-$assignUser->load( TRUE );
+$assignUser->setCacheableObject( false );
+$assignUser->load( true );
 
 if( $assignUser->isAdmin() && !$gBitUser->isAdmin() ) {
 	$gBitSystem->fatalError( tra( 'You cannot modify a system administrator.' ));
@@ -36,7 +36,7 @@ if( isset( $_REQUEST["action"] ) ) {
 	$assignUser->storeUserDefaultGroup( $assignUser->mUserId, $_REQUEST['default_group'] );
 	$assignUser->load();
 }
-$gBitSmarty->assignByRef( 'assignUser', $assignUser );
+$gBitSmarty->assign( 'assignUser', $assignUser );
 
 $listHash = array( 'sort_mode' => 'group_name_asc' );
 $gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
@@ -50,5 +50,5 @@ if($gBitSystem->isPackageActive("quota")) {
 
 
 // Display the template
-$gBitSystem->display( 'bitpackage:users/admin_assign_user.tpl', NULL, array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/admin_assign_user.tpl', null, array( 'display_mode' => 'admin' ));
 ?>

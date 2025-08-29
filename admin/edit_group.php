@@ -9,8 +9,8 @@ require_once( '../../kernel/includes/setup_inc.php' );
 // PERMISSIONS: NEEDS admin
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
-$successMsg = NULL;
-$errorMsg = NULL;
+$successMsg = null;
+$errorMsg = null;
 
 if( count( $_GET ) > 2 || count( $_POST ) > 2 ) {
 	$gBitUser->verifyTicket();
@@ -18,8 +18,8 @@ if( count( $_GET ) > 2 || count( $_POST ) > 2 ) {
 
 if( !empty( $_REQUEST['group_id'] ) ) {
 	$permListHash = array(
-		'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : NULL,
-		'package' => !empty( $_REQUEST['package'] ) ? $_REQUEST['package'] : NULL,
+		'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null,
+		'package' => !empty( $_REQUEST['package'] ) ? $_REQUEST['package'] : null,
 	);
 	$allPerms = $gBitUser->getGroupPermissions( $permListHash );
 }
@@ -42,9 +42,9 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	}
 } elseif( isset($_REQUEST["members"] ) ) {
 	$groupInfo = $gBitUser->getGroupInfo( $_REQUEST["members"] );
-	$gBitSmarty->assignByRef( 'groupInfo', $groupInfo );
+	$gBitSmarty->assign( 'groupInfo', $groupInfo );
 	$groupMembers = $gBitUser->getGroupUsers( $_REQUEST["members"] );
-	$gBitSmarty->assignByRef( 'groupMembers', $groupMembers );
+	$gBitSmarty->assign( 'groupMembers', $groupMembers );
 	$mid = "bitpackage:users/group_list_members.tpl";
 	$gBitSystem->setBrowserTitle( tra( 'Group Members' ).': '.$groupInfo['group_name'] );
 } elseif( isset($_REQUEST["save"] ) ) {
@@ -63,7 +63,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 		$gBitSystem->storeConfig( 'default_home_group', $_REQUEST['group_id'], USERS_PKG_NAME );
 	} elseif( $_REQUEST['group_id'] == $gBitSystem->getConfig( 'default_home_group' ) ) {
 		// the default home group was unchecked.
-		$gBitSystem->storeConfig( 'default_home_group', NULL, USERS_PKG_NAME );
+		$gBitSystem->storeConfig( 'default_home_group', null, USERS_PKG_NAME );
 	}
 } elseif( isset( $_REQUEST['delete'] ) ) {
 	// Process a form to remove a group
@@ -73,7 +73,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	if( isset( $_REQUEST["confirm"] ) ) {
 		$gBitUser->verifyTicket();
 		if( $_REQUEST['group_id'] == $gBitSystem->getConfig( 'default_home_group' ) ) {
-			$gBitSystem->storeConfig( 'default_home_group', NULL, USERS_PKG_NAME );
+			$gBitSystem->storeConfig( 'default_home_group', null, USERS_PKG_NAME );
 		}
 		$gBitUser->expungeGroup( $_REQUEST['group_id'] );
 		$successMsg = "The group ".$groupInfo['group_name']." was deleted.";
@@ -113,7 +113,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 
 if( !empty( $_REQUEST['group_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUEST["action"] == 'create' ) ) {
 	$permPackages = $gBitUser->getPermissionPackages();
-	$gBitSmarty->assignByRef( 'permPackages', $permPackages );
+	$gBitSmarty->assign( 'permPackages', $permPackages );
 
 	// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
 	$listHash = array( 'sort_mode' => 'group_name_asc' );
@@ -138,15 +138,15 @@ if( !empty( $_REQUEST['group_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUE
 }
 $gBitSmarty->assign('groupList', $gBitUser->getAllGroups( $listHash ));
 
-$inc = array();
+$inc = [];
 if( empty( $mid ) ) {
 	if( !empty( $_REQUEST['group_id'] ) ) {
 		$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group_id'] );
 
 		$defaultGroupId = $gBitSystem->getConfig( 'default_home_group' );
-		$gBitSmarty->assignByRef( 'defaultGroupId', $defaultGroupId );
-		$gBitSmarty->assignByRef( 'groupInfo', $groupInfo );
-		$gBitSmarty->assignByRef( 'allPerms', $allPerms );
+		$gBitSmarty->assign( 'defaultGroupId', $defaultGroupId );
+		$gBitSmarty->assign( 'groupInfo', $groupInfo );
+		$gBitSmarty->assign( 'allPerms', $allPerms );
 
 		$gBitSystem->setBrowserTitle( tra( 'Admininster Group' ).': '.$groupInfo['group_name'] );
 		$mid = 'bitpackage:users/admin_group_edit.tpl';
@@ -161,5 +161,5 @@ $gBitSmarty->assign('successMsg',$successMsg);
 $gBitSmarty->assign('errorMsg',$errorMsg);
 
 // Display the template for group administration
-$gBitSystem->display( $mid , NULL, array( 'display_mode' => 'edit' ));
+$gBitSystem->display( $mid , null, array( 'display_mode' => 'edit' ));
 ?>

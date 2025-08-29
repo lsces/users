@@ -325,15 +325,15 @@ array( 'PHP' => '
 // STEP 4
 array( 'DATADICT' => array(
 array( 'CREATEINDEX' => array(
-		'tiki_sema_user_idx' => array( 'tiki_semaphores', '`user_id`', array() ),
-		'tiki_user_prefs_idx' => array( 'tiki_user_preferences', '`user_id`', array() ),
+		'tiki_sema_user_idx' => array( 'tiki_semaphores', '`user_id`', [] ),
+		'tiki_user_prefs_idx' => array( 'tiki_user_preferences', '`user_id`', [] ),
 		'tiki_user_prefs_un_idx' => array( 'tiki_user_preferences', '`user_id`,`pref_name`', array( 'UNIQUE' ) ),
-		'users_groups_map_user_idx' => array( 'users_groups_map', '`user_id`', array() ),
-		'users_groups_map_group_idx' => array( 'users_groups_map', '`group_id`', array() ),
+		'users_groups_map_user_idx' => array( 'users_groups_map', '`user_id`', [] ),
+		'users_groups_map_group_idx' => array( 'users_groups_map', '`group_id`', [] ),
 		'users_groups_map_ug_idx' => array( 'users_groups_map', '`user_id`,`group_id`', array( 'UNIQUE' ) ),
-		'users_groupperms_group_idx' => array( 'users_grouppermissions', '`group_id`', array() ),
+		'users_groupperms_group_idx' => array( 'users_grouppermissions', '`group_id`', [] ),
 		'users_groupperms_group_idx' => array( 'users_grouppermissions', '`group_id`,`perm_name`', array( 'UNIQUE' ) ),
-		'users_groups_inc_group_idx' => array( 'users_groups_inclusion', '`group_id`', array() ),
+		'users_groups_inc_group_idx' => array( 'users_groups_inclusion', '`group_id`', [] ),
 		'users_groups_inc_gi_idx' => array( 'users_groups_inclusion', '`group_id`,`include_group_id`', array( 'UNIQUE' ) ),
 		'users_groups_gi_idx'  => array( 'users_groups', '`group_id`', array('UNIQUE') ),
 	)),

@@ -35,8 +35,8 @@ if( isset( $_REQUEST['settings'] ) ) {
 	}
 	$gBitSystem->storeConfig( 'custom_user_fields', $customFields, USERS_PKG_NAME );
 	$gBitSystem->storeConfig( 'users_display_name', (isset( $_REQUEST['settings']['users_display_name'] ) ? $_REQUEST['settings']['users_display_name'] : 'real_name'), USERS_PKG_NAME );
-	$gBitSystem->storeConfig( 'users_themes', (isset( $_REQUEST['settings']['users_themes'][0] ) ? $_REQUEST['settings']['users_themes'][0] : NULL), USERS_PKG_NAME );
-	$gBitSystem->storeConfig( 'users_layouts', (isset( $_REQUEST['settings']['users_layouts'][0] ) ? $_REQUEST['settings']['users_layouts'][0] : NULL), USERS_PKG_NAME );
+	$gBitSystem->storeConfig( 'users_themes', (isset( $_REQUEST['settings']['users_themes'][0] ) ? $_REQUEST['settings']['users_themes'][0] : null), USERS_PKG_NAME );
+	$gBitSystem->storeConfig( 'users_layouts', (isset( $_REQUEST['settings']['users_layouts'][0] ) ? $_REQUEST['settings']['users_layouts'][0] : null), USERS_PKG_NAME );
 }
 
 ?>

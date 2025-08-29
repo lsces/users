@@ -1,12 +1,12 @@
 <?php
-
-require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\BitBase;
+require_once '../../kernel/includes/setup_inc.php';
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
 $listHash = $_REQUEST;
 
-if( @BitBase::verifyId( $_REQUEST['user_id'] ) ) {
+if( BitBase::verifyId( $_REQUEST['user_id'] ?? 0 ) ) {
 	$listHash['user_id'] = $_REQUEST['user_id'];
 }
 
@@ -24,6 +24,6 @@ if( $userId = (int)BitBase::getParameter( $_REQUEST, 'user_id' ) ) {
 }
 
 $gBitSmarty->assign( 'userActivity', $gBitUser->getUserActivity( $listHash ));
-$gBitSmarty->assignByRef( 'listInfo', $listHash['listInfo'] );
+$gBitSmarty->assign( 'listInfo', $listHash['listInfo'] );
 $gBitSystem->display( 'bitpackage:users/user_activity.tpl', 'User Activity' , array( 'display_mode' => 'admin' ));
 

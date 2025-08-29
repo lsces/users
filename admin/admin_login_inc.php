@@ -1,10 +1,14 @@
 <?php
+
+use Bitweaver\BitBase;
+use Bitweaver\Users\BaseAuth;
+use Bitweaver\Users\BitHybridAuthManager;
 // $Header$
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See below for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
 
-require_once( USERS_PKG_CLASS_PATH.'BaseAuth.php' );
+require_once USERS_PKG_CLASS_PATH.'BaseAuth.php';
 
 $loginSettings = array(
 	'users_allow_register' => array(
@@ -55,168 +59,178 @@ $loginSettings = array(
 );
 $gBitSmarty->assign( 'loginSettings', $loginSettings );
 
-$registerSettings = array(
-	'users_validate_user' => array(
+$registerSettings = [
+	'users_validate_user'                 => [
 		'label' => "Validate users by email",
-		'type' => "checkbox",
-		'note' => "Send an email to the user, to validate registration.",
-	),
-	'users_validate_email' => array(
+		'type'  => "checkbox",
+		'note'  => "Send an email to the user, to validate registration.",
+	],
+	'users_validate_email'                => [
 		'label' => "Validate email address",
-		'type' => "checkbox",
-		'link' => "kernel/admin/index.php?page=server/General Settings",
-		'note' => "This feature should be used only when you need the maximum security and should be used with discretion. If a visitor's email server is not responding, they will not be placed into the group specified below for verified emails. If a users email is determined to be invalid (meaning, the server does respond, but negatively) they will not be able to register. You also must have a valid sender email to use this feature.",
-	),
-	'users_case_sensitive_login' => array(
+		'type'  => "checkbox",
+		'link'  => "kernel/admin/index.php?page=server/General Settings",
+		'note'  => "This feature should be used only when you need the maximum security and should be used with discretion. If a visitor's email server is not responding, they will not be placed into the group specified below for verified emails. If a users email is determined to be invalid (meaning, the server does respond, but negatively) they will not be able to register. You also must have a valid sender email to use this feature.",
+	],
+	'users_case_sensitive_login'          => [
 		'label' => 'Case-Sensitive Login',
-		'type' => "checkbox",
-		'note' => 'This determines whether user login names are case-sensitive.'
-	),
-	'reg_real_name' => array(
+		'type'  => "checkbox",
+		'note'  => 'This determines whether user login names are case-sensitive.',
+	],
+	'reg_real_name'                       => [
 		'label' => "Real Name",
-		'type' => "checkbox",
-		'note' => "Allow users to supply their real name.",
-	),
-	'reg_country' => array(
+		'type'  => "checkbox",
+		'note'  => "Allow users to supply their real name.",
+	],
+	'reg_country'                         => [
 		'label' => "Country",
-		'type' => "checkbox",
-		'note' => "Allow users to pick country of residency.",
-	),
-	'reg_language' => array(
+		'type'  => "checkbox",
+		'note'  => "Allow users to pick country of residency.",
+	],
+	'reg_language'                        => [
 		'label' => "Language",
-		'type' => "checkbox",
-		'note' => "Allow users to select their preferred language.",
-	),
-	'reg_homepage' => array(
+		'type'  => "checkbox",
+		'note'  => "Allow users to select their preferred language.",
+	],
+	'reg_homepage'                        => [
 		'label' => "Homepage URL",
-		'type' => "checkbox",
-		'note' => "Allow users to enter the url to their own homepage.",
-	),
-	'reg_portrait' => array(
+		'type'  => "checkbox",
+		'note'  => "Allow users to enter the url to their own homepage.",
+	],
+	'reg_portrait'                        => [
 		'label' => "Profile Picture",
-		'type' => "checkbox",
-		'note' => "Allow users to upload a profile picture.",
-	),
-	'users_pass_due' => array(
+		'type'  => "checkbox",
+		'note'  => "Allow users to upload a profile picture.",
+	],
+	'users_pass_due'                      => [
 		'label' => "Password invalid after days",
-		'type' => "text",
-		'note' => "",
-	),
-	'users_pass_chr_num' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'users_pass_chr_num'                  => [
 		'label' => "Force to use characters <strong>and</strong> numbers in passwords",
-		'type' => "checkbox",
-		'note' => "",
-	),
-	'users_min_pass_length' => array(
+		'type'  => "checkbox",
+		'note'  => "",
+	],
+	'users_min_pass_length'               => [
 		'label' => "Minimum password length",
-		'type' => "text",
-		'note' => "",
-	),
-	'user_password_generator' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'user_password_generator'             => [
 		'label' => "Password generator",
-		'type' => "checkbox",
-		'note' => "Display password generator on registration page that creates secure passwords.",
-	),
-	'users_register_require_passcode' => array(
+		'type'  => "checkbox",
+		'note'  => "Display password generator on registration page that creates secure passwords.",
+	],
+	'users_register_require_passcode'     => [
 		'label' => "Request passcode to register",
-		'type' => "checkbox",
-		'note' => "",
-	),
-	'users_register_passcode' => array(
+		'type'  => "checkbox",
+		'note'  => "",
+	],
+	'users_register_passcode'             => [
 		'label' => "Passcode",
-		'type' => "text",
-		'note' => "Enter the Passcode that is required for users to register with your site.",
-	),
-	'users_random_number_reg' => array(
+		'type'  => "text",
+		'note'  => "Enter the Passcode that is required for users to register with your site.",
+	],
+	'users_random_number_reg'             => [
 		'label' => "Use basic captcha to prevent automatic/robot registration",
-		'type' => "checkbox",
-		'note' => "This will generate an image with a word that the user has to confirm during the registration step.",
-	),
-	'users_register_recaptcha' => array(
+		'type'  => "checkbox",
+		'note'  => "This will generate an image with a word that the user has to confirm during the registration step.",
+	],
+	'users_register_recaptcha'            => [
 		'label' => "Use advanced reCAPTCHA to prevent automatic/robot registration",
-		'type' => "checkbox",
-		'note' => "To use reCAPTCHA you must get your API keys from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a> and enter them below.",
-	),
-	'users_register_recaptcha_site_key' => array(
+		'type'  => "checkbox",
+		'note'  => "To use reCAPTCHA you must get your API keys from <a href='https://www.google.com/recaptcha/admin/create'>https://www.google.com/recaptcha/admin/create</a> and enter them below.",
+	],
+	'users_register_recaptcha_site_key'   => [
 		'label' => "reCAPTCHA Site Key",
-		'type' => "text",
-		'note' => "This will be given to you after registering your site with Google",
-	),
-	'users_register_recaptcha_secret_key' => array(
+		'type'  => "text",
+		'note'  => "This will be given to you after registering your site with Google",
+	],
+	'users_register_recaptcha_secret_key' => [
 		'label' => "reCAPTCHA Secret Key",
-		'type' => "text",
-		'note' => "This will be given to you after registering your site with Google",
-	),
-	'users_register_cfturnstile' => array(
-		'label' => "Use Cloudflare Turnstile to prevent automatic/robot registration",
-		'type' => "checkbox",
-		'note' => "To use Cloudflare Turnstile you must get your API keys from <a href='https://www.cloudflare.com/application-services/products/turnstile/'>https://www.solvemedia.com</a> and enter them below.",
-	),
-	'users_register_cfturnstile_site_key' => array(
-		'label' => "Cloudflare Site Key",
-		'type' => "text",
-		'note' => "This will be given to you after registering your site with Cloudflare",
-	),
-	'users_register_cfturnstile_secret_key' => array(
-		'label' => "Cloudflare Secret Key",
-		'type' => "text",
-		'note' => "This will be given to you after registering your site with Cloudflare",
-	),
-);
+		'type'  => "text",
+		'note'  => "This will be given to you after registering your site with Google",
+	],
+	'users_register_smcaptcha'            => [
+		'label' => "Use Solve Media CAPTCHA to prevent automatic/robot registration",
+		'type'  => "checkbox",
+		'note'  => "To use Solve Media CAPTCHA you must get your API keys from <a href='https://www.solvemedia.com'>https://www.solvemedia.com</a> and enter them below.",
+	],
+	'users_register_smcaptcha_c_key'      => [
+		'label' => "Solve Media Challenge Key (C-key)",
+		'type'  => "text",
+		'note'  => "This will be given to you after registering your site with Solve Media",
+	],
+	'users_register_smcaptcha_v_key'      => [
+		'label' => "Solve Media Verification Key (V-key)",
+		'type'  => "text",
+		'note'  => "This will be given to you after registering your site with Solve Media",
+	],
+	'users_register_smcaptcha_h_key'      => [
+		'label' => "Solve Media Authentication Hash Key (H-key)",
+		'type'  => "text",
+		'note'  => "This will be given to you after registering your site with Solve Media",
+	],
+];
 $gBitSmarty->assign( 'registerSettings', $registerSettings );
 
-$httpSettings = array(
-	'site_https_login' => array(
+$httpSettings = [
+	'site_https_login'          => [
 		'label' => "Allow secure (https) login",
-		'type' => "checkbox",
-		'note' => "",
-	),
-	'site_https_login_required' => array(
+		'type'  => "checkbox",
+		'note'  => "",
+	],
+	'site_https_login_required' => [
 		'label' => "Require secure (https) login",
-		'type' => "checkbox",
-		'note' => "",
-	),
-	'site_http_domain' => array(
+		'type'  => "checkbox",
+		'note'  => "",
+	],
+	'site_http_domain'          => [
 		'label' => "HTTP server name",
-		'type' => "text",
-		'note' => "",
-	),
-	'site_http_port' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'site_http_port'            => [
 		'label' => "HTTP port",
-		'type' => "text",
-		'note' => "",
-	),
-	'site_http_prefix' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'site_http_prefix'          => [
 		'label' => "HTTP URL prefix",
-		'type' => "text",
-		'note' => "",
-	),
-	'site_https_domain' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'site_https_domain'         => [
 		'label' => "HTTPS server name",
-		'type' => "text",
-		'note' => "",
-	),
-	'site_https_port' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'site_https_port'           => [
 		'label' => "HTTPS port",
-		'type' => "text",
-		'note' => "",
-	),
-	'site_https_prefix' => array(
+		'type'  => "text",
+		'note'  => "",
+	],
+	'site_https_prefix'         => [
 		'label' => "HTTPS URL prefix",
-		'type' => "text",
-		'note' => "",
-	),
-);
+		'type'  => "text",
+		'note'  => "",
+	],
+];
 $gBitSmarty->assign( 'httpSettings', $httpSettings );
 
-$listHash = array( 'sort_mode' => 'group_name_asc' );
-$gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
+
+if (defined ('ROLE_MODEL') ) {
+	$listHash = [ 'sort_mode' => 'role_name_asc' ];
+	$gBitSmarty->assign( 'roleList', $gBitUser->getAllRoles( $listHash ));
+} else {
+	$listHash = [ 'sort_mode' => 'group_name_asc' ];
+	$gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
+}
 
 if( !function_exists("gd_info" ) ) {
 	$gBitSmarty->assign( 'warning', 'PHP GD library is required for this feature (not found on your system)' );
 }
 
-require_once( USERS_PKG_CLASS_PATH.'BitHybridAuthManager.php' );
 BitHybridAuthManager::loadSingleton();
 global $gBitHybridAuthManager;
 
@@ -227,13 +241,13 @@ if( !empty( $_POST ) ) {
 		// make sure all (un)checkboxes stick
 		foreach( $allAuthProviders as $providerKey=>$providerConfig ) {
 			$enabledConfig = $gBitHybridAuthManager->getEnabledConfigKey( $providerConfig['provider'] );
-			$gBitSystem->storeConfig( $enabledConfig, BitBase::getParameter( $_REQUEST['hybridauth'], $enabledConfig, NULL ) );
+			$gBitSystem->storeConfig( $enabledConfig, BitBase::getParameter( $_REQUEST['hybridauth'], $enabledConfig, null ) );
 		}
 		foreach( $_REQUEST['hybridauth'] as $prefName=>$prefValue ) {
 			if( $prefName == 'users_ha_facebook_scope' ) {
 				$prefName = preg_replace('/\s+/', '', $prefName );
 			}
-			$gBitSystem->storeConfig( $prefName, (!empty( $prefValue ) ? $prefValue : NULL ) );
+			$gBitSystem->storeConfig( $prefName, !empty( $prefValue ) ? $prefValue : null );
 		}
 		$gBitHybridAuthManager->clearFromCache();
 	}
@@ -265,10 +279,13 @@ if( !empty( $_POST ) ) {
 	simple_set_value( 'users_validate_email_group', USERS_PKG_NAME );
 
 	if( isset( $_REQUEST['registration_group_choice'] ) ) {
-		$listHash = array();
-		$groupList = $gBitUser->getAllGroups( $listHash );
-		$in = array();
-		$out = array();
+		$listHash = [];
+		$groupList = ( defined( 'ROLE_MODEL' ) ) 
+			? $gBitUser->getAllRoles( $listHash ) 
+			: $gBitUser->getAllGroups( $listHash );
+		
+		$in = [];
+		$out = [];
 		foreach( $groupList as $gr ) {
 			if( $gr['group_id'] == ANONYMOUS_GROUP_ID ) {
 				continue;
@@ -285,7 +302,7 @@ if( !empty( $_POST ) ) {
 			$gBitUser->storeRegistrationChoice( $in, 'y' );
 		}
 		if( count( $out ) ) {
-			$gBitUser->storeRegistrationChoice( $out, NULL );
+			$gBitUser->storeRegistrationChoice( $out, null );
 		}
 	}
 	$gBitSystem->clearFromCache();
@@ -294,7 +311,7 @@ if( !empty( $_POST ) ) {
 $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getAllProviders() );
 
 
-$listHash = array();
+$listHash = [];
 
 // This needs to be made more generic so that it picks up all plugins
 // Could not see where the 'auth_ldap' was defined in the $options['avail'] array
@@ -311,4 +328,3 @@ if( !empty( $_REQUEST["auth_ldap"] ) ) {
 }
 
 $gBitSmarty->assign( 'authSettings', BaseAuth::getConfig() );
-?>
