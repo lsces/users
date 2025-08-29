@@ -16,7 +16,7 @@
 			<div class="form-group">
 				{formlabel label="Username"}
 				{forminput}
-					{$assignUser->getDisplayName(TRUE)}
+					{$assignUser->getDisplayName(true)}
 				{/forminput}
 			</div>
 

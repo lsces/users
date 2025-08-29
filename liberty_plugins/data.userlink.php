@@ -1,4 +1,7 @@
 <?php
+namespace Bitweaver\Liberty;
+use Bitweaver\KernelTools;
+
 /**
  * @version  $Revision$
  * @package  liberty
@@ -26,18 +29,18 @@
  */
 define( 'PLUGIN_GUID_DATAUSERLINK', 'datauserlink' );
 global $gLibertySystem;
-$pluginParams = array (
+$pluginParams = [
 	'tag' => 'USERLINK',
-	'auto_activate' => FALSE,
-	'requires_pair' => FALSE,
+	'auto_activate' => false,
+	'requires_pair' => false,
 	'load_function' => 'data_userlink',
 	'title' => 'UserLink per login or email',
 	'help_page' => 'DataPluginUserLink',
-	'description' => tra("Will show a link to the userpage for a given login name or email."),
+	'description' => KernelTools::tra("Will show a link to the userpage for a given login name or email."),
 	'help_function' => 'data_userlink_help',
 	'syntax' => "{USERLINK login='bigwasp'}",
 	'plugin_type' => DATA_PLUGIN
-);
+];
 $gLibertySystem->registerPlugin( PLUGIN_GUID_DATAUSERLINK, $pluginParams );
 $gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_DATAUSERLINK );
 
@@ -46,27 +49,27 @@ function data_userlink_help() {
 	$help =
 	        '<table class="data help">'
 		        .'<tr>'
-			        .'<th>' . tra( "Key" ) . '</th>'
-				.'<th>' . tra( "Type" ) . '</th>'
-				.'<th>' . tra( "Comments") . '</th>'
+			        .'<th>' . KernelTools::tra( "Key" ) . '</th>'
+				.'<th>' . KernelTools::tra( "Type" ) . '</th>'
+				.'<th>' . KernelTools::tra( "Comments") . '</th>'
 			.'</tr>'
 			.'<tr class="odd">'
 			        .'<td>login</td>'
-			        .'<td>' . tra( "string" ) . '<br />' . tra( "(optional)") . '</td>'
-				.'<td>' . tra( "The login name to generate the link" ) . '</td>'
+			        .'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
+				.'<td>' . KernelTools::tra( "The login name to generate the link" ) . '</td>'
 			.'</tr>'
 			.'<tr class="even">'
 			        .'<td>email</td>'
-				.'<td>' . tra( "string" ) . '<br />' . tra( "(optional)") . '</td>'
-				.'<td>' . tra( "The e-mail address to generate the link" ) . '</td>'
+				.'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
+				.'<td>' . KernelTools::tra( "The e-mail address to generate the link" ) . '</td>'
 			.'</tr>'
 			.'<tr class="odd">'
 			        .'<td>label</td>'
-				.'<td>' . tra( "string" ) . '<br />' . tra( "(optional)") . '</td>'
-				.'<td>' . tra( "The label to show; default is user's name" ) . '</td>'
+				.'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
+				.'<td>' . KernelTools::tra( "The label to show; default is user's name" ) . '</td>'
 			.'</tr>'
 		.'</table>'
-		.tra("Example: ") . "{USERLINK login='admin' label='Site Administrator'}";
+		.KernelTools::tra("Example: ") . "{USERLINK login='admin' label='Site Administrator'}";
 	return $help;
 }
 
@@ -74,7 +77,7 @@ function data_userlink_help() {
 function data_userlink($data, $params) {
 	global $gBitUser;
 
-	$myHash = array();
+	$myHash = [];
 	$ret = '';
 	extract ($params, EXTR_SKIP);
 
@@ -89,12 +92,11 @@ function data_userlink($data, $params) {
 	$user = $gBitUser->userExists($myHash);
 
 	if( $user != Null ) {
-		$tmpUser = $gBitUser->getUserInfo( array( 'user_id' => $user ) );
+		$tmpUser = $gBitUser->getUserInfo( [ 'user_id' => $user ] );
 		if ( isset( $label ) ) {
 			$tmpUser['link_label'] = $label;
 		}
-		$ret = $gBitUser->getDisplayName( TRUE, $tmpUser );
+		$ret = $gBitUser->getDisplayName( true, $tmpUser );
 	}
 	return $ret;
 }
-?>
