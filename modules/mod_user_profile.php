@@ -34,6 +34,6 @@ if( !empty( $module_params['user_id'] )) {
 	$userPrefs = &$gBitUser->mPrefs;
 }
 
-$_template->tpl_vars['userInfo'] = new Smarty_variable( $userInfo );
-$_template->tpl_vars['userPrefs'] = new Smarty_variable( $userPrefs );
+$gBitSmarty->assign( 'userInfo', $userInfo );
+$gBitSmarty->assign( 'userPrefs', $userPrefs );
 ?>

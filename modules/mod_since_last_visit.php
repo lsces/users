@@ -14,7 +14,7 @@
  */
 if( $gBitSystem->isPackageActive( 'bitforums' ) ) {
 	$nvi_info = $gBitSystem->get_news_from_last_visit($user);
-	$_template->tpl_vars['nvi_info'] = new Smarty_variable( $nvi_info);
+	$gBitSmarty->assign( 'nvi_info', $nvi_info);
 }
 
 ?>
