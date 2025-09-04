@@ -154,7 +154,7 @@ if ( !$gBitUser->isRegistered() ) {
 	];
 	$cspHeader = implode('; ', $cspDirectives);
 	// Set the CSP header with a placeholder for the nonce
-	header("Content-Security-Policy: $cspHeader");
+//	header("Content-Security-Policy: $cspHeader");
 }
 
 $gBitSmarty->assign( 'gBitUser', $gBitUser );
