@@ -216,6 +216,7 @@ $gBitSmarty->assign('users', $users );
 $gBitSmarty->assign('usercount', $listHash["cant"]);
 $listHash['listInfo']["numrows"] = $listHash["numrows"] ?? 10;
 $listHash['listInfo']["URL"] = USERS_PKG_URL."admin/index.php";
+$gBitSmarty->assign('control', $listHash['listInfo']);
 $gBitSmarty->assign('listInfo', $listHash['listInfo']);
 
 if ( defined( 'ROLE_MODEL' ) ) {
