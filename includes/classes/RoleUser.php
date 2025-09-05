@@ -2659,6 +2659,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				]);
 			}
 			$res["roles"] = $this->getRoles( $res['user_id'] );
+			$res["user_content_count"] = get_user_content_count( $res['user_id'] );
 			$ret[$res['user_id']] = $res;
 		}
 		$retval = [];
