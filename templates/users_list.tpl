@@ -4,30 +4,30 @@
 {form class=""}
 	<div class="form-group col-xs-12 col-sm-6">
 		{forminput}
-			<input type="text" class="form-control" name="find" value="{$smarty.request.find}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+			<input type="text" class="form-control" name="find" value="{$smarty.request.find|default:''}"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
 		{/forminput}
 		{formhelp note="Search full name, username, or email"}
 	</div>
 	{if $gBitSystem->isPackageActive('stats')}
 	<div class="form-group col-xs-12 col-sm-6">
-		<input type="text" name="referer" class="form-control" value="{$smarty.request.referer}"/>
+		<input type="text" name="referer" class="form-control" value="{$smarty.request.referer|default:''}"/>
 		{formhelp note="Referrer. Enter partial URL or 'none'"}
 	</div>
 	{/if}
 	<div class="form-group col-xs-4 col-md-2">
-		<input class="form-control" type="number" name="max_records" value="{$smarty.request.max_records}"/>
+		<input class="form-control" type="number" name="max_records" value="{$smarty.request.max_records|default:0}"/>
 		{formhelp note="# / Page"}
 	</div>
 	<div class="form-group col-xs-4 col-md-2">
-		<input type="number" min="0" step="1" class="form-control" name="max_content_count" value="{$smarty.request.max_content_count}" />
+		<input type="number" min="0" step="1" class="form-control" name="max_content_count" value="{$smarty.request.max_content_count|default:10}" />
 		{formhelp note="Max # objects created"}
 	</div>
 	<div class="form-group col-xs-4 col-md-2">
-		<input type="number" min="0" step="1" class="form-control" name="min_content_count" value="{$smarty.request.min_content_count}"/>
+		<input type="number" min="0" step="1" class="form-control" name="min_content_count" value="{$smarty.request.min_content_count|default:0}"/>
 		{formhelp note="Min # objects created"}
 	</div>
 	<div class="form-group col-xs-6 col-md-4">
-		<textarea rows="1" name="ip" class="form-control">{$smarty.request.ip}</textarea>
+		<textarea rows="1" name="ip" class="form-control">{$smarty.request.ip|default:''}</textarea>
 		{formhelp note="IP. Comma separated list"}
 	</div>
 	<div class="form-group submit">
@@ -72,7 +72,7 @@
 
 				{if $gBitUser->hasPermission( 'p_users_admin' )}
 					<div class="icon pull-right">
-						{assign var=contentCount value=$userHash.user_id|get_user_content_count}
+						{assign var=contentCount value=$userHash.user_content_count}
 						{if $gBitUser->hasPermission( 'p_users_admin' ) && $contentCount}
 							<strong title="{tr}Content Count{/tr}">{$contentCount} </strong>
 						{/if}

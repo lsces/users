@@ -19,32 +19,32 @@
 					<div class="form-group">
 						{formlabel label="Real Name" for="real_name"}
 						{forminput}
-							<input class="form-control" type="text" name="real_name" id="real_name" value="{$newUser.real_name}" />
+							<input class="form-control" type="text" name="real_name" id="real_name" value="{$newUser.real_name|default:''}" />
 						{/forminput}
 					</div>
 
 					<div class="form-group">
-						{formfeedback error=$errors.email}
+						{if !empty($errors.email)}{formfeedback error=$errors.email}{/if}
 						{formlabel label="Email" for="email"}
 						{forminput}
-							<input class="form-control" type="email" name="email" id="email" size="30" value="{$newUser.email}" />
+							<input class="form-control" type="email" name="email" id="email" size="30" value="{$newUser.email|default:''}" />
 						{/forminput}
 					</div>
 
 					<div class="form-group">
-						{formfeedback error=$errors.login}
+						{if !empty($errors.login)}{formfeedback error=$errors.login}{/if}
 						{formlabel label="Username" for="login"}
 						{forminput}
-							<input class="form-control" type="text" name="login" id="login" value="{$newUser.login}"  />
+							<input class="form-control" type="text" name="login" id="login" value="{$newUser.login|default:''}"  />
 						{/forminput}
 					</div>
 
 					<div class="form-group">
-						{formfeedback error=$errors.password}
+						{if !empty($errors.password)}{formfeedback error=$errors.password}{/if}]
 						{formlabel label="Password" for="password"}
 						{forminput}
 							<div class="input-group">
-								<input class="form-control" type="password" name="password" id="password" value="{$newUser.password}"  />
+								<input class="form-control" type="password" name="password" id="password" value="{$newUser.password|default:''}"  />
 								<span class="input-group-addon" onclick="BitBase.genPass('password','password','password2');$('#password').prop('type','text');">{tr}Generate{/tr}</span>
 							</div>
 						{/forminput}
@@ -56,15 +56,15 @@
 					<div class="form-group">
 						{formlabel label="Repeat Password" for="password2"}
 						{forminput}
-							<input class="form-control" type="password" name="password2" id="password2" value="{$newUser.password2}"  />
+							<input class="form-control" type="password" name="password2" id="password2" value="{$newUser.password2|default:'         '}"  />
 						{/forminput}
 					</div>
 
 					<div class="form-group">
-						{formfeedback error=$errors.login}
+						{if !empty($errors.login)}{formfeedback error=$errors.login}{/if}
 						{formlabel label="User ID" for="user_id"}
 						{forminput}
-							<input class="form-control" type="number" min="1" step="1" name="user_id" id="user_id" value="{$newUser.user_id}"/>
+							<input class="form-control" type="number" min="1" step="1" name="user_id" id="user_id" value="{$newUser.user_id|default:''}"/>
 							{formhelp note="Specify an exact user_id. This is not recommended. If you have no idea why you would need to do this, you do not need this."}
 						{/forminput}
 					</div>
