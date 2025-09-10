@@ -146,10 +146,10 @@ closedir( $h );
 sort( $flags );
 $gBitSmarty->assign('flags', $flags);
 
-$listHash = array(
+$listHash = [
 	'is_public' => 'y',
-	'sort_mode' => array( 'is_default_asc', 'role_desc_asc' ),
-);
+	'sort_mode' => [ 'is_default_asc', 'role_desc_asc' ],
+];
 $roleList = $gBitUser->getAllRoles( $listHash );
 $gBitSmarty->assign( 'roleList', $roleList );
 
@@ -177,4 +177,4 @@ if( !empty( $_REQUEST['error'] ) ) {
 }
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
-$gBitSystem->display('bitpackage:users/role_register.tpl', 'Register' , array( 'display_mode' => 'display' ));
+$gBitSystem->display('bitpackage:users/role_register.tpl', 'Register' , [ 'display_mode' => 'display' ]);

@@ -29,13 +29,13 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 
 if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 	if( !empty( $_REQUEST['role_id'] ) ) {
-		$allPerms = $gBitUser->getRolePermissions( array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null ));
+		$allPerms = $gBitUser->getRolePermissions( [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null ]);
 		// get rolelist separately from the $users stuff to avoid splitting of data due to pagination
-		$listHash = array( 'sort_mode' => 'role_name_asc' );
+		$listHash = [ 'sort_mode' => 'role_name_asc' ];
 		$roleList = $gBitUser->getAllRoles( $listHash );
 	} else {
 		// get rolelist separately from the $users stuff to avoid splitting of data due to pagination
-		$listHash = array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc' );
+		$listHash = [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc' ];
 		$roleList = $gBitUser->getAllRoles( $listHash );
 	}
 	
@@ -54,7 +54,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 		}
 	// Update Permissions
 	} elseif (isset($_REQUEST['updateperms'])) {
-		$listHash = array( 'role_id' => $_REQUEST['role_id'] );
+		$listHash = [ 'role_id' => $_REQUEST['role_id'] ];
 		$updatePerms = $gBitUser->getRolePermissions( $listHash );
 		foreach (array_keys($_REQUEST['perm']) as $per) {
 			if( isset($_REQUEST['perm'][$per]) && !isset($updatePerms[$per]) ) {
@@ -95,7 +95,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 		}
 	// Search for users to add
 	} elseif (!empty($_REQUEST['submitUserSearch'])) {
-		$searchParams = array('find' => $_REQUEST['find']);
+		$searchParams = [ 'find' => $_REQUEST['find'] ];
 		$gBitUser->getList($searchParams);
 		$foundUsers = $searchParams['data'];
 		$mid = 'bitpackage:users/my_role_edit.tpl';
@@ -206,4 +206,4 @@ if (empty($mid)) {
 }
 
 // Display the template for role administration
-$gBitSystem->display( $mid , null, array( 'display_mode' => 'display' ));
+$gBitSystem->display( $mid , null, [ 'display_mode' => 'display' ]);
