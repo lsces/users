@@ -39,10 +39,10 @@
 {/if}
 <nav class="clear">
 	<ul class="list-inline navbar">
-		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows ititle="Username" isort="login"}</li>
-		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows ititle="Real name" isort="real_name"}</li>
-		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows ititle="Registration Date" isort="registration_date"}</li>
-		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows ititle="Last Login" isort="current_login"}</li>
+		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows|default:10 ititle="Username" isort="login"}</li>
+		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows|default:10 ititle="Real name" isort="real_name"}</li>
+		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows|default:10 ititle="Registration Date" isort="registration_date"}</li>
+		<li>{smartlink iurl=$control.URL offset=$control.offset numrows=$control.numrows|default:10 ititle="Last Login" isort="current_login"}</li>
 	</ul>
 </nav>
 
@@ -99,7 +99,7 @@
 					</div>
 					<div>{tr}User ID{/tr}: {$userHash.user_id}</div>
 					<div class="small clear">
-					{if $userHash.referer_url}
+					{if !empty($userHash.referer_url)}
 						<a href="{$userHash.referer_url}" title="{$userHash.short_referer_url|escape}">{$userHash.short_referer_url|truncate:50}</a>
 					{else}
 						&nbsp;
