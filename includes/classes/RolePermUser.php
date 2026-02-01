@@ -271,7 +271,7 @@ class RolePermUser extends RoleUser {
 	}
 
 	/**
-	 * getAllRoless Get a list of all Roles
+	 * getAllRoles Get a list of all Roles
 	 * 
 	 * @param array $pListHash List Hash
 	 * @access public
