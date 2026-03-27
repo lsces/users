@@ -103,7 +103,7 @@ abstract class OAuthSignatureMethod {
     // Avoid a timing leak with a (hopefully) time insensitive compare
     $result = 0;
     for ($i = 0; $i < strlen($signature); $i++) {
-      $result |= ord($built{$i}) ^ ord($signature{$i});
+      $result |= ord($built[$i]) ^ ord($signature[$i]);
     }
 
     return $result == 0;
@@ -211,9 +211,6 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     // Sign using the key
     $ok = openssl_sign($base_string, $signature, $privatekeyid);
 
-    // Release the key resource
-    openssl_free_key($privatekeyid);
-
     return base64_encode($signature);
   }
 
@@ -230,9 +227,6 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 
     // Check the computed signature against the one passed in the query
     $ok = openssl_verify($base_string, $decoded_sig, $publickeyid);
-
-    // Release the key resource
-    openssl_free_key($publickeyid);
 
     return $ok == 1;
   }
