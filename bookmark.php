@@ -11,6 +11,7 @@
  * required setup
  */
 require_once '../kernel/includes/setup_inc.php';
+use Bitweaver\KernelTools;
 
 $statusCode = 205;
 $error = true;
@@ -29,12 +30,12 @@ if( $gBitUser->isRegistered() ){
 					case 'add':
 						$gBitUser->storeFavorite( $_REQUEST['content_id'] );
 						$bookmarkState = 1;
-						$msg = tra( 'This content has been added to your favorites' );
+						$msg = KernelTools::tra( 'This content has been added to your favorites' );
 						break;
 					case 'remove':
 						$gBitUser->expungeFavorite( $_REQUEST['content_id'] );
 						$bookmarkState = 0;
-						$msg = tra( 'This content has been removed from your favorites' );
+						$msg = KernelTools::tra( 'This content has been removed from your favorites' );
 						break;
 				}
 				$gBitSmarty->assign( 'bookmarkState', $bookmarkState );
@@ -42,18 +43,18 @@ if( $gBitUser->isRegistered() ){
 				$error = false;
 			}else{
 				$statusCode = 401;
-				$msg = tra( 'You can not bookmark this type of content, bookmarking denied' );
+				$msg = KernelTools::tra( 'You can not bookmark this type of content, bookmarking denied' );
 			}
 		}else{
 			$statusCode = 401;
-			$msg = tra( 'You do not have permission to view this content, bookmarking denied' );
+			$msg = KernelTools::tra( 'You do not have permission to view this content, bookmarking denied' );
 		}
 	}else{
 		$statusCode = 400;
-		$msg = tra( 'No content was specified to bookmark' );
+		$msg = KernelTools::tra( 'No content was specified to bookmark' );
 	}
 }else{
-	$msg = tra( 'You must be a registered user to bookmark content' );
+	$msg = KernelTools::tra( 'You must be a registered user to bookmark content' );
 }
 
 $gBitSmarty->assign( 'statusCode', $statusCode );

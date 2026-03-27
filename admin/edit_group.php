@@ -5,6 +5,7 @@
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
 
 // PERMISSIONS: NEEDS admin
 $gBitSystem->verifyPermission( 'p_users_admin' );
@@ -31,12 +32,12 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	if( isset( $_REQUEST["confirm"] ) ) {
 		$gBitUser->batchAssignUsersToGroup( $_REQUEST['batch_assign'] );
 	} else {
-		$gBitSystem->setBrowserTitle( tra( 'Confirm Batch Group Assignment' ) );
+		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Confirm Batch Group Assignment' ) );
 		$formHash['batch_assign'] = $_REQUEST["batch_assign"];
 		$msgHash = array(
-			'label' => tra( 'Batch Assign Users to Group' ),
+			'label' => KernelTools::tra( 'Batch Assign Users to Group' ),
 			'confirm_item' => $groupInfo['group_name'],
-			'warning' => tra( 'This will assign every user on the site to the group' ).' <strong>'.$groupInfo['group_name'].'</strong>',
+			'warning' => KernelTools::tra( 'This will assign every user on the site to the group' ).' <strong>'.$groupInfo['group_name'].'</strong>',
 		);
 		$gBitSystem->confirmDialog( $formHash,$msgHash );
 	}
@@ -46,7 +47,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	$groupMembers = $gBitUser->getGroupUsers( $_REQUEST["members"] );
 	$gBitSmarty->assign( 'groupMembers', $groupMembers );
 	$mid = "bitpackage:users/group_list_members.tpl";
-	$gBitSystem->setBrowserTitle( tra( 'Group Members' ).': '.$groupInfo['group_name'] );
+	$gBitSystem->setBrowserTitle( KernelTools::tra( 'Group Members' ).': '.$groupInfo['group_name'] );
 } elseif( isset($_REQUEST["save"] ) ) {
 	if( empty($_REQUEST["name"] ) ) {
 		$_REQUEST["name"] = $_REQUEST["olgroup"];
@@ -79,10 +80,10 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 		$successMsg = "The group ".$groupInfo['group_name']." was deleted.";
 		unset( $_REQUEST['group_id'] );
 	} else {
-		$gBitSystem->setBrowserTitle( tra('Delete group') );
+		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Delete group') );
 		$msgHash = array(
-			'confirm_item' => tra( 'Are you sure you want to permantly remove the group' )." <strong>$groupInfo[group_name]</strong>".'?',
-			'warning' => tra( 'This cannot be undone.' ),
+			'confirm_item' => KernelTools::tra( 'Are you sure you want to permantly remove the group' )." <strong>$groupInfo[group_name]</strong>".'?',
+			'warning' => KernelTools::tra( 'This cannot be undone.' ),
 		);
 		$gBitSystem->confirmDialog( $formHash,$msgHash );
 	}
@@ -105,7 +106,7 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 		$successMsg = 'The permission '.$_REQUEST['permission'].' was removed successflly. <a href="'.USERS_PKG_URL.'admin/edit_group.php?action=assign&amp;perm='.$_REQUEST['permission'].'&amp;group_id='.$_REQUEST['group_id'].'&amp;pacakge='.$_REQUEST['package'].'">Undo last action.</a>';
 	} elseif( $_REQUEST["action"] == 'create' ) {
 		$mid = 'bitpackage:users/admin_group_edit.tpl';
-		$gBitSystem->setBrowserTitle( tra( 'Create New Group' ) );
+		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Create New Group' ) );
 	} elseif ($_REQUEST["action"] == 'assign') {
 		$gBitUser->assignPermissionToGroup($_REQUEST["perm"], $_REQUEST['group_id']);
 	}
@@ -127,7 +128,7 @@ if( !empty( $_REQUEST['group_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUE
 	$gBitSmarty->assign( 'contentList', $cList );
 	$gBitSmarty->assign( 'contentSelect', $contentSelect );
 */
-	$contentTypes = array( '' => tra( 'All Content' ) );
+	$contentTypes = array( '' => KernelTools::tra( 'All Content' ) );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		$contentTypes[$cType['content_type_guid']] = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 	}
@@ -148,10 +149,10 @@ if( empty( $mid ) ) {
 		$gBitSmarty->assign( 'groupInfo', $groupInfo );
 		$gBitSmarty->assign( 'allPerms', $allPerms );
 
-		$gBitSystem->setBrowserTitle( tra( 'Admininster Group' ).': '.$groupInfo['group_name'] );
+		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Admininster Group' ).': '.$groupInfo['group_name'] );
 		$mid = 'bitpackage:users/admin_group_edit.tpl';
 	} else {
-		$gBitSystem->setBrowserTitle( tra( 'Admin List Groups' ) );
+		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Admin List Groups' ) );
 		$_REQUEST['group_id'] = 0;
 		$mid = 'bitpackage:users/admin_groups_list.tpl';
 	}

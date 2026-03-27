@@ -12,9 +12,11 @@
  * required setup
  */
 include_once( '../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
+
 $user = $gBitUser->mUserId;
 if (!$user) {
-	$gBitSmarty->assign('msg', tra("You must log in to use this feature"));
+	$gBitSmarty->assign('msg', KernelTools::tra( "You must log in to use this feature" ));
 	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
 	die;
 }

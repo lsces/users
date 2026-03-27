@@ -7,18 +7,19 @@
 // ASSIGN USER TO ROLES
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
 if (!$gBitUser->userExists( array( 'user_id' => $_REQUEST["assign_user"] ) ) ) {
-	$gBitSystem->fatalError( tra( "User doesnt exist" ));
+	$gBitSystem->fatalError( KernelTools::tra( "User doesnt exist" ));
 }
 
 $assignUser = new RolePermUser( $_REQUEST["assign_user"] );
 $assignUser->load( true );
 
 if( $assignUser->isAdmin() && !$gBitUser->isAdmin() ) {
-	$gBitSystem->fatalError( tra( 'You cannot modify a system administrator.' ));
+	$gBitSystem->fatalError( KernelTools::tra( 'You cannot modify a system administrator.' ));
 }
 
 if( isset( $_REQUEST["action"] ) ) {

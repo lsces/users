@@ -1,5 +1,7 @@
 <?php
 require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
+
 $gBitSystem->verifyPermission( 'p_admin' );
 
 $feedback = [];
@@ -25,14 +27,14 @@ if( !empty( $_REQUEST['save'] )) {
 		}
 	}
 
-	$feedback['success'] = tra( "The permissions were successfully added to the requested groups." );
+	$feedback['success'] = KernelTools::tra( "The permissions were successfully added to the requested groups." );
 	// we need to update the groups list
 	$allGroups = $gBitUser->getAllGroups( $listHash );
 }
 
 // Check to see if we have unassigned permissions
 if(( $unassignedPerms = $gBitUser->getUnassignedPerms() )) {
-	$feedback['warning'] = tra( 'You have some permissions that are not assigned to any group. You need to assign these to at least one group each.' );
+	$feedback['warning'] = KernelTools::tra( 'You have some permissions that are not assigned to any group. You need to assign these to at least one group each.' );
 	$gBitSmarty->assign( 'unassignedPerms', $unassignedPerms );
 }
 
@@ -42,5 +44,5 @@ $gBitSmarty->assign( 'permPackages', $gBitUser->getPermissionPackages() );
 $gBitSmarty->assign( 'feedback', $feedback );
 $gBitSmarty->assign( 'contentWithPermissions', LibertyContent::getContentWithPermissionsList() );
 
-$gBitSystem->display( 'bitpackage:users/admin_permissions.tpl', tra( 'Permission Maintenance' ), array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/admin_permissions.tpl', KernelTools::tra( 'Permission Maintenance' ), array( 'display_mode' => 'admin' ));
 ?>

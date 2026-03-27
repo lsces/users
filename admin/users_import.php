@@ -5,6 +5,7 @@
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
+use Bitweaver\KernelTools;
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
@@ -25,7 +26,7 @@ if( isset( $_REQUEST["batchimport"])) {
 
 		// is the file a valid CSV file?
 		if( empty( $fields[0] ) ) {
-			$gBitSystem->fatalError( tra( "The file is not a CSV file or has not a correct syntax" ));
+			$gBitSystem->fatalError( KernelTools::tra( "The file is not a CSV file or has not a correct syntax" ));
 		}
 
 		//now load the users in a table
@@ -41,7 +42,7 @@ if( isset( $_REQUEST["batchimport"])) {
 
 		// were there any users in the list?
 		if( !is_array( $userRecords ) ) {
-			$gBitSystem->fatalError( tra( "No records were found. Check the file please!" ));
+			$gBitSystem->fatalError( KernelTools::tra( "No records were found. Check the file please!" ));
 		}
 		// Process user array
 		$added = 0;

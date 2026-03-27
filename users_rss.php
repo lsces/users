@@ -13,6 +13,7 @@
 // ensure that we use absolute URLs everywhere
 $_REQUEST['uri_mode'] = true;
 require_once "../kernel/includes/setup_inc.php";
+use Bitweaver\KernelTools;
 
 $gBitSystem->verifyPackage( 'rss' );
 $gBitSystem->verifyFeature( 'users_rss' );
@@ -44,7 +45,7 @@ if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
 	foreach( $feeds as $feed ) {
 		$item = new FeedItem();
 
-		$item->title = tra( "New user registration" ).": ".$feed['login'];
+		$item->title = KernelTools::tra( "New user registration" ).": ".$feed['login'];
 		$item->link = $gBitUser->getDisplayUrl( $feed['login'] );
 
 		$item->description = '';
@@ -53,13 +54,13 @@ if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
 			$item->description .= '<img alt="user portrait" title="'.$feed['login'].'" src="'.$feed['thumbnail_url'].'" /><br />';
 		}
 		if( !empty( $feed['real_name'] ) ) {
-			$item->description .= tra( "Real Name" ).": ".$feed['real_name'].'<br />';
+			$item->description .= KernelTools::tra( "Real Name" ).": ".$feed['real_name'].'<br />';
 		}
-		$item->description .= tra( "Login" ).': <a href="'.$gBitUser->getDisplayUrl( $feed['login'] ).'">'.$feed['login'].'</a><br />';
+		$item->description .= KernelTools::tra( "Login" ).': <a href="'.$gBitUser->getDisplayUrl( $feed['login'] ).'">'.$feed['login'].'</a><br />';
 		if( $gBitUser->hasPermission( 'p_users_admin' ) ) {
-			$item->description .= tra( "Email Address" ).': <a href="mailto:'.$feed['email'].'">'.$feed['email'].'</a><br />';
+			$item->description .= KernelTools::tra( "Email Address" ).': <a href="mailto:'.$feed['email'].'">'.$feed['email'].'</a><br />';
 		}
-		$item->description .= tra( "Member Since" ).": ".smarty_modifier_bit_short_datetime( $feed['registration_date'] ).'<br />';
+		$item->description .= KernelTools::tra( "Member Since" ).": ".smarty_modifier_bit_short_datetime( $feed['registration_date'] ).'<br />';
 
 		$item->date = ( int )$feed['registration_date'];
 		$item->source = BIT_BASE_URI;

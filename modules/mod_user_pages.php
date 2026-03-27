@@ -8,6 +8,7 @@
  * @subpackage modules
  */
 
+use Bitweaver\KernelTools;
 
 global $gQueryUser, $gBitUser, $module_rows, $module_params, $gLibertySystem, $module_title;
 
@@ -19,11 +20,11 @@ if( !empty( $gQueryUser->mUserId ) ) {
 
 if( empty( $module_title ) ) {
 	if( !empty( $module_params['content_type_guid'] ) && !empty( $gLibertySystem->mContentTypes[$module_params['content_type_guid']] ) ) {
-		$title = tra( "Last Changes" ).': '.$gLibertySystem->getContentTypeName( $module_params['content_type_guid'], true );
+		$title = KernelTools::tra( "Last Changes" ).': '.$gLibertySystem->getContentTypeName( $module_params['content_type_guid'], true );
 		$gBitSmarty->assign( 'contentType', $module_params['content_type_guid'] );
 	} else {
 		$gBitSmarty->assign( 'contentType', false );
-		$title = tra( "Last Changes" );
+		$title = KernelTools::tra( "Last Changes" );
 	}
 	$gBitSmarty->assign( 'moduleTitle', $title );
 }

@@ -12,12 +12,13 @@
  * required setup
  */
 require_once '../kernel/includes/setup_inc.php';
+use Bitweaver\KernelTools;
 
 global $gBitUser, $gBitSystem;
 
 // PERMISSIONS: registered user required
 if ( !$gBitUser->isRegistered() ) {
-	$gBitSystem->fatalError( tra( "You are not logged in." ));
+	$gBitSystem->fatalError( KernelTools::tra( "You are not logged in." ));
 }
 
 if( !empty( $_REQUEST["cancel"] ) ) {
@@ -45,7 +46,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 			$_REQUEST["name"] = $_REQUEST["olgroup"];
 		}
 		if( $gBitUser->storeGroup( $_REQUEST ) ) {
-			$successMsg = tra("Group changes were saved sucessfully.");
+			$successMsg = KernelTools::tra( "Group changes were saved sucessfully." );
 		} else {
 			$errorMsg = $gBitUser->mErrors['groups'];
 		}
@@ -69,25 +70,25 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		// Process a form to remove a group
 		if( $_REQUEST["action"] == 'delete' ) {
 			if( $gBitUser->getDefaultGroup( $_REQUEST['group_id'] ) ) {
-				$errorMsg = tra("You cannot remove this group, as it is currently set as your 'Default' group");
+				$errorMsg = KernelTools::tra( "You cannot remove this group, as it is currently set as your 'Default' group" );
 			} else {
 				$gBitUser->expungeGroup( $_REQUEST['group_id'] );
-				$successMsg = tra("The group was deleted.");
+				$successMsg = KernelTools::tra( "The group was deleted.");
 				unset( $_REQUEST['group_id'] );
 			}
 		// remove a permission from a group
 		} elseif ($_REQUEST["action"] == 'remove') {
 			$gBitUser->removePermissionFromGroup( $_REQUEST["permission"], $_REQUEST['group_id'] );
-			$successMsg = tra("Permission Removed");
+			$successMsg = KernelTools::tra( "Permission Removed");
 			$mid = 'bitpackage:users/my_group_edit.tpl';
 		// Create a new group
 		} elseif( $_REQUEST["action"] == 'create' ) {
-			$gBitSystem->setBrowserTitle( tra('Create New Group') );
+			$gBitSystem->setBrowserTitle( KernelTools::tra( 'Create New Group') );
 			$mid = 'bitpackage:users/my_group_edit.tpl';
 		// Assign a permission to a group
 		} elseif ($_REQUEST["action"] == 'assign') {
 			$gBitUser->assignPermissionToGroup($_REQUEST["perm"], $_REQUEST['group_id']);
-			$successMsg = tra("Permission Assigned");
+			$successMsg = KernelTools::tra( "Permission Assigned" );
 			$mid = 'bitpackage:users/my_group_edit.tpl';
 		}
 	// Search for users to add
@@ -103,7 +104,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 				$gBitUser->addUserToGroup( $_REQUEST['assignuser'], $_REQUEST['group_id'] );
 			}
 			else {
-				$errorMsg = tra("You can not assign users to this group.");
+				$errorMsg = KernelTools::tra( "You can not assign users to this group." );
 			}
 		}
 		$mid = 'bitpackage:users/my_group_edit.tpl';
@@ -137,10 +138,10 @@ if ( ( !empty( $_REQUEST['add_public_group'] ) || !empty( $_REQUEST['remove_publ
 	$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['public_group_id'] );
 	if ( empty($groupInfo) || $groupInfo['is_public'] != 'y' ) {
 		if (empty($_REQUEST['add_public_group'])) {
-			$errorMsg[] = tra("You can't join this group.");
+			$errorMsg[] = KernelTools::tra( "You can't join this group." );
 		}
 		else {
-			$errorMsg[] = tra("You can't leave this group.");
+			$errorMsg[] = KernelTools::tra( "You can't leave this group." );
 		}
 	} elseif ( !empty( $_REQUEST['add_public_group'] ) ) {
 		$gBitUser->addUserToGroup( $gBitUser->mUserId, $_REQUEST['public_group_id'] );
