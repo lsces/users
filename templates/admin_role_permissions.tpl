@@ -8,7 +8,8 @@
 		{formfeedback hash=$feedback}
 
 		{form}
-			<input type="hidden" name="package" value="{$smarty.request.package}" />
+			<input type="hidden" name="package" value="{$smarty.request.package|default:'All'}" />
+			<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 
 			<p>
 				{smartlink ititle=All package=$packageKey}
@@ -34,8 +35,8 @@
 						</tr>
 						{assign var=prev_package value=$perm.package}
 					{/if}
-					<tr class="{cycle values="odd,even"}{if $unassignedPerms.$p} prio5{/if}">
-						<td>{if $unassignedPerms.$p}{booticon iname="fa-triangle-exclamation" iexplain="Unassigned Permission"}{/if}</td>
+					<tr class="{cycle values="odd,even"}{if $unassignedPerms.$p|default:false} prio5{/if}">
+						<td>{if $unassignedPerms.$p|default:false}{booticon iname="fa-triangle-exclamation" iexplain="Unassigned Permission"}{/if}</td>
 						<td title="{$perm.perm_desc}"><abbr title="{$perm.perm_desc}">{$p}</abbr></td>
 						{foreach from=$allRoles item=role}
 							{if     $perm.perm_level == 'admin'     }{assign var=id value=1}
@@ -43,18 +44,18 @@
 							{elseif $perm.perm_level == 'registered'}{assign var=id value=3}
 							{elseif $perm.perm_level == 'basic'     }{assign var=id value=-1}{/if}
 
-							{if $id == $role.role_id and !$role.perms.$p}
+							{if $id == $role.role_id && !$role.perms.$p|default:false}
 								{assign var=class value="prio5"}
-							{elseif $id == $role.role_id and $role.perms.$p}
+							{elseif $id == $role.role_id && $role.perms.$p|default:false}
 								{assign var=class value="prio1"}
-							{elseif $id != $role.role_id and $role.perms.$p}
+							{elseif $id != $role.role_id && $role.perms.$p|default:false}
 								{assign var=class value="prio5"}
 							{else}
 								{assign var=class value=""}
 							{/if}
 
 							<td class="{if $role.role_id lt 4}alignright{else}content-center{/if} {$class}">
-								<input id="{$p}{$role.role_id}" type="checkbox" value="{$p}" name="perms[{$role.role_id}][{$p}]" title="{$role.role_name}" {if $role.perms.$p}checked="checked"{/if}/>
+								<input id="{$p}{$role.role_id}" type="checkbox" value="{$p}" name="perms[{$role.role_id}][{$p}]" title="{$role.role_name}" {if $role.perms.$p|default:false}checked="checked"{/if}/>
 							</td>
 
 							{if $role.role_id lt 4}
