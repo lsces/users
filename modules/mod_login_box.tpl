@@ -28,7 +28,7 @@
 				</div>
 			{/if}
 
-			{if $gBitSystem->isFeatureActive('http_login_url') or $gBitSystem->isFeatureActive('https_login_url')}
+			{if $gBitSystem->isFeatureActive('http_login_url') || $gBitSystem->isFeatureActive('https_login_url')}
 				<div class="form-group">
 					<a href="{$gBitSystem->getConfig('http_login_url')}" title="{tr}Click here to login using the default security protocol{/tr}">{tr}standard{/tr}</a> |
 					<a href="{$gBitSystem->getConfig('https_login_url')}" title="{tr}Click here to login using a secure protocol{/tr}">{tr}secure{/tr}</a>

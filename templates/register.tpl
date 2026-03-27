@@ -114,7 +114,7 @@
 		{/forminput}
 	</div>
 	{/if}
-	{if $gBitSystem->isFeatureActive( 'reg_real_name' ) or $gBitSystem->isFeatureActive( 'reg_homepage' ) or $gBitSystem->isFeatureActive( 'reg_country' ) or $gBitSystem->isFeatureActive( 'reg_language' ) or $gBitSystem->isFeatureActive( 'reg_portrait' )}
+	{if $gBitSystem->isFeatureActive( 'reg_real_name' ) || $gBitSystem->isFeatureActive( 'reg_homepage' ) || $gBitSystem->isFeatureActive( 'reg_country' ) || $gBitSystem->isFeatureActive( 'reg_language' ) || $gBitSystem->isFeatureActive( 'reg_portrait' )}
 		{if $gBitSystem->isFeatureActive( 'reg_homepage' )}
 			<div class="form-group">
 				{formlabel label="HomePage" for="users_homepage"}
@@ -204,7 +204,7 @@
 		{formlabel label="Group" for="group"}
 		{forminput}
 			{foreach item=gr from=$groupList name=group}
-				<input class="form-control" type="radio" name="group" value="{$gr.group_id|escape}"{if ($reg.group eq '' and $smarty.foreach.group.last) or $reg.group eq $gr.group_id} checked="checked"{/if}>
+				<input class="form-control" type="radio" name="group" value="{$gr.group_id|escape}"{if ($reg.group eq '' && $smarty.foreach.group.last) || $reg.group eq $gr.group_id} checked="checked"{/if}>
 					{if $gr.is_default eq "y"}
 						{tr}None{/tr}
 					{elseif $gr.group_desc}

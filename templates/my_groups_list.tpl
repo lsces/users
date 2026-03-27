@@ -44,7 +44,7 @@
 							<th>{tr}Action{/tr}</th>
 						</tr>
 						{foreach from=$publicGroups key=groupId item=group}
-							{if $group.used ne 'y' and $group.is_default ne 'y'}			
+							{if $group.used ne 'y' && $group.is_default ne 'y'}			
 								<tr class="{cycle values="odd,even"}">
 									<td>{$group.group_name}</td>
 									<td>{$group.group_desc}</td>

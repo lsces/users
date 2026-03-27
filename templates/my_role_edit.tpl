@@ -156,7 +156,7 @@
 										<th>&nbsp;</th>
 									</tr>
 									{foreach key=permName item=perm from=$allPerms}
-										{if $package eq $perm.package or $package eq 'all'}
+										{if $package eq $perm.package || $package eq 'all'}
 											<tr class="{cycle values="even,odd"}">
 												<td><input type="checkbox" id="{$permName}" name="perm[{$permName}]"{if $roleInfo.perms.$permName} checked="checked"{/if} /></td>
 												<td><label for="{$permName}">{$permName}</label></td>

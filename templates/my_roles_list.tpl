@@ -44,7 +44,7 @@
 							<th>{tr}Action{/tr}</th>
 						</tr>
 						{foreach from=$publicRoles key=roleId item=role}
-							{if $role.used ne 'y' and $role.is_default ne 'y'}			
+							{if $role.used ne 'y' && $role.is_default ne 'y'}			
 								<tr class="{cycle values="odd,even"}">
 									<td>{$role.role_name}</td>
 									<td>{$role.role_desc}</td>

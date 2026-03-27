@@ -130,7 +130,7 @@
 					{/forminput}
 				</div>
 				{/if}
-				{if $gBitSystem->isFeatureActive( 'reg_real_name' ) or $gBitSystem->isFeatureActive( 'reg_homepage' ) or $gBitSystem->isFeatureActive( 'reg_country' ) or $gBitSystem->isFeatureActive( 'reg_language' ) or $gBitSystem->isFeatureActive( 'reg_portrait' )}
+				{if $gBitSystem->isFeatureActive( 'reg_real_name' ) || $gBitSystem->isFeatureActive( 'reg_homepage' ) || $gBitSystem->isFeatureActive( 'reg_country' ) || $gBitSystem->isFeatureActive( 'reg_language' ) || $gBitSystem->isFeatureActive( 'reg_portrait' )}
 					{if $gBitSystem->isFeatureActive( 'reg_homepage' )}
 						<div class="form-group">
 							{formlabel label="HomePage" for="users_homepage"}
@@ -224,7 +224,7 @@
 					{formlabel label="Role" for="role"}
 					{forminput}
 						{foreach item=gr from=$roleList name=role}
-							<input type="radio" name="role" value="{$gr.role_id|escape}"{if ($reg.role eq '' and $smarty.foreach.role.last) or $reg.role eq $gr.role_id} checked="checked"{/if}>
+							<input type="radio" name="role" value="{$gr.role_id|escape}"{if ($reg.role eq '' && $smarty.foreach.role.last) || $reg.role eq $gr.role_id} checked="checked"{/if}>
 								{if $gr.is_default eq "y"}
 									{tr}None{/tr}
 								{elseif $gr.role_desc}

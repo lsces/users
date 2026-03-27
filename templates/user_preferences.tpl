@@ -18,7 +18,7 @@
 							{formlabel label="Real Name" for="real_name"}
 							{forminput}
 								<input class="form-control" type="text" name="real_name" id="real_name" value="{$editUser->mInfo.real_name|escape}" />
-								{if !$gBitSystem->getConfig('users_display_name') or $gBitSystem->getConfig('users_display_name') eq 'real_name'}
+								{if !$gBitSystem->getConfig('users_display_name') || $gBitSystem->getConfig('users_display_name') eq 'real_name'}
 									{formhelp note="This is the name that is visible to other users when viewing information added by you."}
 								{/if}
 							{/forminput}
@@ -178,7 +178,7 @@
 				{form legend="Change your password" secure=$gBitSystem->isFeatureActive("site_https_login_required")}
 					<input type="hidden" name="view_user" value="{$editUser->mUserId}" />
 					{* Users with admin priv can change password without knowing the old one *}
-					{if !$view_user or ( !$gBitUser->hasPermission('p_users_admin') and $view_user )}
+					{if !$view_user || ( !$gBitUser->hasPermission('p_users_admin') && $view_user )}
 						<div class="form-group">
 							{formlabel label="Old password" for="old"}
 							{forminput}

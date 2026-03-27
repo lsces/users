@@ -43,11 +43,11 @@
 							{elseif $perm.perm_level == 'registered'}{assign var=id value=3}
 							{elseif $perm.perm_level == 'basic'     }{assign var=id value=-1}{/if}
 
-							{if $id == $group.group_id and !$group.perms.$p}
+							{if $id == $group.group_id && !$group.perms.$p}
 								{assign var=class value="prio5"}
-							{elseif $id == $group.group_id and $group.perms.$p}
+							{elseif $id == $group.group_id && $group.perms.$p}
 								{assign var=class value="prio1"}
-							{elseif $id != $group.group_id and $group.perms.$p}
+							{elseif $id != $group.group_id && $group.perms.$p}
 								{assign var=class value="prio5"}
 							{else}
 								{assign var=class value=""}

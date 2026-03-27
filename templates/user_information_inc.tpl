@@ -1,6 +1,6 @@
 {* $Header$ *}
 {strip}
-{if $userData->getPreference('users_information') eq 'public' or $gBitUser->mUserId eq $userData->mUserId}
+{if $userData->getPreference('users_information') eq 'public' || $gBitUser->mUserId eq $userData->mUserId}
 	<div class="form-group">
 		{formlabel label="Login"}
 		{forminput}
@@ -85,7 +85,7 @@
 			{/forminput}
 		</div>
 
-		{if $gBitSystem->isPackageActive( 'messages' ) and $userData->getPreference('messages_allow_messages') ne 'n' and $gBitUser->mUserId ne $userData->mUserId}
+		{if $gBitSystem->isPackageActive( 'messages' ) && $userData->getPreference('messages_allow_messages') ne 'n' && $gBitUser->mUserId ne $userData->mUserId}
 			<div class="form-group">
 				{formlabel label="Send Message"}
 				{forminput}

@@ -1,4 +1,4 @@
-{if $userInfo.is_private neq 'true' or $gBitUser->mUserId eq $userInfo.user_id}
+{if $userInfo.is_private neq 'true' || $gBitUser->mUserId eq $userInfo.user_id}
 {strip}
 {bitmodule}
 <div style="text-align:center;">
@@ -12,7 +12,7 @@
 	{/if}
 
 	<div class="floaticon">
-		{if $gQueryUserId and $gBitSystem->isPackageActive( 'messages' ) and $gBitUser->hasPermission( 'p_messages_send' ) and $userPrefs.messages_allow_messages eq 'y'}
+		{if $gQueryUserId && $gBitSystem->isPackageActive( 'messages' ) && $gBitUser->hasPermission( 'p_messages_send' ) && $userPrefs.messages_allow_messages eq 'y'}
 			&nbsp;<a href="{$smarty.const.MESSAGES_PKG_URL}compose.php?to={$userInfo.login}">{booticon iname="fa-envelope" iexplain="Send user a personal message"}</a>
 		{/if}
 		{if $gBitUser->hasPermission('p_users_edit_user_homepage')}

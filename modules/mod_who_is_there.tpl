@@ -13,7 +13,7 @@
 		{/if}
 	</div>
 	{section name=ix loop=$online_users}
-		{if $user and $gBitSystem->isFeatureActive( 'feature_messages' ) and $gBitUser->hasPermission( 'p_messages_send' )}
+		{if $user && $gBitSystem->isFeatureActive( 'feature_messages' ) && $gBitUser->hasPermission( 'p_messages_send' )}
 			<a href="{$smarty.const.MESSAGES_PKG_URL}compose.php?to={$online_users[ix].user}" title="{tr}Send a message to{/tr} {$online_users[ix].user}">{booticon iname="fa-envelope" iexplain="send message"}</a>
 		{/if}
 		{if $online_users[ix].users_information eq 'public'}
