@@ -126,10 +126,10 @@ class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod {
     $base_string = $request->get_signature_base_string();
     $request->base_string = $base_string;
 
-    $key_parts = [
-			$consumer->secret,
-			( $token ) ? $token->secret : ""
-		];
+    $key_parts = array(
+      $consumer->secret,
+      ($token) ? $token->secret : ""
+    );
 
     $key_parts = OAuthUtil::urlencode_rfc3986($key_parts);
     $key = implode('&', $key_parts);
@@ -158,10 +158,10 @@ class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod {
    * OAuthRequest handles this!
    */
   public function build_signature($request, $consumer, $token) {
-    $key_parts = [
-			$consumer->secret,
-			( $token ) ? $token->secret : ""
-		];
+    $key_parts = array(
+      $consumer->secret,
+      ($token) ? $token->secret : ""
+    );
 
     $key_parts = OAuthUtil::urlencode_rfc3986($key_parts);
     $key = implode('&', $key_parts);
@@ -211,6 +211,9 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     // Sign using the key
     $ok = openssl_sign($base_string, $signature, $privatekeyid);
 
+    // Release the key resource
+    openssl_free_key($privatekeyid);
+
     return base64_encode($signature);
   }
 
@@ -228,6 +231,9 @@ abstract class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     // Check the computed signature against the one passed in the query
     $ok = openssl_verify($base_string, $decoded_sig, $publickeyid);
 
+    // Release the key resource
+    openssl_free_key($publickeyid);
+
     return $ok == 1;
   }
 }
@@ -242,8 +248,8 @@ class OAuthRequest {
   public static $POST_INPUT = 'php://input';
 
   function __construct($http_method, $http_url, $parameters=null) {
-    $parameters = $parameters ? $parameters : [];
-    $parameters = [ ...OAuthUtil::parse_parameters(parse_url($http_url, PHP_URL_QUERY)), ...$parameters];
+    $parameters = ($parameters) ? $parameters : array();
+    $parameters = array_merge( OAuthUtil::parse_parameters(parse_url($http_url, PHP_URL_QUERY)), $parameters);
     $this->parameters = $parameters;
     $this->http_method = $http_method;
     $this->http_url = $http_url;
@@ -310,12 +316,10 @@ class OAuthRequest {
    */
   public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters=null) {
     $parameters = ($parameters) ?  $parameters : array();
-    $defaults = [
-			"oauth_version"      => OAuthRequest::$version,
-			"oauth_nonce"        => OAuthRequest::generate_nonce(),
-			"oauth_timestamp"    => OAuthRequest::generate_timestamp(),
-			"oauth_consumer_key" => $consumer->key,
-		];
+    $defaults = array("oauth_version" => OAuthRequest::$version,
+                      "oauth_nonce" => OAuthRequest::generate_nonce(),
+                      "oauth_timestamp" => OAuthRequest::generate_timestamp(),
+                      "oauth_consumer_key" => $consumer->key);
     if ($token)
       $defaults['oauth_token'] = $token->key;
 
@@ -500,7 +504,7 @@ class OAuthRequest {
 class OAuthServer {
   protected $timestamp_threshold = 300; // in seconds, five minutes
   protected $version = '1.0';             // hi blaine
-  protected $signature_methods = [];
+  protected $signature_methods = array();
 
   protected $data_store;
 
@@ -565,7 +569,7 @@ class OAuthServer {
     $consumer = $this->get_consumer($request);
     $token = $this->get_token($request, $consumer, "access");
     $this->check_signature($request, $consumer, $token);
-    return [ $consumer, $token ];
+    return array($consumer, $token);
   }
 
   // Internals from here
@@ -602,7 +606,8 @@ class OAuthServer {
     if (!in_array($signature_method,
                   array_keys($this->signature_methods))) {
       throw new OAuthException(
-				"Signature method '$signature_method' not supported try one of the following: " .
+        "Signature method '$signature_method' not supported " .
+        "try one of the following: " .
         implode(", ", array_keys($this->signature_methods))
       );
     }
@@ -773,7 +778,7 @@ class OAuthUtil {
   // May 28th, 2010 - method updated to tjerk.meesters for a speed improvement.
   //                  see http://code.google.com/p/oauth/issues/detail?id=163
   public static function split_header($header, $only_allow_oauth_parameters = true) {
-    $params = [];
+    $params = array();
     if (preg_match_all('/('.($only_allow_oauth_parameters ? 'oauth_' : '').'[a-z_-]*)=(:?"([^"]*)"|([^,]*))/', $header, $matches)) {
       foreach ($matches[1] as $i => $h) {
         $params[$h] = OAuthUtil::urldecode_rfc3986(empty($matches[3][$i]) ? $matches[4][$i] : $matches[3][$i]);
@@ -808,7 +813,7 @@ class OAuthUtil {
     } else {
       // otherwise we don't have apache and are just going to have to hope
       // that $_SERVER actually contains what we need
-      $out = [];
+      $out = array();
       if( isset($_SERVER['CONTENT_TYPE']) )
         $out['Content-Type'] = $_SERVER['CONTENT_TYPE'];
       if( isset($_ENV['CONTENT_TYPE']) )
@@ -839,7 +844,7 @@ class OAuthUtil {
 
     $pairs = explode('&', $input);
 
-    $parsed_parameters = [];
+    $parsed_parameters = array();
     foreach ($pairs as $pair) {
       $split = explode('=', $pair, 2);
       $parameter = OAuthUtil::urldecode_rfc3986($split[0]);
@@ -852,7 +857,7 @@ class OAuthUtil {
         if (is_scalar($parsed_parameters[$parameter])) {
           // This is the first duplicate, so transform scalar (string) into an array
           // so we can add the duplicates
-          $parsed_parameters[$parameter] = [ $parsed_parameters[$parameter] ];
+          $parsed_parameters[$parameter] = array($parsed_parameters[$parameter]);
         }
 
         $parsed_parameters[$parameter][] = $value;
@@ -875,7 +880,7 @@ class OAuthUtil {
     // Ref: Spec: 9.1.1 (1)
     uksort($params, 'strcmp');
 
-    $pairs = [];
+    $pairs = array();
     foreach ($params as $parameter => $value) {
       if (is_array($value)) {
         // If two or more parameters share the same name, they are sorted by their value

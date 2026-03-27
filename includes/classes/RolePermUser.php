@@ -247,6 +247,11 @@ class RolePermUser extends RoleUser {
 			$this->mRoles = $this->getRoles( 0, $pForceRefresh );
 		}
 	}
+	function loadGroups( $pForceRefresh = false ) {
+		if( $this->isValid() ) {
+			$this->mRoles = $this->getRoles( 0, $pForceRefresh );
+		}
+	}
 
 	/**
 	 * isInRole work out if a given user is assigned to a role
@@ -510,6 +515,16 @@ class RolePermUser extends RoleUser {
 			$ret['num_members'] = $this->mDb->getOne( $sql, [ $pRoleId ] );
 		}
 		return $ret;
+	}
+
+	/**
+	 * getRoleInfo as Group information
+	 * 
+	 * @param int $pGroupId
+	 * @return array information
+	 */
+	public function getGroupInfo( $pGroupId ) {
+		return $this->getRoleInfo( $pGroupId );
 	}
 
 	/**

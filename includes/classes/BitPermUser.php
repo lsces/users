@@ -20,6 +20,7 @@
  */
 namespace Bitweaver\Users;
 
+use ADORecordSet;
 use Bitweaver\KernelTools;
 
 /**
@@ -506,25 +507,26 @@ class BitPermUser extends BitUser {
 	 * 
 	 * @param array $pGroupId 
 	 * @access public
-	 * @return group information
+	 * @return array group information
 	 */
-	function getGroupInfo( $pGroupId )
-	{
+	public function getGroupInfo( $pGroupId ) :array
+	{	
 		if (\Bitweaver\BitBase::verifyId( $pGroupId )) {
 			$sql = "SELECT * FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id` = ?";
-			$ret = $this->mDb->getRow( $sql, array( $pGroupId ) );
+			$ret = $this->mDb->getRow( $sql, [ $pGroupId ] );
 
-			$listHash = array(
+			$listHash = [
 				'group_id'  => $pGroupId,
 				'sort_mode' => 'up.perm_name_asc',
-			);
+			];
 			$ret["perms"] = $this->getGroupPermissions( $listHash );
 
 			$sql = "SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . "users_groups_map` WHERE `group_id` = ?";
-			$ret['num_members'] = $this->mDb->getOne( $sql, array( $pGroupId ) );
+			$ret['num_members'] = $this->mDb->getOne( $sql, [ $pGroupId ] );
 
 			return $ret;
 		}
+		return [];
 	}
 
 	/**
@@ -533,7 +535,7 @@ class BitPermUser extends BitUser {
 	 * @param numeric $pUserId User ID
 	 * @param mixed $pGroupMixed A single group ID or an array of group IDs
 	 * @access public
-	 * @return Either an ADO RecordSet (success) or false (failure).
+	 * @return ADORecordSet|bool an ADO RecordSet (success) or false (failure).
 	 */
 	function addUserToGroup( $pUserId, $pGroupMixed )
 	{
