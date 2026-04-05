@@ -877,6 +877,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 						$pParamHash['user_store']['user_id'] = $this->mDb->GenID( 'users_users_user_id_seq' );
 					}
 					$this->mUserId = $pParamHash['user_store']['user_id'];
+					$pParamHash['user_store']['registration_ip'] = $_SERVER['REMOTE_ADDR'];
 					$result = $this->mDb->associateInsert( BIT_DB_PREFIX.'users_users', $pParamHash['user_store'] );
 				}
 				// make sure user is added into the default role map
@@ -1211,7 +1212,8 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			if( $gBitSystem->isFeatureActive( 'users_remember_me' ) && isset( $_REQUEST['rme'] ) && $_REQUEST['rme'] == 'on' ) {
 				$cookieTime = (int)( time() + (int)$gBitSystem->getConfig( 'users_remember_time', 86400 ));
 				$cookiePath = $gBitSystem->getConfig( 'cookie_path', $cookiePath );
-				$cookieDomain = $gBitSystem->getConfig( 'cookie_domain', $cookieDomain ?? parse_url(BIT_ROOT_URL, PHP_URL_HOST) );
+				$cookieDomain = parse_url(BIT_ROOT_URL, PHP_URL_HOST) ?? '/';
+				$gBitSystem->getConfig( 'cookie_domain', $cookieDomain);
 			}
 		}
 		setcookie( $siteCookie, $pCookie, [
@@ -1631,7 +1633,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			$key = 'login';
 		}
 		$tmpUser = $this->getUserInfo( [ $key => $iHomepage ]);
-		if( @$this->verifyId( $tmpUser['user_id'] )) {
+		if( @$this->verifyId( $tmpUser['user_id'] ?? 0 )) {
 			$ret = $tmpUser['user_id'];
 		}
 		return $ret;
