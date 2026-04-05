@@ -532,9 +532,9 @@ class RolePermUser extends RoleUser {
 	 * 
 	 * @param int $pUserId User ID
 	 * @param mixed $pRoleMixed A single role ID or an array of role IDs
-	 * @return array|bool Either an ADO RecordSet (success) or false (failure).
+	 * @return bool Either an ADO RecordSet (success) or false (failure).
 	 */
-	public static function addUserToRole( ?int $pUserId, array|int $pRoleMixed ): array|bool {
+	public static function addUserToRole( ?int $pUserId, array|int $pRoleMixed ): bool {
 		global $gBitUser;
 		$result = false;
 		if( BitBase::verifyId( $pUserId ) && !empty( $pRoleMixed )) {
@@ -557,7 +557,8 @@ class RolePermUser extends RoleUser {
 				}
 				if( !$isInRole ) {
 					$query = "INSERT INTO `".BIT_DB_PREFIX."users_roles_map` (`user_id`,`role_id`) VALUES(?,?)";
-					$result = $gBitUser->mDb->query( $query, [ $pUserId, $roleId ] );
+					$gBitUser->mDb->query( $query, [ $pUserId, $roleId ] );
+					$result = true;
 				}
 			}
 		}

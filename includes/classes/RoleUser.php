@@ -347,6 +347,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				$pParamHash['registration_date'] = date( "U" );
 			}
 			$pParamHash['user_store']['registration_date'] = $pParamHash['registration_date'];
+			$pParamHash['user_store']['registration_ip'] = $pParamHash['registration_ip'];
 
 			if( !empty( $pParamHash['email'] ) && empty($this->mErrors['email']) ) {
 				$pParamHash['user_store']['email'] = substr( $pParamHash['email'], 0, 200 ) ;
@@ -1210,7 +1211,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			if( $gBitSystem->isFeatureActive( 'users_remember_me' ) && isset( $_REQUEST['rme'] ) && $_REQUEST['rme'] == 'on' ) {
 				$cookieTime = (int)( time() + (int)$gBitSystem->getConfig( 'users_remember_time', 86400 ));
 				$cookiePath = $gBitSystem->getConfig( 'cookie_path', $cookiePath );
-				$cookieDomain = $gBitSystem->getConfig( 'cookie_domain', $cookieDomain, parse_url(BIT_ROOT_URL, PHP_URL_HOST) );
+				$cookieDomain = $gBitSystem->getConfig( 'cookie_domain', $cookieDomain ?? parse_url(BIT_ROOT_URL, PHP_URL_HOST) );
 			}
 		}
 		setcookie( $siteCookie, $pCookie, [
@@ -2761,10 +2762,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	 */
 	public function userExists( $pUserMixed ) {
 		$ret = false;
-		if ( is_array( $pUserMixed ) ) {
+		if ( \is_array( $pUserMixed ) ) {
 			if( $cur = current( $pUserMixed ) ) {
-				$conditionSql = (is_numeric( $cur )) ? " `".key( $pUserMixed )."` " : " UPPER(`".key( $pUserMixed )."`)";
-				$query = "SELECT user_id FROM  `".BIT_DB_PREFIX."users`".$conditionSql;
+				$conditionSql = (is_numeric( $cur )) ? " `".key( $pUserMixed )."` " : " `".key( $pUserMixed )."`";
+				$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE $conditionSql = ?";
 				$ret = $this->mDb->getOne( $query, [ strtoupper( $cur ) ] );
 			}
 		}
