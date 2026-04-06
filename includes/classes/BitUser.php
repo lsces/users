@@ -19,6 +19,7 @@
 namespace Bitweaver\Users;
 use Bitweaver\BitMailer;
 use Bitweaver\KernelTools;
+use Bitweaver\Liberty\LibertyContent;
 
 define( 'AVATAR_TYPE_CENTRALIZED', 'c' );
 define( 'AVATAR_TYPE_USER_DB', 'u' );
@@ -2603,12 +2604,12 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 
 			if( !empty( $res['referer_url'] )) {
 				if ( $gBitSystem->isPackageActive('stats') ) {
-					$res['short_referer_url'] = stats_referer_display_short($res['referer_url']);
+					$res['short_referer_url'] = \Bitweaver\Stats\stats_referer_display_short($res['referer_url']);
 				}
 			}
 			if( !empty( $res['avatar_file_name'] )) {
 				$res['avatar_url'] = $this->getSourceUrl( array( 'attachment_id'=>$res['avatar_attachment_id'], 'mime_type'=>$res['avatar_mime_type'], 'file_name'=>$res['avatar_file_name'] ) );
-				$res['thumbnail_url'] = liberty_fetch_thumbnail_url( array(
+				$res['thumbnail_url'] = \Bitweaver\Liberty\liberty_fetch_thumbnail_url( array(
 					'source_file' => $this->getSourceFile( array( 'sub_dir'=>$res['avatar_attachment_id'], 'user_id' => $res['user_id'], 'file_name'=>$res['avatar_file_name'], 'mime_type'=>$res['avatar_mime_type'], 'package'=>\Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name( array( 'mime_type'=>$res['avatar_mime_type'], 'name'=>$res['avatar_file_name'] ) ) ) ),
 					'file_name' => $res['avatar_url'],
 					// TODO: Make this a preference
