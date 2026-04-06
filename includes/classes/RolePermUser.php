@@ -703,8 +703,8 @@ class RolePermUser extends RoleUser {
 	 * @return bool true on success, false if no perms were loaded
 	 */
 	public function loadPermissions( $pForceReload=false ) {
+		$this->mPerms = [];
 		if( $this->isValid() && (empty( $this->mPerms ) || $pForceReload) ) {
-			$this->mPerms = [];
 			// the double up.`perm_name` is intentional - the first is for hash key, the second is for hash value
 			$query = "
 				SELECT up.`perm_name` AS `hash_key`, up.`perm_name`, up.`perm_desc`, up.`perm_level`, up.`package`

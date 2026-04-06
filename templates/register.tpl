@@ -1,13 +1,13 @@
 {strip}
 
 {form class="col-md-6 col-xs-12 form-horizontal" action="`$smarty.const.USERS_PKG_URL`register.php" enctype="multipart/form-data" legend="Register as a new user" secure=$gBitSystem->isFeatureActive("site_https_login_required")}
-	{foreach from=$reg.CUSTOM item='custom' key='custom_name'}
+	{foreach from=$reg.CUSTOM ?? [] item='custom' key='custom_name'}
 		<input type="hidden" name="CUSTOM[{$custom_name}]" value="{$custom}"/>
 	{/foreach}
-	{foreach from=$reg.auth item='auth' key='auth_name'}
+	{foreach from=$reg.auth ?? [] item='auth' key='auth_name'}
 		<input type="hidden" name="auth[{$auth_name}]" value="{$auth}"/>
 	{/foreach}
-	{formfeedback error=$errors.create}
+	{formfeedback error=$errors.create ?? ''}
 	{*if $hybridProviders}
 		<div class="form-group">
 			{formlabel label="Click to Register" for="user"}
@@ -21,10 +21,10 @@
 
 	{if $gBitSystem->isFeatureActive('users_register_passcode')}
 		<div class="form-group">
-			{formfeedback error=$errors.passcode}
+			{formfeedback error=$errors.passcode ?? ''}
 			{formlabel label="Passcode to register" for="passcode"}
 			{forminput}
-				<input class="form-control" type="password" name="passcode" value="{$reg.passcode}" id="passcode" required />
+				<input class="form-control" type="password" name="passcode" value="{$reg.passcode ?? ''}" id="passcode" required />
 				{formhelp note="This is not your user password. It is a code required for registration. Contact your site administrator for details."}
 			{/forminput}
 		</div>
@@ -34,17 +34,17 @@
 		<div class="form-group">
 			{formlabel label="Your Name" for="real_name"}
 			{forminput}
-				<input class="form-control" type="text" name="real_name" id="real_name" value="{$smarty.request.real_name}" />
+				<input class="form-control" type="text" name="real_name" id="real_name" value="{$smarty.request.real_name ?? ''}" />
 				{formhelp note="This will be displayed in links to your information."}
 			{/forminput}
 		</div>
 	{/if}
 
 	<div class="form-group">
-		{formfeedback error=$errors.login}
+		{formfeedback error=$errors.login ?? ''}
 		{formlabel label="Username" for="login"}
 		{forminput}
-			<input class="form-control" type="text" name="login" id="login" value="{$reg.login}" onkeyup="BitUser.updateUserUrl();" required />
+			<input class="form-control" type="text" name="login" id="login" value="{$reg.login ?? ''}" onkeyup="BitUser.updateUserUrl();" required />
 			{formhelp note="This will be used in links to your profile. Your username can only contain numbers, characters, and underscores."}
 			<div class="alert alert-info nomargin" id="loginurl">{$smarty.const.BIT_ROOT_URI}</div>
 		{/forminput}
@@ -68,16 +68,16 @@
 	{/if}
 
 	<div class="form-group">
-		{formfeedback error=$errors.email}
+		{formfeedback error=$errors.email ?? ''}
 		{formlabel label="Email" for="email"}
 		{forminput}
-			<input class="form-control" type="email" name="email" id="email" value="{$reg.email}" required  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+			<input class="form-control" type="email" name="email" id="email" value="{$reg.email ?? ''}" required  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
 		{/forminput}
 	</div>
 
 	{if !$gBitSystem->isFeatureActive( 'users_validate_user' )}
 		<div class="form-group">
-			{formfeedback error=$errors.password}
+			{formfeedback error=$errors.password ?? ''}
 			{formlabel label="Password" for="pass"}
 			{forminput}
 				<input class="form-control" type="password" id="pass1" name="password" required />
@@ -85,7 +85,7 @@
 		</div>
 
 		<div class="form-group">
-			{formfeedback error=$errors.password2}
+			{formfeedback error=$errors.password2 ?? ''}
 			{formlabel label="Repeat password" for="password2"}
 			{forminput}
 				<input class="form-control" type="password" id="password2" name="password2" required />
@@ -223,7 +223,7 @@
 		{include file=$package.template }
 	{/foreach}
 
-	{captcha force=true variant=row}
+	{* captcha force=true variant=row *}
 
 	<div class="form-group">
 		{formlabel label="" for=""}
