@@ -422,10 +422,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			}
 		}
 
-		if( $gBitSystem->isFeatureActive( 'users_register_recaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
+/*		if( $gBitSystem->isFeatureActive( 'users_register_recaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
 			require_once USERS_PKG_INCLUDE_PATH.'recaptchalib.php';
 			if( !empty( $pParamHash["recaptcha_challenge_field"] ) && !empty( $pParamHash["recaptcha_response_field"] ) ) {
-				$resp = recaptcha_check_answer ( $gBitSystem->getConfig( 'users_register_recaptcha_secret_key' ), $_SERVER["REMOTE_ADDR"], $pParamHash["recaptcha_challenge_field"], $pParamHash["recaptcha_response_field"] );
+				$resp = ''; // recaptcha_check_answer ( $gBitSystem->getConfig( 'users_register_recaptcha_secret_key' ), $_SERVER["REMOTE_ADDR"], $pParamHash["recaptcha_challenge_field"], $pParamHash["recaptcha_response_field"] );
 				if( !$resp->is_valid ) {
 					$this->mErrors['recaptcha'] = $resp->error;
 				}
@@ -433,7 +433,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				$this->mErrors['recaptcha'] = 'Wrong Answer';
 			}
 		}
-
+*/
 		if( $gBitSystem->isFeatureActive( 'users_register_smcaptcha' ) && (empty( $pParamHash['novalidation'] ) || $pParamHash['novalidation'] != 'yes') ) {
 			require_once USERS_PKG_INCLUDE_PATH.'solvemedialib.php';
 			if( !empty( $pParamHash['adcopy_challenge'] ) && !empty( $pParamHash['adcopy_response'] ) ) {
