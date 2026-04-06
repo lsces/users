@@ -1,22 +1,26 @@
 <?php
 
+use Bitweaver\HttpStatusCodes;
+use Bitweaver\KernelTools;
+use Bitweaver\Wiki\BitPage;
+
 	// Register the new user
-	$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
+	$userClass = $gBitSystem->getConfig( 'user_class', 'RolePermUser' );
 	$newUser = new $userClass();
 
 	if( $newUser->preRegisterVerify( $pRegisterHash ) && $newUser->register( $pRegisterHash ) ) {
 		$gBitUser->mUserId = $newUser->mUserId;
 
 		// add user to user-selected group
-		if ( !empty( $_REQUEST['group'] ) ) {
-			$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group'] );
-			if ( empty($groupInfo) || $groupInfo['is_public'] != 'y' ) {
+		if ( !empty( $_REQUEST['role'] ) ) {
+			$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['group'] );
+			if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
 				$errors[] = "You can't use this group";
 				$gBitSmarty->assign( 'errors', $errors );
 			} else {
 				$userId = $newUser->getUserId();
-				$gBitUser->addUserToGroup( $userId, $_REQUEST['group'] );
-				$gBitUser->storeUserDefaultGroup( $userId, $_REQUEST['group'] );
+				$gBitUser->addUserToRole( $userId, $_REQUEST['group'] );
+				$gBitUser->storeUserDefaultRole( $userId, $_REQUEST['group'] );
 			}
 		}
 
@@ -27,7 +31,7 @@
 
 		// requires validation by email 
 		if( $gBitSystem->isFeatureActive( 'users_validate_user' ) ) {
-			$gBitSmarty->assign('msg',tra('You will receive an email with information to login for the first time into this site'));
+			$gBitSmarty->assign('msg',KernelTools::tra('You will receive an email with information to login for the first time into this site'));
 			$gBitSmarty->assign('showmsg','y');
 		} else {
 			if( !empty( $_SESSION['loginfrom'] ) ) {
