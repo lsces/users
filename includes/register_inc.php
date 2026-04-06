@@ -11,16 +11,31 @@ use Bitweaver\Wiki\BitPage;
 	if( $newUser->preRegisterVerify( $pRegisterHash ) && $newUser->register( $pRegisterHash ) ) {
 		$gBitUser->mUserId = $newUser->mUserId;
 
-		// add user to user-selected group
-		if ( !empty( $_REQUEST['role'] ) ) {
-			$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['group'] );
-			if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
-				$errors[] = "You can't use this group";
-				$gBitSmarty->assign( 'errors', $errors );
-			} else {
-				$userId = $newUser->getUserId();
-				$gBitUser->addUserToRole( $userId, $_REQUEST['group'] );
-				$gBitUser->storeUserDefaultRole( $userId, $_REQUEST['group'] );
+		if( defined(ROLE_MODEL) ) {
+			// add user to user-selected role
+			if ( !empty( $_REQUEST['role'] ) ) {
+				$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['group'] );
+				if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
+					$errors[] = "You can't use this group";
+					$gBitSmarty->assign( 'errors', $errors );
+				} else {
+					$userId = $newUser->getUserId();
+					$gBitUser->addUserToRole( $userId, $_REQUEST['group'] );
+					$gBitUser->storeUserDefaultRole( $userId, $_REQUEST['group'] );
+				}
+			}
+		} else {
+			// add user to user-selected group
+			if ( !empty( $_REQUEST['group'] ) ) {
+				$groupInfo = $gBitUser->getGroupInfo( $_REQUEST['group'] );
+				if ( empty($groupInfo) || $groupInfo['is_public'] != 'y' ) {
+					$errors[] = "You can't use this group";
+					$gBitSmarty->assign( 'errors', $errors );
+				} else {
+					$userId = $newUser->getUserId();
+					$gBitUser->addUserToGroup( $userId, $_REQUEST['group'] );
+					$gBitUser->storeUserDefaultGroup( $userId, $_REQUEST['group'] );
+				}
 			}
 		}
 
