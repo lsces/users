@@ -75,7 +75,7 @@ if( $gBitSystem->isFeatureActive( 'site_store_session_db' ) && !empty( $gBitDbTy
 */
 }
 
-session_name( BIT_SESSION_NAME );
+session_name( RolePermUser::getSiteCookieName() );
 if( $gBitSystem->isFeatureActive( 'users_remember_me' )) {
 	session_set_cookie_params( $gBitSystem->getConfig( 'site_session_lifetime', 0 ), $gBitSystem->getConfig( 'cookie_path', BIT_ROOT_URL ), $gBitSystem->getConfig( 'cookie_domain', '' ));
 } else {
@@ -129,10 +129,10 @@ if( !empty( $gOverrideLoginFunction )) {
 if( empty( $gBitUser ) || !$gBitUser->isValid() ) {
 
 	if( !($gBitUser = RolePermUser::loadFromCache( ANONYMOUS_USER_ID ) ) ) { // $userClass::loadFromCache( ANONYMOUS_USER_ID ) ) ) {
-//		if( $gBitUser->load( true ) ) {
-$gBitUser = new RolePermUser();
+		if( empty($gBitUser) ) {
+			$gBitUser = new RolePermUser();
 			// maybe do something...
-//		}
+		}
 	}
 }
 
