@@ -71,7 +71,7 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 				'handler_class'       => 'BitUser',
 				'handler_package'     => 'users',
 				'handler_file'        => 'BitUser.php',
-				'maintainer_url'      => 'http://www.bitweaver.org'
+				'maintainer_url'      => 'https://www.bitweaver.org'
 			)
 		);
 		$this->mUserId = ( @$this->verifyId( $pUserId ) ? $pUserId : null);
@@ -2441,15 +2441,12 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 				$pParamHash['users_information'] = $gBitSystem->mDb->getOne( "SELECT pref_value FROM liberty_content_prefs lcp INNER JOIN users_users uu ON (lcp.content_id=uu.content_id) WHERE uu.login=? AND pref_name='users_information'", array( $pParamHash['login'] ), 1, null, 86400 );
 			}
 
-			if( $pUseLink && ($gBitUser->hasPermission( 'p_users_view_user_homepage' ) || $pParamHash['users_information'] == 'public') ) {
-				$ret = '<a class="username" title="'.( !empty( $pParamHash['link_title'] ) ? $pParamHash['link_title'] : KernelTools::tra( 'Profile for' ).' '.htmlspecialchars( $displayName ))
-					.'" href="'.BitUser::getDisplayUrlFromHash( $pParamHash ).'">'
-					. htmlspecialchars( isset( $pParamHash['link_label'] ) ? $pParamHash['link_label'] : $displayName )
-					.'</a>';
-			} else {
-				$ret = htmlspecialchars( $displayName );
-			}
-		} else {
+			$ret = ( $pUseLink && ( $gBitUser->hasPermission( 'p_users_view_user_homepage' ) || $pParamHash['users_information'] == 'public' ) ) ? '<a class="username" title="' . ( !empty( $pParamHash['link_title'] ) ? $pParamHash['link_title'] : KernelTools::tra( 'Profile for' ) . ' ' . htmlspecialchars( $displayName ) )
+				. '" href="' . BitUser::getDisplayUrlFromHash( $pParamHash ) . '">'
+				. htmlspecialchars( isset( $pParamHash['link_label'] ) ? $pParamHash['link_label'] : $displayName )
+				. '</a>' : htmlspecialchars( $displayName );
+		}
+		else {
 			$ret = KernelTools::tra( "Anonymous" );
 		}
 
@@ -2717,13 +2714,9 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 	 */
 	function userExists( $pUserMixed ) {
 		$ret = false;
-		if ( is_array( $pUserMixed ) ) {
-			if( $cur = current( $pUserMixed ) ) {
-				if( is_numeric( $cur ) ) {
-					$conditionSql = " `".key( $pUserMixed )."` ";
-				} else {
-					$conditionSql = " UPPER(`".key( $pUserMixed )."`)";
-				}
+		if (is_array( $pUserMixed )) {
+			if ($cur = current( $pUserMixed )) {
+				$conditionSql = ( is_numeric( $cur ) ) ? " `" . key( $pUserMixed ) . "` " : " UPPER(`" . key( $pUserMixed ) . "`)";
 				$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE $conditionSql = ?";
 				$ret = $this->mDb->getOne( $query, array( strtoupper( $cur ) ) );
 			}

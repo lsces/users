@@ -77,7 +77,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				'handler_class'       => 'RoleUser',
 				'handler_package'     => 'users',
 				'handler_file'        => 'RoleUser.php',
-				'maintainer_url'      => 'http://www.bitweaver.org',
+				'maintainer_url'      => 'https://www.bitweaver.org',
 			]
 		);
 		$this->mUserId = @$this->verifyId( $pUserId ) ? $pUserId : null;
@@ -1740,6 +1740,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	 * @return array user info
 	 */
 	public function getUserIdFromCookieHash( $pHash ) {
+		if ( !$this->mDb->tableExists( 'users_cnxn' ) ) { return []; }
 		$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie` = ?";
 		return $this->mDb->getOne( $query, [ $pHash ]);
 	}
