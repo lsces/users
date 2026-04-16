@@ -132,7 +132,12 @@ if( empty( $gBitUser ) || !$gBitUser->isValid() ) {
 		if( empty($gBitUser) ) {
 			$gBitUser = new RolePermUser();
 			// maybe do something...
+			unset( $_SESSION['user_role'] );
 		}
+	}
+} else {
+	if (empty($_SESSION['user_role'])) {
+		$_SESSION['user_role'] = 3;
 	}
 }
 
