@@ -191,7 +191,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 
 				// break the real name into first and last name using the last space as the beginning of the last name
 				// for people who really want to use first and last name fields
-				if( preg_match( '/ /', $this->mInfo['real_name'] ) ) {
+				if( preg_match( '/ /', $this->mInfo['real_name'] ?? '' ) ) {
 					$this->mInfo['first_name'] = substr( $this->mInfo['real_name'], 0, strrpos($this->mInfo['real_name'], ' ') );
 					$this->mInfo['last_name'] = substr( $this->mInfo['real_name'], strrpos($this->mInfo['real_name'], ' ')+1 );
 				}else{
@@ -214,7 +214,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 					$this->setPreference( 'users_country', str_replace( '_', ' ', $this->getPreference( 'users_country' ) ) );
 				}
 				if( !empty($extraParams[0]) && $extraParams[0] ) {
-					$this->mInfo['real_name'] = trim( $this->mInfo['real_name'] );
+					$this->mInfo['real_name'] = trim( $this->mInfo['real_name'] ?? '' );
 					$this->mInfo['display_name'] = !empty( $this->mInfo['real_name'] ) ? $this->mInfo['real_name'] :
 						( !empty( $this->mUsername) ? $this->mUsername :
 						( !empty( $this->mInfo['email'] ) ? substr( $this->mInfo['email'], 0, strpos( $this->mInfo['email'],'@' )) :
@@ -347,7 +347,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				$pParamHash['registration_date'] = date( "U" );
 			}
 			$pParamHash['user_store']['registration_date'] = $pParamHash['registration_date'];
-			$pParamHash['user_store']['registration_ip'] = $pParamHash['registration_ip'];
+			$pParamHash['user_store']['registration_ip'] = $pParamHash['registration_ip'] ?? $_SERVER['REMOTE_ADDR'];
 
 			if( !empty( $pParamHash['email'] ) && empty($this->mErrors['email']) ) {
 				$pParamHash['user_store']['email'] = substr( $pParamHash['email'], 0, 200 ) ;
@@ -816,7 +816,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 
 			if( !empty( $pParamHash['user_store'] ) && count( $pParamHash['user_store'] ) ) {
 				if( $this->isValid() ) {
-					$userId = array ( "user_id" => $this->mUserId );
+					$userId = [ "user_id" => $this->mUserId ];
 					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_users', $pParamHash['user_store'], $userId );
 				} else {
 					if( empty( $pParamHash['user_store']['user_id'] ) ) {
@@ -870,7 +870,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 					$pParamHash['user_store']['default_role_id'] = key( $defaultRoles );
 				}
 				if( $this->isValid() ) {
-					$userId = array ( "user_id" => $this->mUserId );
+					$userId = [ "user_id" => $this->mUserId ];
 					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX.'users_users', $pParamHash['user_store'], $userId );
 				} else {
 					if( empty( $pParamHash['user_store']['user_id'] ) ) {
@@ -1388,7 +1388,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				// getHomeRole is RolePermUser method
 				if( method_exists( $this, 'getHomeRole' ) &&
 					(( @$this->verifyId( $this->mInfo['default_role_id'] ) && ( $role_home = $this->getHomeRole( $this->mInfo['default_role_id'] ) ) ) ||
-					( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getRoleHome( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
+					( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getHomeRole( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
 					$indexType = 'role_home';
 				}
 
