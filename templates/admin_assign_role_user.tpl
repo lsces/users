@@ -12,6 +12,7 @@
 	<div class="body">
 		{form legend="User Information" action="`$smarty.const.USERS_PKG_URL`admin/assign_role_user.php"}
 			<input type="hidden" value="{$assignUser->mUserId}" name="assign_user" />
+			<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 
 			<div class="form-group">
 				{formlabel label="Username"}
@@ -35,7 +36,6 @@
 			</div>
 
 			{if $gBitSystem->isPackageActive('quota')}
-			{include_php file="`$smarty.const.QUOTA_PKG_INCLUDE_PATH`quota_inc.php"}
 			<div class="form-group">
 				{formlabel label="Quota"}
 				{forminput}
@@ -73,7 +73,7 @@
 			</div>
 
 			<div class="form-group submit">
-				<input type="submit" class="btn btn-default" value="{tr}set{/tr}" name="set_default" />
+				<input type="submit" class="btn btn-default" value="{tr}Set{/tr}" name="set_default" />
 			</div>
 		{/form}
 
@@ -87,21 +87,22 @@
 			</tr>
 			{cycle values="even,odd" print=false}
 			{foreach from=$roles key=roleId item=role}
-				{if !$assignUser->mRoles.$roleId && $roleId != -1}
+				{if empty($assignUser->mRoles.$roleId) && $roleId != -1}
 					<tr class="{cycle}">
 						<td>{$role.role_name}</td>
 						<td>{$role.role_desc}</td>
 						<td class="actionicon">
-							<a href="{$smarty.const.USERS_PKG_URL}admin/assign_role_user.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=assign&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}">
+							<a href="{$smarty.const.USERS_PKG_URL}admin/assign_role_user.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=assign&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}&amp;tk={$gBitUser->mTicket}">
 								{booticon iname="fa-key" iexplain="assign"}
 							</a>
 						</td>
 					</tr>
 				{/if}
 			{/foreach}
+
 		</table>
 
-		{pagination assign_user=$assign_user}
+		{* pagination assign_user=$assign_user *}
 
 	</div><!-- end .body -->
 </div><!-- end .users -->

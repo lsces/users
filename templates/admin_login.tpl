@@ -21,11 +21,11 @@
 						{else}
 							<input type="text" class="form-control" name="{$feature}" id="{$feature}" value="{$gBitSystem->getConfig($feature)|escape}" />
 						{/if}
-						{formhelp note=$output.note page=$output.page link=$output.link}
+						{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 					{else}
 						{forminput label="checkbox"}
 							{html_checkboxes name="$feature" values="y" checked=$gBitSystem->getConfig($feature) labels=false id=$feature} {tr}{$output.label}{/tr}
-							{formhelp note=$output.note page=$output.page link=$output.link}
+							{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 						{/forminput}
 					{/if}
 				{/forminput}
@@ -98,7 +98,7 @@
 
 	{jstab title="Single Sign On"}
 		<div class="form-group">
-			{formfeedback hash=$authSettings.err}
+			{formfeedback hash=$authSettings.err ?? ''}
 
 			{formlabel label="Authentication method"}
 			{forminput}
@@ -159,12 +159,12 @@
 					{forminput}
 						{formlabel label=$output.label for=$feature}
 						<input type="text" class="form-control" name="{$feature}" id="{$feature}" value="{$gBitSystem->getConfig($feature)|escape}" />
-						{formhelp note=$output.note page=$output.page link=$output.link}
+						{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 					{/forminput}
 				{else}
 					{forminput label="checkbox"}
 						{html_checkboxes name="$feature" values="y" checked=$gBitSystem->getConfig($feature) labels=false id=$feature} {tr}{$output.label}{/tr}
-						{formhelp note=$output.note page=$output.page link=$output.link}
+						{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 					{/forminput}
 				{/if}
 			</div>
@@ -182,19 +182,19 @@
 					{forminput}
 						{formlabel label=$output.label for=$feature}
 						<input type="text" class="form-control" name="{$feature}" id="{$feature}" value="{$gBitSystem->getConfig($feature)|escape}" />
-						{formhelp note=$output.note page=$output.page link=$output.link}
+						{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 					{/forminput}
 				{else}
 					{forminput label="checkbox"}
 						{html_checkboxes name="$feature" values="y" checked=$gBitSystem->getConfig($feature) labels=false id=$feature} {tr}{$output.label}{/tr}
-						{formhelp note=$output.note page=$output.page link=$output.link}
+						{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 					{/forminput}
 				{/if}
 			</div>
 		{/foreach}
 	{/jstab}
 	{foreach from=$authSettings.avail item='method' key='meth_name'}
-		{if $method.options}
+		{if !empty($method.options)}
 			{jstab title=$method.name}
 				<input type="hidden" name="page" value="{$page}" />
 				{foreach from=$method.options item='output' key='op_id'}
@@ -212,7 +212,7 @@
 							{else}
 								<input type="text" class="form-control" name="{$op_id}" id="{$op_id}" value="{$output.value|escape}" />
 							{/if}
-							{formhelp note=$output.note page=$output.page link=$output.link}
+							{formhelp note=$output.note page=$output.page ?? '' link=$output.link ?? ''}
 						{/forminput}
 					</div>
 				{/foreach}
