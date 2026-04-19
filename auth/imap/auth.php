@@ -11,6 +11,9 @@
  * @package users
  * @subpackage auth
  */
+namespace Bitweaver\Users;
+use Bitweaver\KernelTools;
+
 class IMAPAuth extends BaseAuth {
 
 	function __construct() {
@@ -56,19 +59,19 @@ class IMAPAuth extends BaseAuth {
 	function isSupported() {
 		$ret = true;
 		if (!function_exists('imap_open')) {
-			$this->mErrors['support']=tra("IMAP Authentication is not supported as PHP IMAP Extention not loaded.");
+			$this->mErrors['support']=KernelTools::tra("IMAP Authentication is not supported as PHP IMAP Extention not loaded.");
 			$ret = false;
 		}
 		return $ret;
 	}
 
 	function createUser(&$userattr) {
-		$this->mErrors['create']=tra("Cannot create users in an IMAP Server.");
+		$this->mErrors['create']=KernelTools::tra("Cannot create users in an IMAP Server.");
 		return false;
 	}
 
 	function canManageAuth() {
-		$this->mErrors[]=tra("Cannot create users in an IMAP Server.");
+		$this->mErrors[]=KernelTools::tra("Cannot create users in an IMAP Server.");
 		return false;
 	}
 

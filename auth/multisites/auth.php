@@ -11,6 +11,9 @@
  * @package users
  * @subpackage auth
  */
+namespace Bitweaver\Users;
+use Bitweaver\KernelTools;
+
 class MultisitesAuth extends BaseAuth {
 
 	function __construct() {

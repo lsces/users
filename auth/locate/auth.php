@@ -14,6 +14,9 @@
  * @package users
  * @subpackage auth
  */
+namespace Bitweaver\Users;
+use Bitweaver\KernelTools;
+
 class LocateAuth extends BaseAuth {
 
 	function __construct() {
