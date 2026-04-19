@@ -8,10 +8,11 @@
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
 use Bitweaver\KernelTools;
+use Bitweaver\Users\RolePermUser;
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
-if (!$gBitUser->userExists( array( 'user_id' => $_REQUEST["assign_user"] ) ) ) {
+if (!$gBitUser->userExists( [ 'user_id' => $_REQUEST["assign_user"] ] ) ) {
 	$gBitSystem->fatalError( KernelTools::tra( "User doesnt exist" ));
 }
 
@@ -24,12 +25,15 @@ if( $assignUser->isAdmin() && !$gBitUser->isAdmin() ) {
 
 if( isset( $_REQUEST["action"] ) ) {
 	$gBitUser->verifyTicket();
-	if ($_REQUEST["action"] == 'assign') {
-		$assignUser->addUserToRole( $assignUser->mUserId, $_REQUEST["role_id"] );
-	} elseif ($_REQUEST["action"] == 'removerole') {
-		$assignUser->removeUserFromRole($_REQUEST["assign_user"], $_REQUEST["role_id"]);
+	switch ($_REQUEST["action"]) {
+		case 'assign':
+			$assignUser->addUserToRole( $assignUser->mUserId, $_REQUEST["role_id"] );
+			break;
+		case 'removerole':
+			$assignUser->removeUserFromRole( $_REQUEST["assign_user"], $_REQUEST["role_id"] );
+			break;
 	}
-	bit_redirect( 'assign_role_user.php?assign_user='.$assignUser->mUserId );
+	KernelTools::bit_redirect( "assign_role_user.php?assign_user={$assignUser->mUserId}" );
 }elseif(isset($_REQUEST['set_default'])) {
 	$gBitUser->verifyTicket();
 	$assignUser->storeUserDefaultRole( $assignUser->mUserId, $_REQUEST['default_role'] );
@@ -37,11 +41,11 @@ if( isset( $_REQUEST["action"] ) ) {
 }
 $gBitSmarty->assign( 'assignUser', $assignUser );
 
-$listHash = array( 'sort_mode' => 'role_name_asc' );
-$gBitSmarty->assign('roles', $gBitUser->getAllRoles( $listHash ));
+$listHash = [ 'sort_mode' => 'role_name_asc' ];
+$roles = $gBitUser->getAllRoles( $listHash );
+$gBitSmarty->assign('roles', $roles);
 
 $gBitSystem->setBrowserTitle( 'Edit User: '.$assignUser->mUsername );
 
 // Display the template
-$gBitSystem->display( 'bitpackage:users/admin_assign_role_user.tpl', null, array( 'display_mode' => 'admin' ));
-?>
+$gBitSystem->display( 'bitpackage:users/admin_assign_role_user.tpl', null, [ 'display_mode' => 'admin' ]);

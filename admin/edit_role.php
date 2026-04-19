@@ -118,7 +118,7 @@ if( !empty( $_REQUEST['role_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUES
 	$gBitSmarty->assign( 'permPackages', $permPackages );
 
 	// get role list separately from the $users stuff to avoid splitting of data due to pagination
-	$listHash = array( 'sort_mode' => 'role_name_asc' );
+	$listHash = [ 'sort_mode' => 'role_name_asc' ];
 
 /*
 	// get content and pass it on to the template
@@ -129,14 +129,14 @@ if( !empty( $_REQUEST['role_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUES
 	$gBitSmarty->assign( 'contentList', $cList );
 	$gBitSmarty->assign( 'contentSelect', $contentSelect );
 */
-	$contentTypes = array( '' => KernelTools::tra( 'All Content' ) );
+	$contentTypes = [ '' => KernelTools::tra( 'All Content' ) ];
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		$contentTypes[$cType['content_type_guid']] = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 	}
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 } else {
 	// get rolelist separately from the $users stuff to avoid splitting of data due to pagination
-	$listHash = array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc' );
+	$listHash = [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc' ];
 }
 $gBitSmarty->assign('roleList', $gBitUser->getAllRoles( $listHash ));
 
@@ -144,11 +144,6 @@ $inc = [];
 if( empty( $mid ) ) {
 	if( !empty( $_REQUEST['role_id'] ) ) {
 		$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['role_id'] );
-
-		$defaultRoleId = $gBitSystem->getConfig( 'default_home_role' );
-		$gBitSmarty->assign( 'defaultRoleId', $defaultRoleId );
-		$gBitSmarty->assign( 'roleInfo', $roleInfo );
-		$gBitSmarty->assign( 'allPerms', $allPerms );
 
 		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Admininster Role' ).': '.$roleInfo['role_name'] );
 		$mid = 'bitpackage:users/admin_role_edit.tpl';
@@ -159,6 +154,9 @@ if( empty( $mid ) ) {
 	}
 }
 
+$gBitSmarty->assign( 'defaultRoleId', $gBitSystem->getConfig( 'default_home_role' ) );
+$gBitSmarty->assign( 'roleInfo', $roleInfo ?? [] );
+$gBitSmarty->assign( 'allPerms', $allPerms ?? [] );
 $gBitSmarty->assign('successMsg',$successMsg);
 $gBitSmarty->assign('errorMsg',$errorMsg);
 
