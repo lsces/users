@@ -34,6 +34,7 @@ $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getEnabledProvid
 // Everything below here is needed for registration
 
 use Bitweaver\Users\BaseAuth;
+use Bitweaver\Users\RolePermUser;
 
 if( !empty( $_REQUEST['returnto'] ) ) {
 	$_SESSION['returnto'] = $_REQUEST['returnto'];

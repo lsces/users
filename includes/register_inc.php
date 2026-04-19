@@ -3,6 +3,7 @@
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\KernelTools;
 use Bitweaver\Wiki\BitPage;
+use Bitweaver\Users\RolePermUser;
 
 	// Register the new user
 	$userClass = $gBitSystem->getConfig( 'user_class', 'RolePermUser' );

@@ -177,7 +177,7 @@ class BaseAuth {
 		} elseif (!empty($pAuthMixed)) {
 			$authPlugin=BaseAuth::getAuthMethod( $pAuthMixed );
 			if (file_exists( $authPlugin['file'] )) {
-//				require_once $authPlugin['file'];
+				require_once $authPlugin['file'];
 				$cl = $authPlugin['class'];
 				$instance = new $cl();
 				if( $instance->isSupported() ) {

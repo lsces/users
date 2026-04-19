@@ -32,7 +32,7 @@ $redirectUrl = false;
 
 //Remember where user is logging in from and send them back later; using session variable for those of us who use WebISO services
 //do not use session loginfrom with signin.php or register.php - only "inline" login forms display in perm denied fatals, etc.
-if( isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_DIR.'/login' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_DIR.'/register' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_DIR.'/validate' ) === false ) {
+if( isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/login' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/register' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/validate' ) === false ) {
 	$from = parse_url( $_SERVER['HTTP_REFERER'] );
 	if( $_SERVER['HTTP_HOST'] == $from['host'] ) {
 		// We have a referer  from this site, but not an authentication URL
@@ -51,7 +51,7 @@ if( !empty( $_REQUEST['provider'] ) ) {
 		if( $gBitUser->isRegistered() ) {
 			$gBitHybridAuthManager->expungeUserProfile( $gBitUser->mUserId, $_REQUEST['provider'] );
 		}
-		\Bitweaver\bit_redirect( $_SESSION['loginfrom'] );
+		KernelTools::bit_redirect( $_SESSION['loginfrom'] );
 	} else {
 		try {
 			$auth = $gBitHybridAuthManager->authenticate( $_REQUEST['provider'], $gBitUser );
@@ -90,7 +90,7 @@ if( !empty( $_REQUEST['provider'] ) ) {
 					} elseif( !empty( $_REQUEST['auth_new'] ) && !$gBitUser->isRegistered() ) {
 						$pRegisterHash = $_REQUEST;
 						$pRegisterHash['novalidation'] = true;
-						foreach( array( 'displayName' => 'real_name', 'email'=>'email', 'emailVerified'=>'verified_email', 'gender'=>'customers_gender', 'firstName'=>'customers_firstname', 'lastName'=>'customers_lastname', 'phone'=>'customers_telephone' ) as $member=>$key ) {
+						foreach( [ 'displayName' => 'real_name', 'email' => 'email', 'emailVerified' => 'verified_email', 'gender' => 'customers_gender', 'firstName' => 'customers_firstname', 'lastName' => 'customers_lastname', 'phone' => 'customers_telephone' ] as $member=>$key ) {
 							if( $auth->$member ) {
 								$pRegisterHash[$key] = $auth->$member;
 							}
