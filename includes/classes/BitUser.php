@@ -2610,8 +2610,8 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 					'source_file' => $this->getSourceFile( array( 'sub_dir'=>$res['avatar_attachment_id'], 'user_id' => $res['user_id'], 'file_name'=>$res['avatar_file_name'], 'mime_type'=>$res['avatar_mime_type'], 'package'=>\Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name( array( 'mime_type'=>$res['avatar_mime_type'], 'name'=>$res['avatar_file_name'] ) ) ) ),
 					'file_name' => $res['avatar_url'],
 					// TODO: Make this a preference
-					'size'         => 'avatar'
-				));
+					'size'        => 'avatar',
+				) );
 			}
 			$res["groups"] = $this->getGroups( $res['user_id'] );
 			$ret[$res['user_id']] = $res;
