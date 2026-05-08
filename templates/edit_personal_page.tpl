@@ -7,7 +7,7 @@
 		<h1>
 			{* this weird dual assign thing is cause smarty wont interpret backticks to object in assign tag - spiderr *}
 			{assign var=conDescr value=$gContent->getContentTypeName()}
-			{if $pageInfo.page_id}
+			{if !empty($pageInfo.page_id )}
 				{assign var=editLabel value="{tr}Edit{/tr} $conDescr"}
 				{tr}{tr}Edit{/tr} {$pageInfo.original_title}{/tr}
 			{else}
@@ -18,7 +18,7 @@
 	</div>
 
 	{* Check to see if there is an editing conflict *}
-	{if $errors.edit_conflict}
+	{if !empty($errors.edit_conflict)}
 		<script>/* <![CDATA[ */
 			alert( "{$errors.edit_conflict|strip_tags}" );
 		/* ]]> */</script>
@@ -26,7 +26,7 @@
 	{/if}
 
 	<div class="body">
-		{if $translateFrom}
+		{if !empty($translateFrom)}
 			<div class="translate">
 
 				{if $translateFrom->mInfo.google_guess}
@@ -59,7 +59,7 @@
 			</div>
 		{/if}
 
-		{if $page eq 'SandBox'}
+		{if $page ?? '' eq 'SandBox'}
 			<div class="admin box">{tr}The SandBox is a page where you can practice your editing skills, use the preview feature to preview the appeareance of the page, no versions are stored for this page.{/tr}</div>
 		{/if}
 
@@ -67,10 +67,11 @@
 			{jstabs}
 				{jstab title="$editLabel Body"}
 					{legend legend="`$editLabel` Body"}
-						<input type="hidden" name="page_id" value="{$pageInfo.page_id}" />
+						<input type="hidden" name="page_id" value="{$pageInfo.page_id ?? 0}" />
+						<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 
 						<div class="form-group">
-							{formfeedback warning=$errors.title}
+							{formfeedback warning=$errors.title ?? ''}
 							{formlabel label="$conDescr Title" for="title"}
 							{forminput}
 								{if $gBitUser->hasPermission( 'p_wiki_rename_page' ) || !$pageInfo.page_id}
@@ -91,7 +92,7 @@
 							</div>
 						{/if}
 
-						{if $pageInfo.edit_section == 1}
+						{if $pageInfo.edit_section ?? 0 == 1}
 							<input type="hidden" name="section" value="{$pageInfo.section}" />
 						{/if}
 
@@ -107,11 +108,11 @@
 							</div>
 						{/if}
 
-						{if $page ne 'SandBox'}
+						{if $page ?? '' ne 'SandBox'}
 							<div class="form-group">
 								{formlabel label="Comment" for="edit_comment"}
 								{forminput}
-									<input size="50" type="text" name="edit_comment" id="edit_comment" value="{$pageInfo.edit_comment}" />
+									<input size="50" type="text" name="edit_comment" id="edit_comment" value="{$pageInfo.edit_comment ?? ''}" />
 									{formhelp note="Add a comment to illustrate your most recent changes."}
 								{/forminput}
 							</div>

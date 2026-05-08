@@ -51,6 +51,7 @@ if( isset($_REQUEST["newuser"] ) ) {
 	} else {
 		$gBitSystem->setBrowserTitle( 'Assume User Identity' );
 		$formHash['assume_user'] = $_REQUEST['assume_user'];
+		$formHash['tk'] = $_REQUEST['tk'];
 		$msgHash = [
 			'confirm_item' => KernelTools::tra( 'This will log you in as the user' ) . " <strong>$userInfo[real_name] ($userInfo[login])</strong>",
 		];

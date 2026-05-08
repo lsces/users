@@ -7,10 +7,10 @@
 				{if $gBitSystem->isPackageActive( 'bitcommerce' ) && $gBitUser->hasPermission( 'p_commerce_admin' )}
 					{smartlink ipackage=bitcommerce ifile="admin/list_orders.php" user_id=$userInfo.user_id ititle="Orders" booticon="fa-shopping-cart"}
 				{/if}
-				{smartlink ipackage=users ifile="admin/index.php" assume_user=$userInfo.user_id ititle="Assume user identity" booticon="fa-user-doctor"}
+				{smartlink ipackage=users ifile="admin/index.php" assume_user=$userInfo.user_id tk=$gBitUser->mTicket ititle="Assume user identity" booticon="fa-user-doctor"}
 				{smartlink ipackage=users ifile="admin/assign_user.php" assign_user=$userInfo.user_id ititle="Assign Group" booticon="fa-key"}
 				{smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userInfo.user_id ititle="User Activity" booticon="fa-bolt"}
-				{if $users[user].user_id != $smarty.const.ANONYMOUS_USER_ID}
+				{if $userInfo.user_id != $smarty.const.ANONYMOUS_USER_ID}
 					{smartlink ipackage=liberty ifile="list_content.php" user_id=$userInfo.user_id ititle="User Content" booticon="fa-square-list"}
 					{smartlink ipackage=users ifile="admin/index.php" action=delete user_id=$userInfo.user_id ititle="Remove" booticon="fa-trash"}
 				{/if}
@@ -28,7 +28,7 @@
 			{/if}
 		</div>
 	{/if}
-	{if $userInfo.logo_url}
+	{if !empty($userInfo.logo_url)}
 		<div style="text-align:center;">
 			<img src="{$userInfo.logo_url}" class="icon" title="{tr}Logo{/tr}" alt="{$gBitUser->getDisplayName()} {tr}Logo{/tr}" />
 		</div>

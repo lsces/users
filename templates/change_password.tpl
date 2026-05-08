@@ -8,7 +8,7 @@
 	<div class="body">
 		{form ipackage=users ifile="change_password.php" secure=$gBitSystem->isFeatureActive("site_https_login_required")}
 			<input type="hidden" name="user_id" value="{$userInfo.user_id}" />
-			{if $userInfo.provpass}
+			{if !empty($userInfo.provpass)}
 				<input type="hidden" name="provpass" value="{$userInfo.provpass|escape}" />
 			{/if}
 
@@ -19,7 +19,7 @@
 				{/forminput}
 			</div>
 
-			{if !$userInfo.provpass}
+			{if empty($userInfo.provpass)}
 				<div class="form-group">
 					{formlabel label="Old Password" for="oldpass"}
 					{forminput}

@@ -1,5 +1,5 @@
 <?php
-
+namespace Bitweaver\Users;
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\KernelTools;
 use Bitweaver\Wiki\BitPage;
