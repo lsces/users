@@ -1624,7 +1624,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			// iHomepage is the user_id for the user...
 			$key = 'user_id';
 			// force to proper integer to get things like "007." to properly query
-			$iHomepage = (integer) $iHomepage;
+			$iHomepage = (int) $iHomepage;
 		} elseif( substr( $iHomepage, 0, 7 ) == 'mailto:' ) {
 			// iHomepage is the email address of the user...
 			$key = 'email';
@@ -1735,14 +1735,14 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	/**
 	 * getByHash get user from cookie hash
 	 *
-	 * @param array $pHash
+	 * @param string $pCookie
 	 * @access public
-	 * @return array user info
+	 * @return int|null user_id
 	 */
-	public function getUserIdFromCookieHash( $pHash ) {
-		if ( !$this->mDb->tableExists( 'users_cnxn' ) ) { return []; }
+	public function getUserIdFromCookie( string $pCookie ) {
 		$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie` = ?";
-		return $this->mDb->getOne( $query, [ $pHash ]);
+		$result = $this->mDb->getOne( $query, [ $pCookie ]);
+		return $result ? (int)$result : null;
 	}
 
 	/**
@@ -2687,14 +2687,14 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	 * @access public
 	 * @return int|array|bool false on failure - mErrors will contain reason for failure
 	 */
-	public function getRoles( int $pUserId = 0, bool $pForceRefresh = false ) {
-		$pUserId = !empty( $pUserId ) ? $pUserId : $this->mUserId;
-		if( !isset( $this->cUserRoles[$pUserId] ) || $pForceRefresh ) {
+	public function getRoles( int $pUserId = -1, bool $pForceRefresh = false ) {
+		$userId = $pUserId ?? ( $this->mUserId ?? -1 );
+		if( !isset( $this->cUserRoles[$userId] ) || $pForceRefresh ) {
 			$query = "
 				SELECT ur.`role_id`, ur.`role_name`, ur.`user_id` as role_owner_user_id
 				FROM `".BIT_DB_PREFIX."users_roles_map` urm INNER JOIN `".BIT_DB_PREFIX."users_roles` ur ON (ur.`role_id`=urm.`role_id`)
 				WHERE urm.`user_id`=? OR urm.`role_id`=".ANONYMOUS_TEAM_ID;
-			$ret = $this->mDb->getAssoc( $query, [ (int) $pUserId ]);
+			$ret = $this->mDb->getAssoc( $query, [ (int) $userId ]);
 			if( $ret ) {
 				foreach( array_keys( $ret ) as $roleId ) {
 					$res = [];
@@ -2704,10 +2704,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				}
 			}
 			// cache it
-			$this->cUserRoles[$pUserId] = $ret;
+			$this->cUserRoles[$userId] = $ret;
 			return $ret;
 		} else {
-			return $this->cUserRoles[$pUserId];
+			return $this->cUserRoles[$userId];
 		}
 	}
 

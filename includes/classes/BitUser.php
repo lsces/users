@@ -1605,7 +1605,7 @@ class BitUser extends \Bitweaver\Liberty\LibertyMime {
 			// iHomepage is the user_id for the user...
 			$key = 'user_id';
 			// force to proper integer to get things like "007." to properly query
-			$iHomepage = (integer)$iHomepage;
+			$iHomepage = (int)$iHomepage;
 		} elseif( substr( $iHomepage, 0, 7 ) == 'mailto:' ) {
 			// iHomepage is the email address of the user...
 			$key = 'email';

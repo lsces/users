@@ -116,7 +116,7 @@ if( !empty( $gOverrideLoginFunction )) {
 //		var_dump( 'load from cache' ); die;
 	} else {
 		$gBitUser = new RolePermUser();
-		if( $gBitUser->mUserId = $gBitUser->getUserIdFromCookieHash( $_COOKIE[$siteCookie] ) ) {
+		if( $gBitUser->mUserId = $gBitUser->getUserIdFromCookie( $_COOKIE[$siteCookie] ) ) {
 			// we have user with this cookie.
 			if( $gBitUser->load( true ) ) {
 				// maybe do something...
