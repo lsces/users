@@ -6,7 +6,7 @@
 // | This source file is subject to version 2.0 of the GPL license		|
 // +--------------------------------------------------------------------+
 // | Portions Copyright (c) 2003 The zen-cart developers				|
-// | Portions Copyright (c) 2003 osCommerce								|	
+// | Portions Copyright (c) 2003 osCommerce								|
 // +--------------------------------------------------------------------+
 //
 

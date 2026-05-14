@@ -51,9 +51,7 @@ if(!empty($_SESSION['freecap_word_hash']) && !empty($_POST['word']))
 		$_SESSION['freecap_attempts'] = 0;
 		$_SESSION['freecap_word_hash'] = false;
 
-
 		// now process form
-
 
 		// now go somewhere else
 		// header("Location: somewhere.php");

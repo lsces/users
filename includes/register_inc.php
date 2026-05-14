@@ -1,11 +1,11 @@
 <?php
 namespace Bitweaver\Users;
+
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\KernelTools;
 use Bitweaver\Wiki\BitPage;
-use Bitweaver\Users\RolePermUser;
 
-	// Register the new user
+// Register the new user
 	$userClass = $gBitSystem->getConfig( 'user_class', 'RolePermUser' );
 	$newUser = new $userClass();
 
@@ -45,7 +45,7 @@ use Bitweaver\Users\RolePermUser;
 			$newUser->storePreference('users_information','private');
 		}
 
-		// requires validation by email 
+		// requires validation by email
 		if( $gBitSystem->isFeatureActive( 'users_validate_user' ) ) {
 			$gBitSmarty->assign('msg',KernelTools::tra('You will receive an email with information to login for the first time into this site'));
 			$gBitSmarty->assign('showmsg','y');
@@ -63,7 +63,7 @@ use Bitweaver\Users\RolePermUser;
 			// return to referring page
 			if( !empty( $_SESSION['returnto'] ) ) {
 				$url = $_SESSION['returnto'];
-			// forward to group post-registration page 
+			// forward to group post-registration page
 			} elseif ( !empty( $_REQUEST['group'] ) && !empty( $groupInfo['after_registration_page'] ) ) {
 				if ( $newUser->verifyId( $groupInfo['after_registration_page'] ) ) {
 					$url = BIT_ROOT_URI."index.php?content_id=".$groupInfo['after_registration_page'];

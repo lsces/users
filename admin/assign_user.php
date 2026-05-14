@@ -11,7 +11,7 @@ use Bitweaver\KernelTools;
 
 $gBitSystem->verifyPermission( 'p_users_admin' );
 
-if (!$gBitUser->userExists( array( 'user_id' => $_REQUEST["assign_user"] ) ) ) {
+if (!$gBitUser->userExists( [ 'user_id' => $_REQUEST["assign_user"] ] ) ) {
 	$gBitSystem->fatalError( KernelTools::tra( "User doesnt exist" ));
 }
 
@@ -39,17 +39,15 @@ if( isset( $_REQUEST["action"] ) ) {
 }
 $gBitSmarty->assign( 'assignUser', $assignUser );
 
-$listHash = array( 'sort_mode' => 'group_name_asc' );
+$listHash = [ 'sort_mode' => 'group_name_asc' ];
 $gBitSmarty->assign('groups', $gBitUser->getAllGroups( $listHash ));
 
 $gBitSystem->setBrowserTitle( 'Edit User: '.$assignUser->mUsername );
 
 if($gBitSystem->isPackageActive("quota")) {
-	include(QUOTA_PKG_INCLUDE_PATH.'quota_inc.php');	
+	include(QUOTA_PKG_INCLUDE_PATH.'quota_inc.php');
 }
 
-
-
 // Display the template
-$gBitSystem->display( 'bitpackage:users/admin_assign_user.tpl', null, array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/admin_assign_user.tpl', null, [ 'display_mode' => 'admin' ]);
 ?>

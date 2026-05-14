@@ -12,7 +12,6 @@ use Bitweaver\KernelTools;
 
 global $gQueryUser, $gBitUser, $module_rows, $module_params, $gLibertySystem, $module_title;
 
-
 $userId = $gBitUser->mUserId;
 if( !empty( $gQueryUser->mUserId ) ) {
 	$userId = $gQueryUser->mUserId;
@@ -33,13 +32,13 @@ if( !empty( $module_params['show_date'] ) ) {
 	$gBitSmarty->assign( 'userShowDate',  true  );
 }
 
-$listHash = array(
+$listHash = [
 	'content_type_guid' => !empty( $module_params['content_type_guid'] ) ? $module_params['content_type_guid'] : null,
 	'offset' => 0,
 	'max_records' => $module_rows,
 	'sort_mode' => 'last_modified_desc',
 	'user_id' => $userId,
-);
+];
 $modLastPages = $gBitUser->getContentList( $listHash );
 $gBitSmarty->assign( 'modLastPages', $modLastPages );
 ?>

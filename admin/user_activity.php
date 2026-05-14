@@ -20,10 +20,10 @@ if( !empty( $_REQUEST['ip'] ) ) {
 
 if( $userId = (int)BitBase::getParameter( $_REQUEST, 'user_id' ) ) {
 	$listHash['user_id'] = $userId;
-	$gBitSmarty->assign( 'userInfo',  $gBitUser->getUserInfo( array( 'user_id' => $userId ) ) );
+	$gBitSmarty->assign( 'userInfo',  $gBitUser->getUserInfo( [ 'user_id' => $userId ] ) );
 }
 
 $gBitSmarty->assign( 'userActivity', $gBitUser->getUserActivity( $listHash ));
 $gBitSmarty->assign( 'listInfo', $listHash['listInfo'] );
-$gBitSystem->display( 'bitpackage:users/user_activity.tpl', 'User Activity' , array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/user_activity.tpl', 'User Activity' , [ 'display_mode' => 'admin' ]);
 

@@ -1,31 +1,29 @@
 <?php
 global $gBitSystem, $gUpgradeFrom, $gUpgradeTo, $gBitDb;
 
-$upgrades = array(
+$upgrades = [
 
+'TIKIWIKI19' =>  [
+	'TIKIWIKI18' =>  [
 
-'TIKIWIKI19' => array (
-	'TIKIWIKI18' => array (
+[ 'DATADICT' => [
+[ 'ALTER' => [
+	'tiki_user_tasks' => [
+		'title' => [ '`title`', 'VARCHAR(250)' ],
+		'description' => [ '`description`', 'X' ],
+	],
+]],
+[ 'RENAMECOLUMN' => [
+	'tiki_pages' => [ '`created`' => '`date` I8' ],
+]],
+]],
 
-array( 'DATADICT' => array(
-array( 'ALTER' => array(
-	'tiki_user_tasks' => array(
-		'title' => array( '`title`', 'VARCHAR(250)' ),
-		'description' => array( '`description`', 'X' ),
-	),
-)),
-array( 'RENAMECOLUMN' => array(
-	'tiki_pages' => array( '`created`' => '`date` I8' ),
-)),
-)),
-
-array( 'QUERY' =>
-	array( 'SQL92' => array(
+[ 'QUERY' =>
+	[ 'SQL92' => [
 		"UPDATE `".BIT_DB_PREFIX."tiki_user_tasks` SET `title`= (SELECT `title` FROM `".BIT_DB_PREFIX."tiki_user_tasks_history` WHERE `".BIT_DB_PREFIX."tiki_user_tasks`.`taskId`=`belongs_to`)",
 		"UPDATE `".BIT_DB_PREFIX."tiki_user_tasks` SET `description`= (SELECT `description` FROM `".BIT_DB_PREFIX."tiki_user_tasks_history` WHERE `".BIT_DB_PREFIX."tiki_user_tasks`.`taskId`=`belongs_to`)",
-	)
-)),
-
+	],
+], ],
 
 /*
 
@@ -44,8 +42,8 @@ CREATE TABLE tiki_user_tasks_history (
   completed integer(14) DEFAULT NULL,                -- date of the completation if it is null it is not yet completed
   deleted integer(14) DEFAULT NULL,                  -- date of the deleteation it it is null it is not deleted
   status char(1) DEFAULT NULL,                       -- null := waiting,
-                                                     -- o := open / in progress,
-                                                     -- c := completed -> (percentage = 100)
+													 -- o := open / in progress,
+													 -- c := completed -> (percentage = 100)
   percentage int(4) DEFAULT NULL,
   accepted_creator char(1) DEFAULT NULL,             -- y - yes, n - no, null - waiting
   accepted_user char(1) DEFAULT NULL,                -- y - yes, n - no, null - waiting
@@ -64,35 +62,32 @@ ALTER TABLE tiki_user_tasks ADD completed int(14) default NULL;
 ALTER TABLE tiki_user_tasks ADD percentage int(4) default NULL;
 */
 
-	)
-),
+	],
+],
 
-
-
-
-'BONNIE' => array(
-	'BWR1' => array(
+'BONNIE' => [
+	'BWR1' => [
 
 // STEP 1
-array( 'QUERY' =>
-	array( 'MYSQL' => array(
+[ 'QUERY' =>
+	[ 'MYSQL' => [
 	"ALTER TABLE `".BIT_DB_PREFIX."tiki_user_preferences` DROP PRIMARY KEY",
 	"ALTER TABLE `".BIT_DB_PREFIX."users_usergroups` DROP PRIMARY KEY",
 	"ALTER TABLE `".BIT_DB_PREFIX."users_grouppermissions` DROP PRIMARY KEY",
 	"ALTER TABLE `".BIT_DB_PREFIX."tiki_group_inclusion` DROP PRIMARY KEY",
 	"ALTER TABLE `".BIT_DB_PREFIX."tiki_user_watches` DROP PRIMARY KEY",
-	)),
-),
+	]],
+],
 
 // STEP 1
-array( 'DATADICT' => array(
-array( 'RENAMETABLE' => array(
+[ 'DATADICT' => [
+[ 'RENAMETABLE' => [
 		'users_usergroups' => 'users_groups_map',
 		'tiki_group_inclusion' => 'users_groups_inclusion',
-	)
-),
-array( 'RENAMECOLUMN' => array(
-	'users_users' => array(
+	],
+],
+[ 'RENAMECOLUMN' => [
+	'users_users' => [
 		'`userId`' => '`user_id` I4',
 		'`lastLogin`' => '`last_login` I8',
 		'`currentLogin`' => '`current_login` I8',
@@ -103,115 +98,114 @@ array( 'RENAMECOLUMN' => array(
 //		'`avatarData`' => '`avatar_data`',
 //		'`avatarLibName`' => '`avatar_lib_name`',
 //		'`avatarType`' => '`avatar_type`',
-	),
-	'users_groups_map' => array(
-		'`userId`' => '`user_id` I4'
-	),
-	'tiki_semaphores' => array( '`semName`' => '`sem_name` C(250)',
-							   '`timestamp`' => '`created` I8' ),
-	'tiki_user_preferences' => array(
-		'`prefName`' => '`pref_name` C(40)'
-	),
+	],
+	'users_groups_map' => [
+		'`userId`' => '`user_id` I4',
+	],
+	'tiki_semaphores' => [ '`semName`' => '`sem_name` C(250)',
+							   '`timestamp`' => '`created` I8', ],
+	'tiki_user_preferences' => [
+		'`prefName`' => '`pref_name` C(40)',
+	],
 //	'users_groups_inclusion' => array('`groupName`', '`group_name`'),
 //	'users_groups_inclusion' => array('`includeGroup`', '`include_group`'),
-	'tiki_user_bookmarks_folders' => array(
+	'tiki_user_bookmarks_folders' => [
 		'`folderId`' => '`folder_id` I4',
 		'`parentId`' => '`parent_id` I4',
-	),
-	'tiki_user_bookmarks_urls' => array(
+	],
+	'tiki_user_bookmarks_urls' => [
 		'`urlId`' => '`url_id` I4',
 		'`lastUpdated`' => '`last_updated` I8',
 		'`folderId`' => '`folder_id` I4',
-	),
-	'tiki_user_menus' => array(
+	],
+	'tiki_user_menus' => [
 		'`menuId`' => '`menu_id` I4',
-	),
-	'users_grouppermissions' => array(
+	],
+	'users_grouppermissions' => [
 		'`permName`' => '`perm_name` C(30)',
-	),
-	'users_groups' => array(
+	],
+	'users_groups' => [
 		'`groupName`' => '`group_name` C(30)',
 		'`groupDesc`' => '`group_desc` C(255)',
 		'`groupHome`' => '`group_home` C(255)',
-	),
-	'users_groups_map' => array(
-		'`userId`' => '`user_id` I4'
-	),
-	'users_objectpermissions' => array(
+	],
+	'users_groups_map' => [
+		'`userId`' => '`user_id` I4',
+	],
+	'users_objectpermissions' => [
 		'`permName`' => '`perm_name` C(30)',
 		'`objectType`' => '`object_type` C(20)',
-	),
-	'users_permissions' => array(
+	],
+	'users_permissions' => [
 		'`permName`' => '`perm_name` C(30)',
 		'`permDesc`' => '`perm_desc` C(250)',
 		'`type`' => '`package` C(100)',
-	),
-	'tiki_userfiles' => array(
+	],
+	'tiki_userfiles' => [
 		'`fileId`' => '`file_id` I4',
 		'`isFile`' => '`is_file` C(1)',
-	),
-	'tiki_user_tasks' => array(
+	],
+	'tiki_user_tasks' => [
 		'`taskId`' => '`task_id` I4' ,
-	)
-)),
+	],
+]],
 
-array( 'ALTER' => array(
-	'users_users' => array(
-		'content_id' => array( '`content_id`', 'I4' ), 
-		'default_group_id' => array( '`default_group_id`', 'I4' ), 
-		'real_name' => array( '`real_name`', 'VARCHAR(64)'),
-		'avatar_attachment_id' => array( '`avatar_attachment_id`', 'I4' ), 
-		'portrait_attachment_id' => array( '`portrait_attachment_id`', 'I4' ), 
-		'logo_attachment_id' => array( '`logo_attachment_id`', 'I4' ), 
+[ 'ALTER' => [
+	'users_users' => [
+		'content_id' => [ '`content_id`', 'I4' ],
+		'default_group_id' => [ '`default_group_id`', 'I4' ],
+		'real_name' => [ '`real_name`', 'VARCHAR(64)'],
+		'avatar_attachment_id' => [ '`avatar_attachment_id`', 'I4' ],
+		'portrait_attachment_id' => [ '`portrait_attachment_id`', 'I4' ],
+		'logo_attachment_id' => [ '`logo_attachment_id`', 'I4' ],
 
-	),
-	'tiki_semaphores' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_sessions' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-		'session_id' => array( '`session_id`', 'VARCHAR(32)' ), 
-	),
-	'tiki_user_bookmarks_folders' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_user_bookmarks_urls' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_user_menus' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_user_preferences' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_user_tasks' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'tiki_user_watches' => array(
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'users_groups' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
-		'user_id' => array( '`user_id`', 'I4' ), 
-	),
-	'users_grouppermissions' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
-	),
-	'users_objectpermissions' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
-		'object_id' => array( '`object_id`', 'I4' ), 
-	),
-	'users_groups_map' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
-	),
-	'users_groups_inclusion' => array(
-		'group_id' => array( '`group_id`', 'I4' ), 
-		'include_group_id' => array( '`include_group_id`', 'I4' ), 
-	),
-)),
+	],
+	'tiki_semaphores' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_sessions' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+		'session_id' => [ '`session_id`', 'VARCHAR(32)' ],
+	],
+	'tiki_user_bookmarks_folders' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_user_bookmarks_urls' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_user_menus' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_user_preferences' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_user_tasks' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'tiki_user_watches' => [
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'users_groups' => [
+		'group_id' => [ '`group_id`', 'I4' ],
+		'user_id' => [ '`user_id`', 'I4' ],
+	],
+	'users_grouppermissions' => [
+		'group_id' => [ '`group_id`', 'I4' ],
+	],
+	'users_objectpermissions' => [
+		'group_id' => [ '`group_id`', 'I4' ],
+		'object_id' => [ '`object_id`', 'I4' ],
+	],
+	'users_groups_map' => [
+		'group_id' => [ '`group_id`', 'I4' ],
+	],
+	'users_groups_inclusion' => [
+		'group_id' => [ '`group_id`', 'I4' ],
+		'include_group_id' => [ '`include_group_id`', 'I4' ],
+	],
+]],
 
-
-array( 'CREATE' => array (
+[ 'CREATE' =>  [
 'users_cnxn' => "
   user_id I4,
   cookie C(64),
@@ -224,12 +218,12 @@ array( 'CREATE' => array (
   CONSTRAINTS	', CONSTRAINT `users_cnxn_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
 ",
 
-)),
+]],
 
-)),
+]],
 
 // STEP 2
-array( 'PHP' => '
+[ 'PHP' => '
 	global $gBitSystem, $gBitDb;
 	$max = $gBitDb->GetOne( "SELECT MAX(user_id) FROM `'.BIT_DB_PREFIX.'users_users`" );
 	$gBitSystem->mDb->CreateSequence( "users_users_user_id_seq", $max + 1 );
@@ -241,23 +235,20 @@ array( 'PHP' => '
 		$id = $gBitDb->GenID( "users_groups_id_seq" );
 		$gBitDb->query( "UPDATE `'.BIT_DB_PREFIX.'users_groups` SET group_id=? WHERE group_name=?", array( $id, $name ) );
 	}
-' ),
+' ],
 
 // STEP 3
-array( 'QUERY' =>
-	array( 'SQL92' => array(
+[ 'QUERY' =>
+	[ 'SQL92' => [
 		"UPDATE `".BIT_DB_PREFIX."users_grouppermissions` SET `perm_name`=replace(`perm_name`,'tiki_','bit_')",
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`=replace(`perm_name`,'tiki_','bit_')",
 		"UPDATE `".BIT_DB_PREFIX."users_objectpermissions` SET `perm_name`=replace(`perm_name`,'tiki_','bit_')",
 
-
-
-
 		"INSERT INTO `".BIT_DB_PREFIX."users_users` (`real_name`, `login`, `email`, `user_id` ) VALUES ('Anonymous', 'anonymous', 'anonymous@localhost', ".ANONYMOUS_USER_ID.")",
 // TikiWiki assigns the creator user foreign key as 'system' even if there is now 'system' user - XOXO spiderr
 // In order for all pages to upgrade, there must be at least an 'admin' and 'system' user
- 		"INSERT INTO `".BIT_DB_PREFIX."users_users` (`real_name`, `login`, `email`, `user_id` ) VALUES ('Administrator', 'admin', 'root@localhost', ".ROOT_USER_ID.")",
- 		"INSERT INTO `".BIT_DB_PREFIX."users_users` (`real_name`, `login`, `email` ) VALUES ('System', 'system', 'system@localhost' )",
+		"INSERT INTO `".BIT_DB_PREFIX."users_users` (`real_name`, `login`, `email`, `user_id` ) VALUES ('Administrator', 'admin', 'root@localhost', ".ROOT_USER_ID.")",
+		"INSERT INTO `".BIT_DB_PREFIX."users_users` (`real_name`, `login`, `email` ) VALUES ('System', 'system', 'system@localhost' )",
 		"UPDATE `".BIT_DB_PREFIX."tiki_semaphores` SET `user_id`=(SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE `".BIT_DB_PREFIX."users_users`.`login`=`".BIT_DB_PREFIX."tiki_semaphores`.`user`)",
 		"UPDATE `".BIT_DB_PREFIX."tiki_semaphores` SET `user_id`=(SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE `".BIT_DB_PREFIX."users_users`.`login`=`".BIT_DB_PREFIX."tiki_semaphores`.`user`)",
 		"UPDATE `".BIT_DB_PREFIX."tiki_sessions` SET `user_id`=(SELECT `user_id` FROM `".BIT_DB_PREFIX."users_users` WHERE `".BIT_DB_PREFIX."users_users`.`login`=`".BIT_DB_PREFIX."tiki_sessions`.`user`)",
@@ -278,37 +269,36 @@ array( 'QUERY' =>
 		"update `".BIT_DB_PREFIX."tiki_user_watches` set `type` = 'bitpage' where `type` = 'Wiki page'",
 		"update `".BIT_DB_PREFIX."tiki_user_watches` set `type` = 'bitpage' where `type` = 'Wiki-Seite'",
 
-
-	),
-)),
+	],
+], ],
 
 // STEP 4
-array( 'DATADICT' => array(
-array( 'DROPCOLUMN' => array(
-		'tiki_semaphores' => array( '`user`' ),
-		'tiki_sessions' => array( '`user`', '`sessionId`' ),
-		'users_groups_map' => array( '`groupName`' ),
-		'users_grouppermissions' => array( '`groupName`' ),
-		'users_objectpermissions' => array( '`groupName`' ),
-		'users_groups_inclusion' => array( '`groupName`' ),
-		'tiki_user_bookmarks_folders' => array( '`user`' ),
-		'tiki_user_bookmarks_urls' => array( '`user`' ),
-		'tiki_user_menus' => array( '`user`' ),
-		'tiki_user_preferences' => array( '`user`' ),
-		'tiki_user_tasks' => array( '`user`' ),
-		'tiki_user_watches' => array( '`user`' ),
-	)),
-)),
+[ 'DATADICT' => [
+[ 'DROPCOLUMN' => [
+		'tiki_semaphores' => [ '`user`' ],
+		'tiki_sessions' => [ '`user`', '`sessionId`' ],
+		'users_groups_map' => [ '`groupName`' ],
+		'users_grouppermissions' => [ '`groupName`' ],
+		'users_objectpermissions' => [ '`groupName`' ],
+		'users_groups_inclusion' => [ '`groupName`' ],
+		'tiki_user_bookmarks_folders' => [ '`user`' ],
+		'tiki_user_bookmarks_urls' => [ '`user`' ],
+		'tiki_user_menus' => [ '`user`' ],
+		'tiki_user_preferences' => [ '`user`' ],
+		'tiki_user_tasks' => [ '`user`' ],
+		'tiki_user_watches' => [ '`user`' ],
+	]],
+]],
 
 // STEP 5
-array( 'QUERY' =>
-	array( 'SQL92' => array(
+[ 'QUERY' =>
+	[ 'SQL92' => [
 		"INSERT INTO `".BIT_DB_PREFIX."users_groups_map` (`group_id`, `user_id` ) VALUES ( -1, ".ANONYMOUS_USER_ID." )",
-	),
-)),
+	],
+], ],
 
 // STEP 2
-array( 'PHP' => '
+[ 'PHP' => '
 	global $gBitSystem, $gBitDb;
 	$adminGroup = $gBitDb->GetOne( "SELECT `group_id` FROM `'.BIT_DB_PREFIX.'users_grouppermissions` where perm_name=\'bit_p_admin\'" );
 	if( empty( $adminGroup ) ) {
@@ -320,70 +310,68 @@ array( 'PHP' => '
 		$gBitDb->query( "INSERT INTO `'.BIT_DB_PREFIX.'users_groups_map` (`group_id`,`user_id`) VALUES ( $adminGroup, '.ROOT_USER_ID.' )" );
 		$gBitDb->query( "INSERT INTO `'.BIT_DB_PREFIX.'users_grouppermissions` (`perm_name`, `group_id`) VALUES( \'bit_p_admin\', $adminGroup )" );
 	}
-' ),
+' ],
 
 // STEP 4
-array( 'DATADICT' => array(
-array( 'CREATEINDEX' => array(
-		'tiki_sema_user_idx' => array( 'tiki_semaphores', '`user_id`', [] ),
-		'tiki_user_prefs_idx' => array( 'tiki_user_preferences', '`user_id`', [] ),
-		'tiki_user_prefs_un_idx' => array( 'tiki_user_preferences', '`user_id`,`pref_name`', array( 'UNIQUE' ) ),
-		'users_groups_map_user_idx' => array( 'users_groups_map', '`user_id`', [] ),
-		'users_groups_map_group_idx' => array( 'users_groups_map', '`group_id`', [] ),
-		'users_groups_map_ug_idx' => array( 'users_groups_map', '`user_id`,`group_id`', array( 'UNIQUE' ) ),
-		'users_groupperms_group_idx' => array( 'users_grouppermissions', '`group_id`', [] ),
-		'users_groupperms_group_idx' => array( 'users_grouppermissions', '`group_id`,`perm_name`', array( 'UNIQUE' ) ),
-		'users_groups_inc_group_idx' => array( 'users_groups_inclusion', '`group_id`', [] ),
-		'users_groups_inc_gi_idx' => array( 'users_groups_inclusion', '`group_id`,`include_group_id`', array( 'UNIQUE' ) ),
-		'users_groups_gi_idx'  => array( 'users_groups', '`group_id`', array('UNIQUE') ),
-	)),
-)),
+[ 'DATADICT' => [
+[ 'CREATEINDEX' => [
+		'tiki_sema_user_idx' => [ 'tiki_semaphores', '`user_id`', [] ],
+		'tiki_user_prefs_idx' => [ 'tiki_user_preferences', '`user_id`', [] ],
+		'tiki_user_prefs_un_idx' => [ 'tiki_user_preferences', '`user_id`,`pref_name`', [ 'UNIQUE' ] ],
+		'users_groups_map_user_idx' => [ 'users_groups_map', '`user_id`', [] ],
+		'users_groups_map_group_idx' => [ 'users_groups_map', '`group_id`', [] ],
+		'users_groups_map_ug_idx' => [ 'users_groups_map', '`user_id`,`group_id`', [ 'UNIQUE' ] ],
+		'users_groupperms_group_idx' => [ 'users_grouppermissions', '`group_id`', [] ],
+		'users_groupperms_group_idx' => [ 'users_grouppermissions', '`group_id`,`perm_name`', [ 'UNIQUE' ] ],
+		'users_groups_inc_group_idx' => [ 'users_groups_inclusion', '`group_id`', [] ],
+		'users_groups_inc_gi_idx' => [ 'users_groups_inclusion', '`group_id`,`include_group_id`', [ 'UNIQUE' ] ],
+		'users_groups_gi_idx'  => [ 'users_groups', '`group_id`', ['UNIQUE'] ],
+	]],
+]],
 
+	],
+],
 
-
-	)
-), 
-
-'BWR1' => array(
-	'BWR2' => array(
+'BWR1' => [
+	'BWR2' => [
 // STEP 1
-array( 'DATADICT' => array(
-	array( 'CREATE' => array (
+[ 'DATADICT' => [
+	[ 'CREATE' =>  [
 		'users_favorites_map' => "
 		  favorite_content_id I4 PRIMARY,
 		  user_id I4 PRIMARY,
 		  map_position I4
 		  CONSTRAINT ', CONSTRAINT `users_fav_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
 		",
-	)),
-	array( 'RENAMETABLE' => array(
+	]],
+	[ 'RENAMETABLE' => [
 		'tiki_semaphores'             => 'users_semaphores',
 		'users_objectpermissions'     => 'users_object_permissions',
 		'users_grouppermissions'      => 'users_group_permissions',
 		'tiki_user_watches'           => 'users_watches',
-	)),
-	array( 'RENAMECOLUMN' => array(
-		'users_watches' => array(
-			'`type`' => '`watch_type` C(200)'
-		),
-		'users_group_permissions' => array(
-			'`value`' => "`perm_value` C(1) default ''"
-		),
-		'users_users' => array(
-			'`password`' => '`user_password` C(32)'
-		),
-		'users_permissions' => array(
-			'`level`' => '`perm_level` C(80)'
-		),
-	)),
-	array( 'DROPTABLE' => array(
+	]],
+	[ 'RENAMECOLUMN' => [
+		'users_watches' => [
+			'`type`' => '`watch_type` C(200)',
+		],
+		'users_group_permissions' => [
+			'`value`' => "`perm_value` C(1) default ''",
+		],
+		'users_users' => [
+			'`password`' => '`user_password` C(32)',
+		],
+		'users_permissions' => [
+			'`level`' => '`perm_level` C(80)',
+		],
+	]],
+	[ 'DROPTABLE' => [
 		'tiki_sessions',
-		'users_groups_inclusion'
-	)),
-)),
+		'users_groups_inclusion',
+	]],
+]],
 
-array( 'QUERY' =>
-	array( 'SQL92' => array(
+[ 'QUERY' =>
+	[ 'SQL92' => [
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`='p_shoutbox_view' WHERE `perm_name`='bit_p_view_shoutbox'",
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`='p_shoutbox_admin' WHERE `perm_name`='bit_p_admin_shoutbox'",
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`='p_shoutbox_post' WHERE `perm_name`='bit_p_post_shoutbox'",
@@ -500,8 +488,6 @@ array( 'QUERY' =>
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`='p_nexus_insert_item' WHERE `perm_name`='bit_p_insert_nexus_item'",
 		"UPDATE `".BIT_DB_PREFIX."users_permissions` SET `perm_name`='p_nexus_create_menus' WHERE `perm_name`='bit_p_create_nexus_menus'",
 
-
-
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_shoutbox_view' WHERE `perm_name`='bit_p_view_shoutbox'",
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_shoutbox_admin' WHERE `perm_name`='bit_p_admin_shoutbox'",
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_shoutbox_post' WHERE `perm_name`='bit_p_post_shoutbox'",
@@ -617,31 +603,30 @@ array( 'QUERY' =>
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_articles_admin' WHERE `perm_name`='bit_p_admin_articles'",
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_nexus_insert_item' WHERE `perm_name`='bit_p_insert_nexus_item'",
 		"UPDATE `".BIT_DB_PREFIX."users_group_permissions` SET `perm_name`='p_nexus_create_menus' WHERE `perm_name`='bit_p_create_nexus_menus'",
-	)
-)),
+	],
+], ],
 
-array( 'DATADICT' => array(
-	array('ALTER' => array(
-		'users_users' => array(	
-			'provpass_expires' => array( '`provpass_expires`', 'I8' ),
-		),
-		'users_groups' => array(
+[ 'DATADICT' => [
+	['ALTER' => [
+		'users_users' => [
+			'provpass_expires' => [ '`provpass_expires`', 'I8' ],
+		],
+		'users_groups' => [
 			'is_public' => '`is_public` C(1)'  ,
 			'after_registration_page' => '`after_registration_page` C(255)' ,
-		),
-		'users_cnxn' => array(
-			'assume_user_id' => array( '`assume_user_id`', 'I4' ),
-		),
-	)),
-	)
-),
+		],
+		'users_cnxn' => [
+			'assume_user_id' => [ '`assume_user_id`', 'I4' ],
+		],
+	]],
+	],
+],
 
-)),
-);
+], ],
+];
 
 if( isset( $upgrades[$gUpgradeFrom][$gUpgradeTo] ) ) {
 	$gBitSystem->registerUpgrade( USERS_PKG_NAME, $upgrades[$gUpgradeFrom][$gUpgradeTo] );
 }
-
 
 ?>

@@ -9,6 +9,7 @@
  */
 
 namespace Bitweaver\Liberty;
+
 use Bitweaver\KernelTools;
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\Users\BitHybridAuthManager;
@@ -46,4 +47,4 @@ $gBitSmarty->assign( 'languages', $languages );
 $gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
-$gBitSystem->display( 'bitpackage:users/signin.tpl', $gBitSystem->getConfig( 'site_title' ).' Login' , array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/signin.tpl', $gBitSystem->getConfig( 'site_title' ).' Login' , [ 'display_mode' => 'display' ]);

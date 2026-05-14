@@ -110,5 +110,5 @@ if ( defined( 'ROLE_MODEL' ) ) {
 }
 
 // Display the template
-$gBitSystem->display( 'bitpackage:users/users_import.tpl', (!empty( $title ) ? $title : 'Import Users' ) , array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/users_import.tpl', (!empty( $title ) ? $title : 'Import Users' ) , [ 'display_mode' => 'admin' ]);
 ?>

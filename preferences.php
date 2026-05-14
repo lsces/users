@@ -1,7 +1,7 @@
 <?php
 namespace Bitweaver\Users;
+
 use Bitweaver\KernelTools;
-use function Bitweaver\Users\scramble_email;
 
 /**
  * user preferences
@@ -210,7 +210,6 @@ if( isset( $_REQUEST["chgpswd"] )) {
 		$feedback['success'] = KernelTools::tra( 'The password was updated successfully' );
 	}
 }
-
 
 // this should go in tidbits
 if( isset( $_REQUEST['tasksprefs'] )) {

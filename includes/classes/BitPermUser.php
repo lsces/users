@@ -51,7 +51,7 @@ class BitPermUser extends BitUser {
 	}
 
 	public function __sleep() {
-		return array_merge( parent::__sleep(), array( 'mPerms' ) );
+		return array_merge( parent::__sleep(), [ 'mPerms' ] );
 	}
 
 	public function __wakeup() {
@@ -80,7 +80,7 @@ class BitPermUser extends BitUser {
 			if( $assumeUser->isAdmin() ) {
 				$this->mErrors['assume_user'] = KernelTools::tra( "User administrators cannot be assumed." );
 			} else {
-				$this->mDb->query( "UPDATE `".BIT_DB_PREFIX."users_cnxn` SET `user_id`=?, `assume_user_id`=? WHERE `cookie`=?", array( $pUserId, $gBitUser->mUserId, $_COOKIE[$this->getSiteCookieName()] ) );
+				$this->mDb->query( "UPDATE `".BIT_DB_PREFIX."users_cnxn` SET `user_id`=?, `assume_user_id`=? WHERE `cookie`=?", [ $pUserId, $gBitUser->mUserId, $_COOKIE[$this->getSiteCookieName()] ] );
 				$ret = true;
 			}
 		}
@@ -115,7 +115,7 @@ class BitPermUser extends BitUser {
 	function sanitizeUserInfo()
 	{
 		if (!empty( $this->mInfo )) {
-			$unsanitary = array( 'provpass', 'hash', 'challenge', 'user_password' );
+			$unsanitary = [ 'provpass', 'hash', 'challenge', 'user_password' ];
 			foreach ( array_keys( $this->mInfo ) as $key ) {
 				if (in_array( $key, $unsanitary )) {
 					unset( $this->mInfo[$key] );
@@ -141,11 +141,11 @@ class BitPermUser extends BitUser {
 			$this->addUserToGroup( $this->mUserId, $defaultGroups );
 			if ($gBitSystem->isFeatureActive( 'users_eponymous_groups' )) {
 				// Create a group just for this user, for permissions assignment.
-				$groupParams = array(
+				$groupParams = [
 					'user_id' => $this->mUserId,
 					'name'    => $pParamHash['user_store']['login'],
-					'desc'    => "Personal group for " . ( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] )
-				);
+					'desc'    => "Personal group for " . ( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] ),
+				];
 				if ($this->storeGroup( $groupParams )) {
 					$this->addUserToGroup( $this->mUserId, $groupParams['group_id'] );
 				}
@@ -172,7 +172,7 @@ class BitPermUser extends BitUser {
 	{
 		static $sGroups = [];
 		if (!isset( $sGroups[$pUserId][$pGroupName] )) {
-			$bindVars = array( $pGroupName );
+			$bindVars = [ $pGroupName ];
 			$whereSql = '';
 			if ($pUserId != '*') {
 				$whereSql = 'AND `user_id`=?';
@@ -212,22 +212,22 @@ class BitPermUser extends BitUser {
 				$gBitSystem->fatalError( KernelTools::tra( 'You cannot delete yourself' ) );
 			}
 			elseif ($this->mUserId != ANONYMOUS_USER_ID) {
-				$userTables = array(
+				$userTables = [
 					'users_groups_map',
-				);
+				];
 
 				foreach ( $userTables as $table ) {
 					$query = "DELETE FROM `" . BIT_DB_PREFIX . $table . "` WHERE `user_id` = ?";
-					$result = $this->mDb->query( $query, array( $this->mUserId ) );
+					$result = $this->mDb->query( $query, [ $this->mUserId ] );
 				}
 
 				if ( parent::expunge() ) {
 					$this->CompleteTrans();
 					return true;
 				}
-				else {
+
 					$this->mDb->RollbackTrans();
-				}
+
 			}
 			else {
 				$this->mDb->RollbackTrans();
@@ -342,7 +342,7 @@ class BitPermUser extends BitUser {
 			while ( $row = $rs->fetchRow() ) {
 				$groupId = $row['group_id'];
 				$ret[$groupId] = $row;
-				$ret[$groupId]['perms'] = $this->getGroupPermissions( array( 'group_id' => $groupId ) );
+				$ret[$groupId]['perms'] = $this->getGroupPermissions( [ 'group_id' => $groupId ] );
 			}
 		}
 
@@ -368,7 +368,7 @@ class BitPermUser extends BitUser {
 			SELECT ug.`group_id` AS `hash_key`, ug.* FROM `" . BIT_DB_PREFIX . "users_groups` ug
 			WHERE `user_id`=?
 			ORDER BY ug.`group_name` ASC";
-		return $this->mDb->getAssoc( $sql, array( $pUserId ) );
+		return $this->mDb->getAssoc( $sql, [ $pUserId ] );
 	}
 
 	/**
@@ -383,11 +383,11 @@ class BitPermUser extends BitUser {
 		// we cannot remove the anonymous group
 		if ($pGroupId != ANONYMOUS_GROUP_ID) {
 			$query = "DELETE FROM `" . BIT_DB_PREFIX . "users_groups_map` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ) );
+			$result = $this->mDb->query( $query, [ $pGroupId ] );
 			$query = "DELETE FROM `" . BIT_DB_PREFIX . "users_group_permissions` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ) );
+			$result = $this->mDb->query( $query, [ $pGroupId ] );
 			$query = "DELETE FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId ) );
+			$result = $this->mDb->query( $query, [ $pGroupId ] );
 			return true;
 		}
 	}
@@ -405,7 +405,7 @@ class BitPermUser extends BitUser {
 		$whereSql = '';
 		if (\Bitweaver\BitBase::verifyId( $pGroupId )) {
 			$whereSql = "AND `group_id`=? ";
-			$bindvars = array( $pGroupId );
+			$bindvars = [ $pGroupId ];
 		}
 		return $this->mDb->getAssoc( "SELECT `group_id`, `group_name` FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `is_default` = 'y' $whereSql ", $bindvars );
 	}
@@ -426,7 +426,7 @@ class BitPermUser extends BitUser {
 				FROM `" . BIT_DB_PREFIX . "users_users` uu
 				INNER JOIN `" . BIT_DB_PREFIX . "users_groups_map` ug ON (uu.`user_id`=ug.`user_id`)
 				WHERE `group_id`=?";
-			$ret = $this->mDb->getAssoc( $query, array( $pGroupId ) );
+			$ret = $this->mDb->getAssoc( $query, [ $pGroupId ] );
 		}
 		return $ret;
 	}
@@ -443,7 +443,7 @@ class BitPermUser extends BitUser {
 		$ret = false;
 		if (\Bitweaver\BitBase::verifyId( $pGroupId )) {
 			$query = "SELECT `group_home` FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id`=?";
-			$ret = $this->mDb->getOne( $query, array( $pGroupId ) );
+			$ret = $this->mDb->getOne( $query, [ $pGroupId ] );
 		}
 		return $ret;
 	}
@@ -510,7 +510,7 @@ class BitPermUser extends BitUser {
 	 * @return array group information
 	 */
 	public function getGroupInfo( $pGroupId ) :array
-	{	
+	{
 		if (\Bitweaver\BitBase::verifyId( $pGroupId )) {
 			$sql = "SELECT * FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id` = ?";
 			$ret = $this->mDb->getRow( $sql, [ $pGroupId ] );
@@ -547,13 +547,13 @@ class BitPermUser extends BitUser {
 				$addGroups = array_keys( $pGroupMixed );
 			}
 			elseif (\Bitweaver\BitBase::verifyId( $pGroupMixed )) {
-				$addGroups = array( $pGroupMixed );
+				$addGroups = [ $pGroupMixed ];
 			}
 			$currentUserGroups = $this->getGroups( $pUserId );
 			foreach ( $addGroups as $groupId ) {
-				if (!$this->mDb->getOne( "SELECT group_id FROM `" . BIT_DB_PREFIX . "users_groups_map` WHERE `user_id` = ? AND `group_id` = ?", array( $pUserId, $groupId ) )) {
+				if (!$this->mDb->getOne( "SELECT group_id FROM `" . BIT_DB_PREFIX . "users_groups_map` WHERE `user_id` = ? AND `group_id` = ?", [ $pUserId, $groupId ] )) {
 					$query = "INSERT INTO `" . BIT_DB_PREFIX . "users_groups_map` (`user_id`,`group_id`) VALUES(?,?)";
-					$result = $this->mDb->query( $query, array( $pUserId, $groupId ) );
+					$result = $this->mDb->query( $query, [ $pUserId, $groupId ] );
 				}
 			}
 		}
@@ -635,9 +635,9 @@ class BitPermUser extends BitUser {
 			}
 			else {
 				$sql = "SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id` = ?";
-				$groupExists = $this->mDb->getOne( $sql, array( $pParamHash['group_id'] ) );
+				$groupExists = $this->mDb->getOne( $sql, [ $pParamHash['group_id'] ] );
 				if ($groupExists) {
-					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX . 'users_groups', $pParamHash['group_store'], array( "group_id" => $pParamHash['group_id'] ) );
+					$result = $this->mDb->associateUpdate( BIT_DB_PREFIX . 'users_groups', $pParamHash['group_store'], [ "group_id" => $pParamHash['group_id'] ] );
 				}
 				else {
 					// A group_id was specified but that group does not exist yet
@@ -667,7 +667,7 @@ class BitPermUser extends BitUser {
 		$ret = '';
 		if (static::verifyId( $pGroupId )) {
 			global $gBitDb;
-			$ret = $gBitDb->getOne( "SELECT `group_name` FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id`=?", array( $pGroupId ) );
+			$ret = $gBitDb->getOne( "SELECT `group_name` FROM `" . BIT_DB_PREFIX . "users_groups` WHERE `group_id`=?", [ $pGroupId ] );
 		}
 		return $ret;
 	}
@@ -697,7 +697,7 @@ class BitPermUser extends BitUser {
 				FROM `" . BIT_DB_PREFIX . "users_users` uu
 					INNER JOIN `" . BIT_DB_PREFIX . "users_groups_map` ugm ON (uu.`user_id`=ugm.`user_id`)
 				WHERE ugm.`group_id` = ?";
-			$ret = $this->mDb->$exec( $query, array( $pGroupId ) );
+			$ret = $this->mDb->$exec( $query, [ $pGroupId ] );
 		}
 		return $ret;
 	}
@@ -721,7 +721,7 @@ class BitPermUser extends BitUser {
 					INNER JOIN `" . BIT_DB_PREFIX . "users_groups` ug ON ( ug.`group_id`=ugp.`group_id` )
 					LEFT OUTER JOIN `" . BIT_DB_PREFIX . "users_groups_map` ugm ON ( ugm.`group_id`=ugp.`group_id` AND ugm.`user_id` = ? )
 				WHERE ug.`group_id`= " . ANONYMOUS_GROUP_ID . " OR ugm.`group_id`=ug.`group_id`";
-			$this->mPerms = $this->mDb->getAssoc( $query, array( $this->mUserId ) );
+			$this->mPerms = $this->mDb->getAssoc( $query, [ $this->mUserId ] );
 			// Add in override permissions
 			if (!empty( $this->mPermsOverride )) {
 				foreach ( $this->mPermsOverride as $key => $val ) {
@@ -745,7 +745,7 @@ class BitPermUser extends BitUser {
 				LEFT OUTER JOIN `" . BIT_DB_PREFIX . "users_group_permissions` ugp ON( up.`perm_name` = ugp.`perm_name` )
 			WHERE ugp.`group_id` IS null AND up.`perm_name` <> ?
 			ORDER BY `package`, up.`perm_name` ASC";
-		return $this->mDb->getAssoc( $query, array( '' ) );
+		return $this->mDb->getAssoc( $query, [ '' ] );
 	}
 
 	/**
@@ -793,9 +793,9 @@ class BitPermUser extends BitUser {
 		if (empty( $pPermission ) || $this->hasPermission( $pPermission )) {
 			return;
 		}
-		else {
+
 			$gBitSystem->fatalPermission( $pPermission, $pMsg );
-		}
+
 	}
 
 	/**
@@ -874,7 +874,7 @@ class BitPermUser extends BitUser {
 	function assignLevelPermissions( $pGroupId, $pLevel, $pPackage = null )
 	{
 		if (\Bitweaver\BitBase::verifyId( $pGroupId ) && !empty( $pLevel )) {
-			$bindvars = array( $pLevel );
+			$bindvars = [ $pLevel ];
 			$whereSql = '';
 			if (!empty( $pPackage )) {
 				$whereSql = ' AND `package`=?';
@@ -911,9 +911,9 @@ class BitPermUser extends BitUser {
 	function assignPermissionToGroup( $pPerm, $pGroupId ) {
 		if( \Bitweaver\BitBase::verifyId( $pGroupId ) && !empty( $pPerm )) {
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_group_permissions` WHERE `group_id` = ? AND `perm_name` = ?";
-			$result = $this->mDb->query( $query, array( $pGroupId, $pPerm ));
+			$result = $this->mDb->query( $query, [ $pGroupId, $pPerm ]);
 			$query = "INSERT INTO `".BIT_DB_PREFIX."users_group_permissions`(`group_id`, `perm_name`) VALUES(?, ?)";
-			$result = $this->mDb->query( $query, array( $pGroupId, $pPerm ));
+			$result = $this->mDb->query( $query, [ $pGroupId, $pPerm ]);
 			return true;
 		}
 	}
@@ -929,7 +929,7 @@ class BitPermUser extends BitUser {
 	function removePermissionFromGroup( $pPerm, $pGroupId ) {
 		if( \Bitweaver\BitBase::verifyId( $pGroupId ) && !empty( $pPerm )) {
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_group_permissions` WHERE `perm_name` = ? AND `group_id` = ?";
-			$result = $this->mDb->query($query, array($pPerm, $pGroupId));
+			$result = $this->mDb->query($query, [$pPerm, $pGroupId]);
 			return true;
 		}
 	}

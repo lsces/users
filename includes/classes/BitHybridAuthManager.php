@@ -8,6 +8,7 @@
  */
 
 namespace Bitweaver\Users;
+
 require_once USERS_PKG_PATH.'hauth/Hybrid/Auth.php';
 
 if( file_exists( EXTERNAL_LIBS_PATH.'facebook/src/Facebook/autoload.php' ) ) {
@@ -17,7 +18,7 @@ if( file_exists( EXTERNAL_LIBS_PATH.'facebook/src/Facebook/autoload.php' ) ) {
 class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 
 	private $mEnabledProviders = [];
-	
+
 	/**
 	 * Constructor
 	 * Loads user configuration and strategies.
@@ -35,7 +36,7 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 	}
 
 	public function __sleep() {
-		return array_merge( parent::__sleep(), array( 'mEnabledProviders' ) );
+		return array_merge( parent::__sleep(), [ 'mEnabledProviders' ] );
 	}
 
 	/**
@@ -53,8 +54,8 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 			if( $authProfile = $authedProvider->getUserProfile() ) {
 				$ret = $authProfile;
 				$this->cacheUserProfile( $pProvider, $authProfile );
-				if( ($userId = $this->mDb->getOne( "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_auth_map` uam WHERE uam.`provider`=? AND uam.`provider_identifier`=?", array( $pProvider, $authProfile->identifier ) )) > ROOT_USER_ID ) {
-				} elseif( $authProfile->emailVerified && ($userId = $this->mDb->getOne( "SELECT uu.`user_id` FROM `".BIT_DB_PREFIX."users_users` uu WHERE uu.`email`=?", array( $authProfile->emailVerified ) )) > ROOT_USER_ID ) {
+				if( ($userId = $this->mDb->getOne( "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_auth_map` uam WHERE uam.`provider`=? AND uam.`provider_identifier`=?", [ $pProvider, $authProfile->identifier ] )) > ROOT_USER_ID ) {
+				} elseif( $authProfile->emailVerified && ($userId = $this->mDb->getOne( "SELECT uu.`user_id` FROM `".BIT_DB_PREFIX."users_users` uu WHERE uu.`email`=?", [ $authProfile->emailVerified ] )) > ROOT_USER_ID ) {
 				} else {
 					$ret = $authProfile;
 				}
@@ -83,7 +84,7 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 				apc_delete( $cacheKey );
 			}
 			$query = "DELETE FROM `".BIT_DB_PREFIX."users_auth_map` WHERE `user_id`=? AND `provider`=?";
-			$result = $this->mDb->query( $query, array( $pUserId, $pProvider ) );
+			$result = $this->mDb->query( $query, [ $pUserId, $pProvider ] );
 		}
 	}
 
@@ -91,12 +92,12 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 		if( \Bitweaver\BitBase::verifyId( $pUserId ) && !empty( $pProvider ) && !empty( $pIdentifier ) ) {
 			$this->StartTrans();
 			$query    = "DELETE FROM `".BIT_DB_PREFIX."users_auth_map` WHERE `user_id`=? AND `provider`=?";
-			$result   = $this->mDb->query( $query, array( $pUserId, $pProvider ) );
+			$result   = $this->mDb->query( $query, [ $pUserId, $pProvider ] );
 			if( !is_null( $pIdentifier ) ) {
 				$profileHash = get_object_vars( $pAuthProfile );
 				ksort( $profileHash );
 				$query      = "INSERT INTO `".BIT_DB_PREFIX."users_auth_map` (`user_id`,`provider`,`provider_identifier`,`last_login`,`profile_json`) VALUES(?, ?, ?, ?, ?)";
-				$result     = $this->mDb->query( $query, array( $pUserId, $pProvider, $pIdentifier, time(), json_encode( $profileHash ) ) );
+				$result     = $this->mDb->query( $query, [ $pUserId, $pProvider, $pIdentifier, time(), json_encode( $profileHash ) ] );
 			}
 			$this->CompleteTrans();
 		}
@@ -123,7 +124,7 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 				global $gBitUser;
 				$pUserId = $gBitUser->mUserId;
 			}
-			if( $ret = $this->mDb->getRow( "SELECT * FROM `".BIT_DB_PREFIX."users_auth_map` WHERE `user_id`=? AND `provider`=?", array( $pUserId, $pProvider ) ) ) {
+			if( $ret = $this->mDb->getRow( "SELECT * FROM `".BIT_DB_PREFIX."users_auth_map` WHERE `user_id`=? AND `provider`=?", [ $pUserId, $pProvider ] ) ) {
 				$ret['profile_hash'] = json_decode( $ret['profile_json'], true );
 			}
 		} catch( \Exception $e ) {
@@ -133,15 +134,15 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 	}
 
 	public function getHybridAuth() {
-		$config = array(
+		$config = [
 			// "base_url" the url that point to HybridAuth Endpoint (where the index.php and config.php are found)
 			"base_url" => USERS_PKG_URI.'hauth/',
 			"debug_mode" => true,
 			"debug_file" => sys_get_temp_dir().'/hybridauth_log',
-		);
+		];
 
 		foreach( $this->mEnabledProviders as $providerKey => $providerHash ) {
-			$config['providers'][$providerHash['provider']] = array ( "enabled" => true );
+			$config['providers'][$providerHash['provider']] =  [ "enabled" => true ];
 			foreach( array_keys( $providerHash['keys'] ) as $configKey ) {
 				$config['providers'][$providerHash['provider']]['keys'][$configKey] = $this->getProviderConfig( $providerKey, $configKey );
 			}
@@ -218,29 +219,28 @@ class BitHybridAuthManager extends \Bitweaver\BitSingleton {
 
 	public function scanProviders() {
 		$ret = [];
-		if( $providerFiles = array_diff(scandir( $this->getProviderPath() ), array('..', '.')) ) {
+		if( $providerFiles = array_diff(scandir( $this->getProviderPath() ), ['..', '.']) ) {
 			foreach( $providerFiles as $providerFile ) {
 				require_once $this->getProviderFile( $provider );
 			}
 		}
 	}
 
-
 	public function getAllProviders() {
-		return array (
-			'google' => array( 'provider' => 'Google', 'icon' => 'icon-google-plus-sign', 'image' => USERS_PKG_URL.'hauth/images/google.png', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'amazon' => array( 'provider' => 'Amazon', 'icon' => 'icon-user', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'aol' => array( 'provider' => 'AOL', 'icon' => 'icon-user', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'facebook' => array( 'provider' => 'Facebook', 'icon' => 'icon-facebook-sign', 'keys' => array( 'id'=>'', 'secret'=> '' ), 'options' => array( 'scope'=>'Comma separated list of requested permissions. Default are: email, user_about_me, user_birthday, user_hometown, user_location, user_website, publish_actions, read_custom_friendlists' ) ),
-			'foursquare' => array( 'provider' => 'Foursquare', 'icon' => 'icon-foursquare', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'instagram' => array( 'provider' => 'Instagram', 'icon' => 'icon-instagram', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'linkedin' => array( 'provider' => 'LinkedIn', 'icon' => 'icon-linkedin', 'keys' => array( 'key'=>'', 'secret'=> '' ) ),
-			'live' => array( 'provider' => 'Live', 'icon' => 'icon-windows', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'openid' => array( 'provider' => 'OpenID', 'icon' => 'icon-user', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'paypal' => array( 'provider' => 'Paypal', 'icon' => 'icon-user', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-			'twitter' => array( 'provider' => 'Twitter', 'icon' => 'icon-twitter', 'keys' => array( 'key'=>'', 'secret'=> '' ) ),
-			'yahoo' => array( 'provider' => 'Yahoo', 'icon' => 'icon-user', 'keys' => array( 'id'=>'', 'secret'=> '' ) ),
-		);
+		return  [
+			'google' => [ 'provider' => 'Google', 'icon' => 'icon-google-plus-sign', 'image' => USERS_PKG_URL.'hauth/images/google.png', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'amazon' => [ 'provider' => 'Amazon', 'icon' => 'icon-user', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'aol' => [ 'provider' => 'AOL', 'icon' => 'icon-user', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'facebook' => [ 'provider' => 'Facebook', 'icon' => 'icon-facebook-sign', 'keys' => [ 'id'=>'', 'secret'=> '' ], 'options' => [ 'scope'=>'Comma separated list of requested permissions. Default are: email, user_about_me, user_birthday, user_hometown, user_location, user_website, publish_actions, read_custom_friendlists' ] ],
+			'foursquare' => [ 'provider' => 'Foursquare', 'icon' => 'icon-foursquare', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'instagram' => [ 'provider' => 'Instagram', 'icon' => 'icon-instagram', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'linkedin' => [ 'provider' => 'LinkedIn', 'icon' => 'icon-linkedin', 'keys' => [ 'key'=>'', 'secret'=> '' ] ],
+			'live' => [ 'provider' => 'Live', 'icon' => 'icon-windows', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'openid' => [ 'provider' => 'OpenID', 'icon' => 'icon-user', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'paypal' => [ 'provider' => 'Paypal', 'icon' => 'icon-user', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+			'twitter' => [ 'provider' => 'Twitter', 'icon' => 'icon-twitter', 'keys' => [ 'key'=>'', 'secret'=> '' ] ],
+			'yahoo' => [ 'provider' => 'Yahoo', 'icon' => 'icon-user', 'keys' => [ 'id'=>'', 'secret'=> '' ] ],
+		];
 	}
-            
+
 }

@@ -8,12 +8,9 @@
  * @subpackage functions
  */
 
-
 namespace Bitweaver;
-use Bitweaver\KernelTools;
+
 use Bitweaver\Users\BitHybridAuthManager;
-use Bitweaver\Users\RolePermUser;
-use Bitweaver\Users\UserRepository;
 
 /**
  * this is a dirty hack to allow admins to log in when we require a visit to the installer
@@ -99,7 +96,7 @@ if( !empty( $_REQUEST['provider'] ) ) {
 							$pRegisterHash['customers_dob'] = ($auth->birthYear ? $auth->birthYear : 1900).'-'.$auth->birthMonth.'-'.$auth->birthDay;
 						}
 						$prefId = $gBitHybridAuthManager->getConfigName( $_REQUEST['provider'], 'id' );
-                        $_SESSION['returnto'] = $_SERVER['SCRIPT_URI'].'?provider='.$_REQUEST['provider'].'&auth_login=1';
+						$_SESSION['returnto'] = $_SERVER['SCRIPT_URI'].'?provider='.$_REQUEST['provider'].'&auth_login=1';
 						include USERS_PKG_INCLUDE_PATH.'register_inc.php';
 					}
 				}
@@ -129,7 +126,7 @@ if( !empty( $_REQUEST['provider'] ) ) {
 				default: $authError = $e->getMessage();
 					break;
 			}
-	 
+
 			$gBitSmarty->assign( 'authError', $authError );
 			$gBitSmarty->assign( 'authExpection', $e );
 			bit_error_log( $authError );
@@ -152,7 +149,6 @@ if( !empty( $tpl ) ) {
 } elseif(( strpos( $redirectUrl, 'signin.php?' ) || strpos( $redirectUrl, 'remind_password.php' )) && strpos( $redirectUrl, 'signin.php?error=' ) == -1 ) {
 // but if we came from a login page, let's go home (except if we got an error when login in)
 	$redirectUrl = $gBitUser->getPostLoginUrl();
-} else {
 }
 
 if( !empty( $redirectUrl ) ) {

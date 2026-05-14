@@ -12,7 +12,6 @@
  * @subpackage auth
  */
 namespace Bitweaver\Users;
-use Bitweaver\KernelTools;
 
 class MultisitesAuth extends BaseAuth {
 
@@ -36,7 +35,7 @@ class MultisitesAuth extends BaseAuth {
 			$loginCol = ' UPPER(`'.(strpos( $user, '@' ) ? 'email' : 'login').'`)';
 			// first verify that the user exists
 			$query = "select `email`, `login`, `user_id`, `user_password` from `".BIT_DB_PREFIX."users_users` where " . $gBitDb->convertBinary(). " $loginCol = ?";
-			$result = $gBitDb->query( $query, array( $loginVal ) );
+			$result = $gBitDb->query( $query, [ $loginVal ] );
 			if( !$result->numRows() ) {
 				$this->mErrors['login'] = 'User not found';
 			} else {
@@ -50,7 +49,7 @@ class MultisitesAuth extends BaseAuth {
 				// TODO - this needs cleaning up - wolff_borg
 				if( !$gBitSystem->isFeatureActive( 'feature_challenge' ) || empty($response) ) {
 					$query = "select `user_id`, `content_id`, `hash` from `".BIT_DB_PREFIX."users_users` where " . $gBitDb->convertBinary(). " $loginCol = ? and (`hash`=? or `hash`=?)";
-					if ( $row = $gBitDb->getRow( $query, array( $loginVal, $hash, $hash2 ) ) ) {
+					if ( $row = $gBitDb->getRow( $query, [ $loginVal, $hash, $hash2 ] ) ) {
 						// auto-update old hashes with simple and standard md5( password )
 						$hashUpdate = '';
 						if( $row['hash'] == $hash ) {
@@ -62,7 +61,7 @@ class MultisitesAuth extends BaseAuth {
 						$query = "update `".BIT_DB_PREFIX."users_users` set  $hashUpdate `last_login`=`current_login`, `current_login`=? where `user_id`=?";
 						$result = $gBitDb->query($query, $bindVars );
 						$query = "select `multisite_id` from `".BIT_DB_PREFIX."multisite_content` where `content_id` = ?";
-						$sites = $gBitDb->getAll($query, array( $row['content_id'] ) );
+						$sites = $gBitDb->getAll($query, [ $row['content_id'] ] );
 						if ( !$sites ) {
 							$ret=USER_VALID;
 						} else {
@@ -85,7 +84,7 @@ class MultisitesAuth extends BaseAuth {
 				} else {
 					// Use challenge-reponse method
 					// Compare pass against md5(user,challenge,hash)
-					$hash = $gBitDb->getOne("select `hash`  from `".BIT_DB_PREFIX."users_users` where " . $gBitDb->convertBinary(). " $loginCol = ?", array( $user ) );
+					$hash = $gBitDb->getOne("select `hash`  from `".BIT_DB_PREFIX."users_users` where " . $gBitDb->convertBinary(). " $loginCol = ?", [ $user ] );
 					if (!isset($_SESSION["challenge"])) {
 						$this->mErrors[] = 'Invalid challenge';
 						$ret=PASSWORD_INCORRECT;
@@ -113,18 +112,18 @@ class MultisitesAuth extends BaseAuth {
 		global $gBitSystem;
 		if( $gBitSystem->isPackageActive( 'multisites' ) ) {
 			return TRUE;
-		} else {
-			return FALSE;
 		}
+			return FALSE;
+
 	}
 
 	function isSupported() {
 		global $gBitSystem;
 		if( $gBitSystem->isPackageActive( 'multisites' ) ) {
 			return TRUE;
-		} else {
-			return FALSE;
 		}
+			return FALSE;
+
 	}
 
 	function createUser( &$pUserHash ) {

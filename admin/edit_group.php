@@ -18,10 +18,10 @@ if( count( $_GET ) > 2 || count( $_POST ) > 2 ) {
 }
 
 if( !empty( $_REQUEST['group_id'] ) ) {
-	$permListHash = array(
+	$permListHash = [
 		'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null,
 		'package' => !empty( $_REQUEST['package'] ) ? $_REQUEST['package'] : null,
-	);
+	];
 	$allPerms = $gBitUser->getGroupPermissions( $permListHash );
 }
 
@@ -34,11 +34,11 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	} else {
 		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Confirm Batch Group Assignment' ) );
 		$formHash['batch_assign'] = $_REQUEST["batch_assign"];
-		$msgHash = array(
+		$msgHash = [
 			'label' => KernelTools::tra( 'Batch Assign Users to Group' ),
 			'confirm_item' => $groupInfo['group_name'],
 			'warning' => KernelTools::tra( 'This will assign every user on the site to the group' ).' <strong>'.$groupInfo['group_name'].'</strong>',
-		);
+		];
 		$gBitSystem->confirmDialog( $formHash,$msgHash );
 	}
 } elseif( isset($_REQUEST["members"] ) ) {
@@ -81,10 +81,10 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 		unset( $_REQUEST['group_id'] );
 	} else {
 		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Delete group') );
-		$msgHash = array(
+		$msgHash = [
 			'confirm_item' => KernelTools::tra( 'Are you sure you want to permantly remove the group' )." <strong>$groupInfo[group_name]</strong>".'?',
 			'warning' => KernelTools::tra( 'This cannot be undone.' ),
-		);
+		];
 		$gBitSystem->confirmDialog( $formHash,$msgHash );
 	}
 //	$mid = 'bitpackage:users/admin_groups_list.tpl';
@@ -117,7 +117,7 @@ if( !empty( $_REQUEST['group_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUE
 	$gBitSmarty->assign( 'permPackages', $permPackages );
 
 	// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
-	$listHash = array( 'sort_mode' => 'group_name_asc' );
+	$listHash = [ 'sort_mode' => 'group_name_asc' ];
 
 /*
 	// get content and pass it on to the template
@@ -128,14 +128,14 @@ if( !empty( $_REQUEST['group_id'] ) || (!empty( $_REQUEST["action"] ) && $_REQUE
 	$gBitSmarty->assign( 'contentList', $cList );
 	$gBitSmarty->assign( 'contentSelect', $contentSelect );
 */
-	$contentTypes = array( '' => KernelTools::tra( 'All Content' ) );
+	$contentTypes = [ '' => KernelTools::tra( 'All Content' ) ];
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		$contentTypes[$cType['content_type_guid']] = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 	}
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 } else {
 	// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
-	$listHash = array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc' );
+	$listHash = [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc' ];
 }
 $gBitSmarty->assign('groupList', $gBitUser->getAllGroups( $listHash ));
 
@@ -162,5 +162,5 @@ $gBitSmarty->assign('successMsg',$successMsg);
 $gBitSmarty->assign('errorMsg',$errorMsg);
 
 // Display the template for group administration
-$gBitSystem->display( $mid , null, array( 'display_mode' => 'edit' ));
+$gBitSystem->display( $mid , null, [ 'display_mode' => 'edit' ]);
 ?>

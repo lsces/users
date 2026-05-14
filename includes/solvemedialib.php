@@ -55,16 +55,14 @@ define("ADCOPY_SIGNUP",            "http://api.solvemedia.com/public/signup");
  * @return string - encoded request
  */
 function _adcopy_qsencode ($data) {
-        $req = "";
-        foreach ( $data as $key => $value )
-                $req .= $key . '=' . urlencode( stripslashes($value) ) . '&';
+		$req = "";
+		foreach ( $data as $key => $value )
+				$req .= $key . '=' . urlencode( stripslashes($value) ) . '&';
 
-        // Cut the last '&'
-        $req=substr($req,0,strlen($req)-1);
-        return $req;
+		// Cut the last '&'
+		$req=substr($req,0,strlen($req)-1);
+		return $req;
 }
-
-
 
 /**
  * Submits an HTTP POST to a solvemedia server
@@ -76,32 +74,30 @@ function _adcopy_qsencode ($data) {
  */
 function _adcopy_http_post($host, $path, $data, $port = 80) {
 
-        $req = _adcopy_qsencode ($data);
+		$req = _adcopy_qsencode ($data);
 
-        $http_request  = "POST $path HTTP/1.0\r\n";
-        $http_request .= "Host: $host\r\n";
-        $http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
-        $http_request .= "Content-Length: " . strlen($req) . "\r\n";
-        $http_request .= "User-Agent: solvemedia/PHP\r\n";
-        $http_request .= "\r\n";
-        $http_request .= $req;
+		$http_request  = "POST $path HTTP/1.0\r\n";
+		$http_request .= "Host: $host\r\n";
+		$http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
+		$http_request .= "Content-Length: " . strlen($req) . "\r\n";
+		$http_request .= "User-Agent: solvemedia/PHP\r\n";
+		$http_request .= "\r\n";
+		$http_request .= $req;
 
-        $response = '';
-        if( false == ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
-                die ('Could not open socket');
-        }
+		$response = '';
+		if( false == ( $fs = @fsockopen($host, $port, $errno, $errstr, 10) ) ) {
+				die ('Could not open socket');
+		}
 
-        fwrite($fs, $http_request);
+		fwrite($fs, $http_request);
 
-        while ( !feof($fs) )
-                $response .= fgets($fs, 1024); // One TCP-IP packet [sic]
-        fclose($fs);
-        $response = explode("\r\n\r\n", $response, 2);
+		while ( !feof($fs) )
+				$response .= fgets($fs, 1024); // One TCP-IP packet [sic]
+		fclose($fs);
+		$response = explode("\r\n\r\n", $response, 2);
 
-        return $response;
+		return $response;
 }
-
-
 
 /**
  * Gets the challenge HTML (javascript and non-javascript version).
@@ -120,16 +116,16 @@ function solvemedia_get_html ($pubkey, $error = null, $use_ssl = false)
 	}
 
 	if ($use_ssl) {
-                $server = ADCOPY_API_SECURE_SERVER;
-        } else {
-                $server = ADCOPY_API_SERVER;
-        }
+				$server = ADCOPY_API_SECURE_SERVER;
+		} else {
+				$server = ADCOPY_API_SERVER;
+		}
 
-        $errorpart = "";
-        if ($error) {
-           $errorpart = ";error=1";
-        }
-        return '<script type="text/javascript" src="'. $server . '/papi/challenge.script?k=' . $pubkey . $errorpart . '"></script>
+		$errorpart = "";
+		if ($error) {
+		   $errorpart = ";error=1";
+		}
+		return '<script type="text/javascript" src="'. $server . '/papi/challenge.script?k=' . $pubkey . $errorpart . '"></script>
 
 	<noscript>
   		<iframe src="'. $server . '/papi/challenge.noscript?k=' . $pubkey . $errorpart . '" height="300" width="500" frameborder="0"></iframe><br/>
@@ -138,17 +134,13 @@ function solvemedia_get_html ($pubkey, $error = null, $use_ssl = false)
 	</noscript>';
 }
 
-
-
-
 /**
  * A SolveMediaResponse is returned from solvemedia_check_answer()
  */
 class SolveMediaResponse {
-        var $is_valid;
-        var $error;
+		var $is_valid;
+		var $error;
 }
-
 
 /**
   * Calls an HTTP POST function to verify if the user's guess was correct
@@ -169,45 +161,45 @@ function solvemedia_check_answer ($privkey, $remoteip, $challenge, $response, $h
 		die ("For security reasons, you must pass the remote ip to solvemedia");
 	}
 
-        //discard spam submissions
-        if ($challenge == null || strlen($challenge) == 0 || $response == null || strlen($response) == 0) {
-                $adcopy_response = new SolveMediaResponse();
-                $adcopy_response->is_valid = false;
-                $adcopy_response->error = 'incorrect-solution';
-                return $adcopy_response;
-        }
+		//discard spam submissions
+		if ($challenge == null || strlen($challenge) == 0 || $response == null || strlen($response) == 0) {
+				$adcopy_response = new SolveMediaResponse();
+				$adcopy_response->is_valid = false;
+				$adcopy_response->error = 'incorrect-solution';
+				return $adcopy_response;
+		}
 
-        $response = _adcopy_http_post (ADCOPY_VERIFY_SERVER, "/papi/verify",
-                                          array (
-                                                 'privatekey' => $privkey,
-                                                 'remoteip'   => $remoteip,
-                                                 'challenge'  => $challenge,
-                                                 'response'   => $response
-                                                 )
-                                          );
+		$response = _adcopy_http_post (ADCOPY_VERIFY_SERVER, "/papi/verify",
+										   [
+												 'privatekey' => $privkey,
+												 'remoteip'   => $remoteip,
+												 'challenge'  => $challenge,
+												 'response'   => $response,
+												 ],
+										  );
 
-        $answers = explode ("\n", $response [1]);
-        $adcopy_response = new SolveMediaResponse();
+		$answers = explode ("\n", $response [1]);
+		$adcopy_response = new SolveMediaResponse();
 
-        if( strlen($hashkey) ){
-                # validate message authenticator
-                $hash = sha1( $answers[0] . $challenge . $hashkey );
+		if( strlen($hashkey) ){
+				# validate message authenticator
+				$hash = sha1( $answers[0] . $challenge . $hashkey );
 
-                if( $hash != $answers[2] ){
-                        $adcopy_response->is_valid = false;
-                        $adcopy_response->error = 'hash-fail';
-                        return $adcopy_response;
-                }
-        }
+				if( $hash != $answers[2] ){
+						$adcopy_response->is_valid = false;
+						$adcopy_response->error = 'hash-fail';
+						return $adcopy_response;
+				}
+		}
 
-        if (trim ($answers [0]) == 'true') {
-                $adcopy_response->is_valid = true;
-        }
-        else {
-                $adcopy_response->is_valid = false;
-                $adcopy_response->error = $answers [1];
-        }
-        return $adcopy_response;
+		if (trim ($answers [0]) == 'true') {
+				$adcopy_response->is_valid = true;
+		}
+		else {
+				$adcopy_response->is_valid = false;
+				$adcopy_response->error = $answers [1];
+		}
+		return $adcopy_response;
 
 }
 
@@ -219,9 +211,8 @@ function solvemedia_check_answer ($privkey, $remoteip, $challenge, $response, $h
  * @param string $appname The name of your application
  */
 function solvemedia_get_signup_url ($domain = null, $appname = null) {
-	return ADCOPY_SIGNUP . "?" .  _adcopy_qsencode (array ('domain' => $domain, 'app' => $appname));
+	return ADCOPY_SIGNUP . "?" .  _adcopy_qsencode ( ['domain' => $domain, 'app' => $appname]);
 }
-
 
 /**
   * Calls an HTTP POST function to verify if the user's response was correct
@@ -232,32 +223,32 @@ function solvemedia_get_signup_url ($domain = null, $appname = null) {
 function solvemedia_precheck_response ($privkey, $verifycode)
 {
 
-    //discard spam submissions
-    if ($verifycode == null || strlen($verifycode) == 0 ) {
-            $adcopy_response = new SolveMediaResponse();
-            $adcopy_response->is_valid = false;
-            $adcopy_response->error = 'incorrect-solution';
-            return $adcopy_response;
-    }
+	//discard spam submissions
+	if ($verifycode == null || strlen($verifycode) == 0 ) {
+			$adcopy_response = new SolveMediaResponse();
+			$adcopy_response->is_valid = false;
+			$adcopy_response->error = 'incorrect-solution';
+			return $adcopy_response;
+	}
 
-    $response = _adcopy_http_post (ADCOPY_VERIFY_SERVER, "/papi/verify.precheck.server",
-                                      array (
-                                             'privatekey' => $privkey,
-                                             'verify_code' => $verifycode
-                                             )
-                                      );
+	$response = _adcopy_http_post (ADCOPY_VERIFY_SERVER, "/papi/verify.precheck.server",
+									   [
+											 'privatekey' => $privkey,
+											 'verify_code' => $verifycode,
+											 ],
+									  );
 
-    $answers = explode ("\n", $response [1]);
-    $adcopy_response = new SolveMediaResponse();
+	$answers = explode ("\n", $response [1]);
+	$adcopy_response = new SolveMediaResponse();
 
-    if (trim ($answers [0]) == 'true') {
-            $adcopy_response->is_valid = true;
-    }
-    else {
-            $adcopy_response->is_valid = false;
-            $adcopy_response->error = $answers [1];
-    }
+	if (trim ($answers [0]) == 'true') {
+			$adcopy_response->is_valid = true;
+	}
+	else {
+			$adcopy_response->is_valid = false;
+			$adcopy_response->error = $answers [1];
+	}
 
-    return $adcopy_response;
+	return $adcopy_response;
 
 }

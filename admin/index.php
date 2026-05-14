@@ -5,6 +5,7 @@
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
 // Initialization
 namespace Bitweaver\Users;
+
 use Bitweaver\BitBase;
 use Bitweaver\KernelTools;
 
@@ -46,7 +47,7 @@ if( isset($_REQUEST["newuser"] ) ) {
 			if ( !isset( $feedback['error'] ) ){
 				$feedback['error'] = [];
 			}
-			$feedback['error'] = array_merge( $feedback['error'], $gBitUser->mErrors ); 
+			$feedback['error'] = array_merge( $feedback['error'], $gBitUser->mErrors );
 		}
 	} else {
 		$gBitSystem->setBrowserTitle( 'Assume User Identity' );
@@ -79,7 +80,7 @@ if( isset( $_REQUEST["action"] ) ) {
 				fputcsv( $fp, $hash );
 			}
 			fclose( $fp );
-		    header( "Content-Type: text/csv" );
+			header( "Content-Type: text/csv" );
 			header('Content-disposition: attachment;filename='.$gBitSystem->getConfig('site_title', 'Site').'-users-export-'.date('Y-m-d_Hi').'.csv');
 			readfile( $file );
 			flush();
@@ -100,14 +101,14 @@ if( isset( $_REQUEST["action"] ) ) {
 
 			if( !empty( $delUsers ) ) {
 				$feedback['success'][] = KernelTools::tra( 'Users deleted' ).": <ul>$delUsers</ul>";
-			} 
+			}
 			if( !empty( $errDelUsers ) ) {
 				$feedback['error'][] = KernelTools::tra( 'Users not deleted' ).": <ul>$errDelUsers</ul>";
 			}
 		} else {
 			foreach( $_REQUEST['batch_user_ids'] as $uid ) {
-				$formHash['input'][] = ( $userInfo = $gBitUser->getUserInfo( [ 'user_id' => $uid ] ) ) 
-					? '<input type="hidden" name="batch_user_ids[]" value="' . $uid . '"/>' . "{$userInfo['real_name']} ({$userInfo['login']})<br/>&lt;{$userInfo['email']}&gt;" 
+				$formHash['input'][] = ( $userInfo = $gBitUser->getUserInfo( [ 'user_id' => $uid ] ) )
+					? '<input type="hidden" name="batch_user_ids[]" value="' . $uid . '"/>' . "{$userInfo['real_name']} ({$userInfo['login']})<br/>&lt;{$userInfo['email']}&gt;"
 					: '<span class="error"/>' . $uid . ' ' . KernelTools::tra( 'not found' ) . '</span>';
 			}
 			$formHash['input'][] = "<input type='checkbox' name='delete_user_content' value='all' checked='checked'/> ".KernelTools::tra( 'Delete all content created by this user' );

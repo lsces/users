@@ -9,9 +9,9 @@
 * Hybrid_Providers_Instagram (By Sebastian Lasse - https://github.com/sebilasse)
 */
 class Hybrid_Providers_Instagram extends Hybrid_Provider_Model_OAuth2
-{ 
-	// default permissions   
-	public $scope = "basic"; 
+{
+	// default permissions
+	public $scope = "basic";
 
 	/**
 	* IDp wrappers initializer 
@@ -29,21 +29,21 @@ class Hybrid_Providers_Instagram extends Hybrid_Provider_Model_OAuth2
 	/**
 	* load the user profile from the IDp api client
 	*/
-	function getUserProfile(){ 
-		$data = $this->api->api("users/self/" ); 
+	function getUserProfile(){
+		$data = $this->api->api("users/self/" );
 
 		if ( $data->meta->code != 200 ){
 			throw new Exception( "User profile request failed! {$this->providerId} returned an invalid response.", 6 );
 		}
 
-		$this->user->profile->identifier  = $data->data->id; 
-		$this->user->profile->displayName = $data->data->full_name ? $data->data->full_name : $data->data->username; 
+		$this->user->profile->identifier  = $data->data->id;
+		$this->user->profile->displayName = $data->data->full_name ? $data->data->full_name : $data->data->username;
 		$this->user->profile->description = $data->data->bio;
 		$this->user->profile->photoURL    = $data->data->profile_picture;
 
-		$this->user->profile->webSiteURL  = $data->data->website; 
-		
-		$this->user->profile->username    = $data->data->username;	
+		$this->user->profile->webSiteURL  = $data->data->website;
+
+		$this->user->profile->username    = $data->data->username;
 
 		return $this->user->profile;
 	}
@@ -55,24 +55,24 @@ class Hybrid_Providers_Instagram extends Hybrid_Provider_Model_OAuth2
 		$this->refreshToken();
 
 		//
-		$response = array();
-		$contacts = array();
-        $profile = ( ( isset( $this->user->profile->identifier ) )?( $this->user->profile ):( $this->getUserProfile() ) );
+		$response = [];
+		$contacts = [];
+		$profile = ( ( isset( $this->user->profile->identifier ) )?( $this->user->profile ):( $this->getUserProfile() ) );
 		try {
-            $response = $this->api->api( "users/{$this->user->profile->identifier}/follows" );
-        } catch (Exception $e) {
-            throw new Exception("User contacts request failed! {$this->providerId} returned an error: $e");
-        }
-        //
+			$response = $this->api->api( "users/{$this->user->profile->identifier}/follows" );
+		} catch (Exception $e) {
+			throw new Exception("User contacts request failed! {$this->providerId} returned an error: $e");
+		}
+		//
 
 		if ( isset( $response ) && $response->meta->code == 200 ) {
 			foreach ($response->data as $contact) {
-                try {
-                    $contactInfo = $this->api->api( "users/".$contact->id );
-                } catch (Exception $e) {
-                    throw new Exception("Contact info request failed for user {$contact->username}! {$this->providerId} returned an error: $e");
-                }
-                //
+				try {
+					$contactInfo = $this->api->api( "users/".$contact->id );
+				} catch (Exception $e) {
+					throw new Exception("Contact info request failed for user {$contact->username}! {$this->providerId} returned an error: $e");
+				}
+				//
 				$uc = new Hybrid_User_Contact();
 				//
 				$uc->identifier     = $contact->id;

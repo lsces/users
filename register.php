@@ -14,7 +14,6 @@ use Bitweaver\KernelTools;
  * required setup
  */
 // Avoid user hell
-use Bitweaver\BitBase;
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\Users\BitHybridAuthManager;
 
@@ -34,7 +33,6 @@ $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getEnabledProvid
 // Everything below here is needed for registration
 
 use Bitweaver\Users\BaseAuth;
-use Bitweaver\Users\RolePermUser;
 
 if( !empty( $_REQUEST['returnto'] ) ) {
 	$_SESSION['returnto'] = $_REQUEST['returnto'];
@@ -94,10 +92,10 @@ closedir( $h );
 sort( $flags );
 $gBitSmarty->assign('flags', $flags);
 
-$listHash = array(
+$listHash = [
 	'is_public' => 'y',
-	'sort_mode' => array( 'is_default_asc', 'group_desc_asc' ),
-);
+	'sort_mode' => [ 'is_default_asc', 'group_desc_asc' ],
+];
 $groupList = $gBitUser->getAllGroups( $listHash );
 $gBitSmarty->assign( 'groupList', $groupList );
 
@@ -125,4 +123,4 @@ if( !empty( $_REQUEST['error'] ) ) {
 }
 
 $gBitSmarty->assign( 'metaKeywords', 'Login, Sign in, Registration, Register, Create new account' );
-$gBitSystem->display('bitpackage:users/register.tpl', 'Register' , array( 'display_mode' => 'display' ));
+$gBitSystem->display('bitpackage:users/register.tpl', 'Register' , [ 'display_mode' => 'display' ]);

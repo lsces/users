@@ -12,6 +12,7 @@
  * @subpackage auth
  */
 namespace Bitweaver\Users;
+
 use Bitweaver\KernelTools;
 
 class IMAPAuth extends BaseAuth {
@@ -43,7 +44,7 @@ class IMAPAuth extends BaseAuth {
 			if(empty($this->mConfig["email"])) {
 				$this->mInfo["email"] = $user;
 			} else {
-				$info=array('login'=>$user);
+				$info=['login'=>$user];
 				$replace_func = create_function('$matches','$info = '.var_export($info,true).';
 							$m = $matches[0];
 							$m = substr($m,1,strlen($m)-2);
@@ -76,37 +77,37 @@ class IMAPAuth extends BaseAuth {
 	}
 
 	function getSettings() {
-		return array(
-		'users_imap_server' => array(
+		return [
+		'users_imap_server' => [
 			'label' => "IMAP Server",
 			'type' => "text",
 			'note' => "",
 			'default' => '',
-		),
-		'users_imap_ssl' => array(
+		],
+		'users_imap_ssl' => [
 			'label' => "Connect Using SSL",
 			'type' => "checkbox",
 			'note' => "",
 			'default' => 'y',
-		),
-		'users_imap_sslvalidate' => array(
+		],
+		'users_imap_sslvalidate' => [
 			'label' => "Require SSL Certificate to be valid",
 			'type' => "checkbox",
 			'note' => "",
 			'default' => 'n',
-		),
-		'users_imap_port' => array(
+		],
+		'users_imap_port' => [
 			'label' => "IMAP Port",
 			'type' => "text",
 			'note' => "",
 			'default' => '993',
-		),
-		'users_imap_email' => array(
+		],
+		'users_imap_email' => [
 			'label' => "LDAP User E-Mail Address",
 			'type' => "text",
 			'note' => "If empty the login is used.<br />Otherwise all %login% is replaced with the login name, and the result used as the email address.<br />Please remember to include the @ sign",
 			'default' => "%login%@redhat.com",
-		),
-	);
+		],
+	];
 	}
 }

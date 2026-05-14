@@ -42,7 +42,7 @@ class Hybrid_Provider_Model_OpenID extends Hybrid_Provider_Model {
 		require_once Hybrid_Auth::$config["path_libraries"] . "OpenID/LightOpenID.php";
 
 		// An error was occurring when proxy wasn't set. Not sure where proxy was meant to be set/initialized.
-		Hybrid_Auth::$config['proxy'] = isset(Hybrid_Auth::$config['proxy']) ? Hybrid_Auth::$config['proxy'] : '';
+		Hybrid_Auth::$config['proxy'] = Hybrid_Auth::$config['proxy'] ?? '';
 
 		$hostPort = parse_url(Hybrid_Auth::$config["base_url"], PHP_URL_PORT);
 		$hostUrl = parse_url(Hybrid_Auth::$config["base_url"], PHP_URL_HOST);
@@ -65,7 +65,7 @@ class Hybrid_Provider_Model_OpenID extends Hybrid_Provider_Model {
 
 		$this->api->identity = $this->openidIdentifier;
 		$this->api->returnUrl = $this->endpoint;
-		$this->api->required = array(
+		$this->api->required = [
 			'namePerson/first',
 			'namePerson/last',
 			'namePerson/friendly',
@@ -81,7 +81,7 @@ class Hybrid_Provider_Model_OpenID extends Hybrid_Provider_Model {
 			'contact/city/home',
 			'contact/country/home',
 			'media/image/default',
-		);
+		];
 
 		# redirect the user to the provider authentication url
 		Hybrid_Auth::redirect($this->api->authUrl());

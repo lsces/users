@@ -13,7 +13,7 @@
  * @subpackage modules
  */
  global $gBitUser, $module_params;
-$listHash['online' ] = true; 
+$listHash['online' ] = true;
 $listHash['last_get'] = !empty( $module_params['time_buffer'] ) ? $module_params['time_buffer'] : 900;
 $online_users = $gBitUser->getUserActivity( $listHash );
 $gBitSmarty->assign( 'online_users', $online_users);

@@ -55,6 +55,6 @@ if( $gBitSystem->isFeatureActive( 'display_users_content_list' ) ) {
 	// end of content listing
 }
 
-$gBitSystem->display( 'bitpackage:users/my_bitweaver.tpl', 'My '.$gBitSystem->getConfig( 'site_title' ) , array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/my_bitweaver.tpl', 'My '.$gBitSystem->getConfig( 'site_title' ) , [ 'display_mode' => 'display' ]);
 
 ?>

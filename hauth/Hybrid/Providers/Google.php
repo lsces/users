@@ -33,7 +33,7 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 		$this->api->token_info_url = "https://www.googleapis.com/oauth2/v2/tokeninfo";
 
 		// Google POST methods require an access_token in the header
-		$this->api->curl_header = array("Authorization: OAuth " . $this->api->access_token);
+		$this->api->curl_header = ["Authorization: OAuth " . $this->api->access_token];
 
 		// Override the redirect uri when it's set in the config parameters. This way we prevent
 		// redirect uri mismatches when authenticating with Google.
@@ -46,8 +46,8 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 	 * {@inheritdoc}
 	 */
 	function loginBegin() {
-		$parameters = array("scope" => $this->scope, "access_type" => "offline");
-		$optionals = array("scope", "access_type", "redirect_uri", "approval_prompt", "hd", "state");
+		$parameters = ["scope" => $this->scope, "access_type" => "offline"];
+		$optionals = ["scope", "access_type", "redirect_uri", "approval_prompt", "hd", "state"];
 
 		foreach ($optionals as $parameter) {
 			if (isset($this->config[$parameter]) && !empty($this->config[$parameter])) {
@@ -97,22 +97,22 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 	function getUserContacts() {
 		// refresh tokens if needed
 		$this->refreshToken();
-		
-		$contacts = array();
+
+		$contacts = [];
 		if (!isset($this->config['contacts_param'])) {
-			$this->config['contacts_param'] = array("max-results" => 500);
+			$this->config['contacts_param'] = ["max-results" => 500];
 		}
-		
+
 		// Google Gmail and Android contacts
 		if (strpos($this->scope, '/m8/feeds/') !== false) {
-			
+
 			$response = $this->api->api("https://www.google.com/m8/feeds/contacts/default/full?"
-					. http_build_query(array_merge(array('alt' => 'json'), $this->config['contacts_param'])));
-			
+					. http_build_query(array_merge(['alt' => 'json'], $this->config['contacts_param'])), );
+
 			if (!$response) {
-				return array();
+				return [];
 			}
-			
+
 			if (isset($response->feed->entry)) {
 				foreach ($response->feed->entry as $idx => $entry) {
 					$uc = new Hybrid_User_Contact();
@@ -127,9 +127,9 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 						if (is_array($entry->link)) {
 							foreach ($entry->link as $l) {
 								if (property_exists($l, 'gd$etag') && $l->type == "image/*") {
-									$uc->photoURL = $this->addUrlParam($l->href, array('access_token' => $this->api->access_token));
+									$uc->photoURL = $this->addUrlParam($l->href, ['access_token' => $this->api->access_token]);
 								} else if ($l->type == "self") {
-									$uc->profileURL = $this->addUrlParam($l->href, array('access_token' => $this->api->access_token));
+									$uc->profileURL = $this->addUrlParam($l->href, ['access_token' => $this->api->access_token]);
 								}
 							}
 						}
@@ -148,15 +148,15 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 					} else {
 						$uc->webSiteURL = '';
 					}
-					
+
 					$contacts[] = $uc;
 				}
 			}
 		}
-		
+
 		return $contacts;
 	}
-	
+
 	/**
 	 * Add query parameters to the $url
 	 *
@@ -164,7 +164,7 @@ class Hybrid_Providers_Google extends Hybrid_Provider_Model_OAuth2 {
 	 * @param array  $params Parameters to add
 	 * @return string
 	 */
-	function addUrlParam($url, array $params){		
+	function addUrlParam($url, array $params){
 		$query = parse_url($url, PHP_URL_QUERY);
 
 		// Returns the URL string with new parameters

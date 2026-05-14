@@ -32,7 +32,7 @@ $gBitSmarty->assign( 'login', $_REQUEST['login'] );
 $gBitSmarty->assign( 'oldpass', $_REQUEST["oldpass"] );
 $gBitSmarty->assign( 'provpass', $_REQUEST["provpass"] );
 
-$userInfo = $gBitUser->getUserInfo( array( 'user_id' => $_REQUEST['user_id'] ));
+$userInfo = $gBitUser->getUserInfo( [ 'user_id' => $_REQUEST['user_id'] ]);
 $gBitSmarty->assign( 'userInfo', $userInfo );
 
 if( isset( $_REQUEST["change"] )) {
@@ -75,4 +75,4 @@ if( isset( $_REQUEST["change"] )) {
 }
 
 // Display the template
-$gBitSystem->display( 'bitpackage:users/change_password.tpl', 'Change Password' , array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/change_password.tpl', 'Change Password' , [ 'display_mode' => 'display' ]);

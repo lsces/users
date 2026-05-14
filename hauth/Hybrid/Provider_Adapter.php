@@ -34,7 +34,7 @@ class Hybrid_Provider_Adapter {
 	 * Provider adapter extra parameters
 	 * @var array
 	 */
-	public $params = array();
+	public $params = [];
 
 	/**
 	 * Provider adapter wrapper path
@@ -56,7 +56,7 @@ class Hybrid_Provider_Adapter {
 	 * @return Hybrid_Provider_Adapter
 	 * @throws Exception
 	 */
-	function factory($id, $params = array()) {
+	function factory($id, $params = []) {
 		Hybrid_Logger::info("Enter Hybrid_Provider_Adapter::factory( $id )");
 
 		# init the adapter config and params
@@ -140,7 +140,7 @@ class Hybrid_Provider_Adapter {
 
 		// make sure params is array
 		if (!is_array($this->params)) {
-			$this->params = array();
+			$this->params = [];
 		}
 
 		# we make use of session_id() as storage hash to identify the current user
@@ -165,8 +165,8 @@ class Hybrid_Provider_Adapter {
 
 		# workaround to solve windows live authentication since microsoft disallowed redirect urls to contain any parameters
 		# http://mywebsite.com/path_to_hybridauth/?hauth.done=Live will not work
-		if ($this->id=="Live") { 
-			$this->params["login_done"] = $HYBRID_AUTH_URL_BASE."live.php"; 
+		if ($this->id=="Live") {
+			$this->params["login_done"] = $HYBRID_AUTH_URL_BASE."live.php";
 		}
 
 		# Workaround to fix broken callback urls for the Facebook OAuth client
@@ -190,7 +190,7 @@ class Hybrid_Provider_Adapter {
 
 		// redirect
 		if (empty($this->params["redirect_mode"])) {
-			Hybrid_Auth::redirect($this->params["login_start"]);	
+			Hybrid_Auth::redirect($this->params["login_start"]);
 		} else {
 			Hybrid_Auth::redirect($this->params["login_start"],$this->params["redirect_mode"]);
 		}
@@ -239,7 +239,7 @@ class Hybrid_Provider_Adapter {
 			throw new Exception("Call to undefined function Hybrid_Providers_{$this->id}::$name().");
 		}
 
-    return call_user_func_array(array($this->adapter, $name), $arguments);
+	return call_user_func_array([$this->adapter, $name], $arguments);
 	}
 
 	/**
@@ -263,13 +263,13 @@ class Hybrid_Provider_Adapter {
 			throw new Exception("User not connected to the provider.", 7);
 		}
 
-		return array(
+		return [
 			"access_token" => $this->adapter->token("access_token"), // OAuth access token
 			"access_token_secret" => $this->adapter->token("access_token_secret"), // OAuth access token secret
 			"refresh_token" => $this->adapter->token("refresh_token"), // OAuth refresh token
 			"expires_in" => $this->adapter->token("expires_in"), // OPTIONAL. The duration in seconds of the access token lifetime
 			"expires_at" => $this->adapter->token("expires_at"), // OPTIONAL. Timestamp when the access_token expire. if not provided by the social api, then it should be calculated: expires_at = now + expires_in
-		);
+		];
 	}
 
 	/**

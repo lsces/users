@@ -33,7 +33,7 @@ $gLibertySystem->registerService( CONTENT_SERVICE_USERS_FAVS,
 	],
 	[
 		'description' => KernelTools::tra( 'Provides a ajax service enabling users to bookmark any content as a favorite.' ),
-	]
+	],
 );
 
 $gBitSystem->registerNotifyEvent( [ "user_registers" => KernelTools::tra( "A user registers" ) ] );

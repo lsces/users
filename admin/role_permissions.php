@@ -9,7 +9,7 @@ $feedback = [];
 // get a list of all roles and their permissions
 $listHash = [
 	'only_root_roles' => true,
-	'sort_mode'       => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc'
+	'sort_mode'       => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc',
 ];
 $allRoles = $gBitUser->getAllRoles( $listHash );
 $allPerms = $gBitUser->getRolePermissions( $_REQUEST );

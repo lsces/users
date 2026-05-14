@@ -119,4 +119,4 @@ if( !empty( $_REQUEST['home'] ) ) {
 }
 
 $gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
-$gBitSystem->display( $centerDisplay, $browserTitle , array( 'display_mode' => 'display' ));
+$gBitSystem->display( $centerDisplay, $browserTitle , [ 'display_mode' => 'display' ]);

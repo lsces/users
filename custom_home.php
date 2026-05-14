@@ -30,5 +30,5 @@ print_r($b);
 */
 $gBitSystem->verifyFeature( 'users_custom_home' );
 // Display the template
-$gBitSystem->display( 'bitpackage:users/custom_home_2.tpl', null, array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/custom_home_2.tpl', null, [ 'display_mode' => 'display' ]);
 ?>

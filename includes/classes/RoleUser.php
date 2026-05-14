@@ -17,9 +17,9 @@
  * required setup
  */
 namespace Bitweaver\Users;
+
 use Bitweaver\BitBase;
 use Bitweaver\BitSystem;
-use Bitweaver\DateTime;
 use Bitweaver\Liberty\LibertyBase;
 use Bitweaver\Liberty\LibertyContent;
 use Bitweaver\KernelTools;
@@ -78,7 +78,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				'handler_package'     => 'users',
 				'handler_file'        => 'RoleUser.php',
 				'maintainer_url'      => 'https://www.bitweaver.org',
-			]
+			],
 		);
 		$this->mUserId = @$this->verifyId( $pUserId ) ? $pUserId : null;
 		$this->mContentId = $pContentId;
@@ -91,11 +91,11 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 
 	public function getCacheKey() {
 		$siteCookie = static::getSiteCookieName();
-		if( $this->isRegistered() && !empty( $_COOKIE[$siteCookie] ) ) { 
+		if( $this->isRegistered() && !empty( $_COOKIE[$siteCookie] ) ) {
 			return $_COOKIE[$siteCookie];
-		} else {
-			return ANONYMOUS_USER_ID;
 		}
+			return ANONYMOUS_USER_ID;
+
 	}
 
 	public static function isCacheableClass() {
@@ -175,18 +175,18 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				$this->mInfo['user_id']       = $this->mInfo['uu_user_id'];
 				$this->mInfo['is_registered'] = $this->isRegistered();
 				foreach( [ 'portrait', 'avatar', 'logo' ] as $img ) {
-				    $this->mInfo[$img.'_path'] = $this->getSourceFile( [ 
+					$this->mInfo[$img.'_path'] = $this->getSourceFile( [
 						'user_id'=>$this->getField( 'user_id' ),
-						'package'=>\Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name([ 
+						'package'=>\Bitweaver\Liberty\liberty_mime_get_storage_sub_dir_name([
 							'mime_type' => $this->getField( $img.'_mime_type' ),
-							'name' =>  $this->getField( $img.'_file_name' ) ] ),
+							'name' =>  $this->getField( $img.'_file_name' ), ] ),
 						'file_name' => basename( $this->mInfo[$img.'_file_name'] ?? '' ),
 						'sub_dir' =>  $this->getField( $img.'_attachment_id' ),
-						'mime_type' => $this->getField( $img.'_mime_type' ) ] );
+						'mime_type' => $this->getField( $img.'_mime_type' ), ] );
 					$this->mInfo[$img.'_url'] = \Bitweaver\Liberty\liberty_fetch_thumbnail_url( [
 						'source_file'=>$this->mInfo[$img.'_path'],
 						'size' => 'small',
-						'mime_image' => false ] );
+						'mime_image' => false, ] );
 				}
 
 				// break the real name into first and last name using the last space as the beginning of the last name
@@ -266,7 +266,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			$this->setPreference( 'site_display_timezone', 'UTC' );
 		}
  */
- 		if( !$this->getPreference( 'bitlanguage' ) ) {
+		if( !$this->getPreference( 'bitlanguage' ) ) {
 			$this->setPreference( 'bitlanguage', $gBitLanguage->mLanguage );
 		}
 		if( !$this->getPreference( 'theme' ) ) {
@@ -369,9 +369,9 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		}
 
 		if( isset( $pParamHash['password'] ) ) {
-            if( isset( $pParamHash["password2"] ) && $pParamHash["password"] != $pParamHash["password2"] ) {
-                $passwordErrors['password2'] = KernelTools::tra("The passwords didn't match");
-            }
+			if( isset( $pParamHash["password2"] ) && $pParamHash["password"] != $pParamHash["password2"] ) {
+				$passwordErrors['password2'] = KernelTools::tra("The passwords didn't match");
+			}
 			if( ( !$this->isValid() || isset( $pParamHash['password'] ) ) && $error = $this->verifyPasswordFormat( $pParamHash['password'] ) ) {
 				$passwordErrors['password'] = $error;
 			}
@@ -614,7 +614,6 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 						if( $Connect ) {
 							\Bitweaver\bitdebug( "Connection succeeded to {$host} SMTP." );
 
-
 							stream_set_timeout( $Connect, 30 );
 							$out = $this->getSmtpResponse( $Connect );
 
@@ -651,10 +650,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 										\Bitweaver\bit_error_log("INVALID EMAIL : ".$pEmail." SMTP FROM : ".$from." SMTP TO: ".$to);
 										$ret = false;
 										break; //break out of foreach and fall through to the end of function
-									}else{
+									}
 										$ret = true;//address has been verified by the server, no more checking necessary
 										break;
-									}
+
 								}
 							} elseif( preg_match ( "/^420/", $out ) ) {
 								// Yahoo has a bad, bad habit of issuing 420's
@@ -708,10 +707,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 					if( $userId = $instance->createUser( $pParamHash )) {
 						$this->mUserId = $userId;
 						break;
-					} else {
+					}
 						$this->mErrors = array_merge( $this->mErrors, $instance->mErrors );
 						return false;
-					}
+
 				}
 			}
 
@@ -792,16 +791,14 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	public function verifyCaptcha( $pCaptcha = null ) {
 		if( $this->hasPermission( 'p_users_bypass_captcha' ) || ( !empty( $_SESSION['captcha_verified'] ) && $_SESSION['captcha_verified'] === true ) ) {
 			return true;
-		} else {
+		}
 			if( empty( $pCaptcha ) || empty( $_SESSION['captcha'] ) || $_SESSION['captcha'] != md5( $pCaptcha ) ) {
 				return false;
-			} else {
+			}
 				$_SESSION['captcha_verified'] = true;
 				return true;
-			}
-		}
-	}
 
+	}
 
 	/**
 	 * store
@@ -1037,7 +1034,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 					// renew password only next half year ;)
 					$pParamHash['user_store']['pass_due'] = $now + 60 * 60 * 24 * $pParamHash['pass_due'];
 				}
-				$pParamHash['user_store']['user_password'] = ($gBitSystem->isFeatureActive( 'users_clear_passwords' )) ? $pParamHash['password'] : ''; 
+				$pParamHash['user_store']['user_password'] = ($gBitSystem->isFeatureActive( 'users_clear_passwords' )) ? $pParamHash['password'] : '';
 				if ( !empty( $pParamHash['hash'] )) $pParamHash['user_store']['hash'] = $pParamHash['hash'];
 				$now = $gBitSystem->getUTCTime();
 				if( !isset( $pParamHash['pass_due'] ) && $gBitSystem->getConfig( 'users_pass_due' )) {
@@ -1222,7 +1219,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 						'domain' => $cookieDomain,
 						'secure' => true,
 						'httponly' => true,
-						'samesite' => 'Strict'
+						'samesite' => 'Strict',
 					] );
 		$_COOKIE[$siteCookie] = $pCookie;
 	}
@@ -1272,12 +1269,12 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				$indexType = 'group_home';
 			}
 
-			$url = isset($_SESSION['loginfrom']) ? $_SESSION['loginfrom'] : $gBitSystem->getIndexPage( $indexType );
+			$url = $_SESSION['loginfrom'] ?? $gBitSystem->getIndexPage( $indexType );
 			unset( $_SESSION['loginfrom'] );
 		}
 		return $url;
 	}
-	
+
 	// {{{ ==================== Banning ====================
 	/**
 	 * ban sets the user account status to -201 suspended
@@ -1965,8 +1962,6 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		return $this->hasPermission( 'p_tidbits_custom_home_layout' ) || $gBitSystem->getConfig( 'users_layouts' ) == 'y' || $gBitSystem->getConfig( 'users_layouts' ) == 'h' || $gBitSystem->getConfig( 'users_layouts' ) == 'u';
 	}
 
-
-
 	// {{{ ==================== image and file functions ====================
 	/**
 	 * getThumbnailUrl
@@ -2143,7 +2138,6 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		return $this->purgeImage( 'portrait' );
 	}
 
-
 	/**
 	 * purgeAvatar
 	 *
@@ -2153,7 +2147,6 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	function purgeAvatar() {
 		return $this->purgeImage( 'avatar' );
 	}
-
 
 	/**
 	 * purgeLogo
@@ -2252,7 +2245,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		$ret = [];
 
 		$query = "select * from `".BIT_DB_PREFIX."users_watches` tw INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON ( tw.`user_id`=uu.`user_id` )  where `event`=? and `object`=?";
-		$result = $this->mDb->query( $query,array( $pEvent,$pObject ));
+		$result = $this->mDb->query( $query,[ $pEvent,$pObject ]);
 
 		if( !$result->numRows() ) {
 			return $ret;
@@ -2481,7 +2474,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			if( $pUseLink && $gBitUser->hasPermission( 'p_users_view_user_homepage' ) && (empty( $pHash['users_information'] ) || $pHash['users_information'] == 'public') ) {
 				$ret = '<a class="username" title="'.( !empty( $pHash['link_title'] ) ? $pHash['link_title'] : KernelTools::tra( 'Profile for' ).' '.htmlspecialchars( $displayName ))
 					.'" href="'.RoleUser::getDisplayUrlFromHash( $pHash ).'">'
-					. htmlspecialchars( isset( $pHash['link_label'] ) ? $pHash['link_label'] : ( isset($displayName) ? $displayName : 'not set' ) )
+					. htmlspecialchars( $pHash['link_label'] ?? ( $displayName ?? 'not set' ) )
 					.'</a>';
 			} else {
 				$ret = htmlspecialchars( $displayName );
@@ -2706,9 +2699,9 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			// cache it
 			$this->cUserRoles[$userId] = $ret;
 			return $ret;
-		} else {
-			return $this->cUserRoles[$userId];
 		}
+			return $this->cUserRoles[$userId];
+
 	}
 
 	/**
@@ -2824,7 +2817,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		if( BitBase::verifyId( $pInput['role_id'] ?? 0 ) ) {
 			$pReturn['role_id'] = $pInput['role_id'];
 		}
-		return;
+
 	}
 
 	public static function getUserObject( $pUserId ) {
@@ -2844,10 +2837,9 @@ function get_user_content_count( $pUserId ) {
 	}
 }
 
-
 // {{{ ==================== Services ====================
 function users_favs_content_list_sql( $pObject, $pParamHash=null ){
-    $ret = [];
+	$ret = [];
 	if( !empty( $pParamHash['user_favs'] ) ){
 		// $ret['select_sql'] = "";
 		$ret['join_sql'] = " INNER JOIN `".BIT_DB_PREFIX."users_favorites_map` ufm ON ( ufm.`favorite_content_id`=lc.`content_id` )";
@@ -2858,7 +2850,7 @@ function users_favs_content_list_sql( $pObject, $pParamHash=null ){
 }
 
 function users_collection_sql( $pObject, $pParamHash=null ){
-    $ret = [];
+	$ret = [];
 	if( !empty( $pParamHash['role_id'] ) and BitBase::verifyId( $pParamHash['role_id'] ) ){
 		// $ret['select_sql'] = "";
 		$ret['join_sql'] = " INNER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON (ugm.`user_id`=uu.`user_id`)";

@@ -7,10 +7,10 @@ $gBitSystem->verifyPermission( 'p_admin' );
 $feedback = [];
 
 // get a list of all groups and their permissions
-$listHash = array(
+$listHash = [
 	'only_root_groups' => true,
-	'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc'
-);
+	'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc',
+];
 $allGroups = $gBitUser->getAllGroups( $listHash );
 $allPerms = $gBitUser->getGroupPermissions( $_REQUEST );
 
@@ -44,5 +44,5 @@ $gBitSmarty->assign( 'permPackages', $gBitUser->getPermissionPackages() );
 $gBitSmarty->assign( 'feedback', $feedback );
 $gBitSmarty->assign( 'contentWithPermissions', LibertyContent::getContentWithPermissionsList() );
 
-$gBitSystem->display( 'bitpackage:users/admin_permissions.tpl', KernelTools::tra( 'Permission Maintenance' ), array( 'display_mode' => 'admin' ));
+$gBitSystem->display( 'bitpackage:users/admin_permissions.tpl', KernelTools::tra( 'Permission Maintenance' ), [ 'display_mode' => 'admin' ]);
 ?>

@@ -13,7 +13,7 @@ function smarty_function_captcha( $pParams, &$gBitSmarty ) {
 
 	if( $gBitSystem->isFeatureActive('users_register_recaptcha') ) {
 		require_once USERS_PKG_INCLUDE_PATH.'recaptcha/autoload.php';
-		if( $recapKey = $gBitSystem->getConfig( 'users_register_recaptcha_secret_key' ) ) {	
+		if( $recapKey = $gBitSystem->getConfig( 'users_register_recaptcha_secret_key' ) ) {
 			$recaptcha = new \ReCaptcha\ReCaptcha( $recapKey );
 		}
 	}

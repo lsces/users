@@ -37,9 +37,9 @@ function users_admin_email_user( &$pParamHash ) {
 		mail( $pParamHash['email'], $siteName.' - '.KernelTools::tra( 'Your registration information' ),$mail_data,"From: ".$gBitSystem->getConfig( 'site_sender_email' )."\r\nContent-type: text/plain;charset=utf-8\r\n" );
 		$gBitSmarty->assign( 'showmsg', 'n' );
 
-		$ret = array(
-			'confirm' => 'Validation email sent to '.$pParamHash['email'].'.'
-		);
+		$ret = [
+			'confirm' => 'Validation email sent to '.$pParamHash['email'].'.',
+		];
 	} elseif( !empty( $pParamHash['password'] )) {
 		// Send the welcome mail
 		$gBitSmarty->assign( 'mailPassword',$pParamHash['password'] );
@@ -47,7 +47,7 @@ function users_admin_email_user( &$pParamHash ) {
 		$mail_data = $gBitSmarty->fetch( 'bitpackage:users/admin_welcome_mail.tpl' );
 		mail( $pParamHash["email"], KernelTools::tra( 'Welcome to' ).' '.$siteName,$mail_data,"From: ".$gBitSystem->getConfig('site_sender_email')."\r\nContent-type: text/plain;charset=utf-8\r\n" );
 		$ret = [
-			'welcome' => 'Welcome email sent to ' . $pParamHash['email'] . '.'
+			'welcome' => 'Welcome email sent to ' . $pParamHash['email'] . '.',
 		];
 	}
 	return $ret;
@@ -64,9 +64,9 @@ function users_admin_email_user( &$pParamHash ) {
 function scramble_email( $email, $method = 'unicode' ) {
 	switch( $method ) {
 		case 'strtr':
-			$trans = array(	"@" => KernelTools::tra(" AT "),
-			"." => KernelTools::tra(" DOT ")
-			);
+			$trans = [	"@" => KernelTools::tra(" AT "),
+			"." => KernelTools::tra(" DOT "),
+			];
 			$ret = strtr($email, $trans);
 			break;
 
@@ -95,7 +95,6 @@ function scramble_email( $email, $method = 'unicode' ) {
 	return $ret;
 }
 
-
 function users_httpauth(){
 	global $gBitSystem, $gBitUser;
 	// require ssl
@@ -114,8 +113,8 @@ function users_httpauth(){
 		exit;
 	}
 
-	$user = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : false;
-	$pass = isset($_SERVER['PHP_AUTH_PW']) ? $_SERVER['PHP_AUTH_PW'] : false;
+	$user = $_SERVER['PHP_AUTH_USER'] ?? false;
+	$pass = $_SERVER['PHP_AUTH_PW'] ?? false;
 	$challenge = false;
 	$response = false;
 	// verify the user is valid first
@@ -125,10 +124,10 @@ function users_httpauth(){
 		return true;
 	}
 	// require http auth
-	else{
+
 		header('WWW-Authenticate: Basic realm="Test"');
 		header('HTTP/1.0 401 Unauthorized');
 		$gBitSystem->fatalError( KernelTools::tra('HTTP Authentication Canceled') );
 		exit;
-	}
+
 }

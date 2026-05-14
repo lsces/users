@@ -9,6 +9,7 @@
  * required setup
  */
 namespace Bitweaver\Users;
+
 use Bitweaver\KernelTools;
 
 if (file_exists(UTIL_PKG_INCLUDE_PATH."pear/Auth/Auth.php")) {
@@ -76,7 +77,7 @@ class LDAPAuth extends BaseAuth {
 
 			$success = $a->storage->fetchData($user_utf8, $pass, false);
 			if ($success == false) {
-				$this->mErrors['login'] = isset($a->storage->options['status']) ? $a->storage->options['status'] : 'Not authenticated';
+				$this->mErrors['login'] = $a->storage->options['status'] ?? 'Not authenticated';
 				return PASSWORD_INCORRECT;
 			}
 		}
@@ -124,18 +125,18 @@ class LDAPAuth extends BaseAuth {
 		global $gBitDb;
 		// set additional attributes here
 		if (empty($userattr["email"])) {
-			$userattr["email"] = $gBitDb->getOne("select `email` from `".BIT_DB_PREFIX."users_users` where `login`=?", array($userattr["login"]));
+			$userattr["email"] = $gBitDb->getOne("select `email` from `".BIT_DB_PREFIX."users_users` where `login`=?", [$userattr["login"]]);
 		}
 		// set the Auth options
 		$a = new \Auth("LDAP", $this->mConfig);
 		// check if the login correct
 		if ($a->addUser($userattr["login"], $userattr["password"], $userattr) === true) {
 			return true;
-		} else {
+		}
 			// otherwise use the error status given back
 			$this->mErrors['create'] = $a->getStatus();
 			return false;
-		}
+
 	}
 
 	function canManageAuth() {

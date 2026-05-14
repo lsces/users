@@ -27,18 +27,18 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 
 if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 	if( !empty( $_REQUEST['group_id'] ) ) {
-		$allPerms = $gBitUser->getGroupPermissions( array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null ));
+		$allPerms = $gBitUser->getGroupPermissions( [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : null ]);
 		// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
-		$listHash = array( 'sort_mode' => 'group_name_asc' );
+		$listHash = [ 'sort_mode' => 'group_name_asc' ];
 		$groupList = $gBitUser->getAllGroups( $listHash );
 	} else {
 		// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
-		$listHash = array( 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc' );
+		$listHash = [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'group_name_asc' ];
 		$groupList = $gBitUser->getAllGroups( $listHash );
 	}
 
 	// Remember a package limit if it is set.
-	$gBitSmarty->assign( 'package',isset( $_REQUEST['package'] ) ? $_REQUEST['package'] : 'all' );
+	$gBitSmarty->assign( 'package',$_REQUEST['package'] ?? 'all' );
 
 	// Save the join
 	if( isset($_REQUEST["save"] ) ) {
@@ -52,7 +52,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		}
 	// Update Permissions
 	} elseif (isset($_REQUEST['updateperms'])) {
-		$listHash = array( 'group_id' => $_REQUEST['group_id'] );
+		$listHash = [ 'group_id' => $_REQUEST['group_id'] ];
 		$updatePerms = $gBitUser->getgroupPermissions( $listHash );
 		foreach (array_keys($_REQUEST['perm']) as $per) {
 			if( isset($_REQUEST['perm'][$per]) && !isset($updatePerms[$per]) ) {
@@ -93,7 +93,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		}
 	// Search for users to add
 	} elseif (!empty($_REQUEST['submitUserSearch'])) {
-		$searchParams = array('find' => $_REQUEST['find']);
+		$searchParams = ['find' => $_REQUEST['find']];
 		$gBitUser->getList($searchParams);
 		$foundUsers = $searchParams['data'];
 		$mid = 'bitpackage:users/my_group_edit.tpl';
@@ -112,7 +112,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 
 	// get pagination url
 	// get grouplist separately from the $users stuff to avoid splitting of data due to pagination
-	$listHash = array( 'sort_mode' => 'group_name_asc' );
+	$listHash = [ 'sort_mode' => 'group_name_asc' ];
 	$groupList = $gBitUser->getAllUserGroups();
 
 	if( !empty( $_REQUEST['group_id'] ) ) {
@@ -125,7 +125,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_groups' ) ) {
 		$gBitSmarty->assign('groupUsers', $groupUsers);
 		$gBitSmarty->assign('groupInfo', $groupInfo);
 		$gBitSmarty->assign( 'allPerms', $allPerms );
-		$gBitSystem->setBrowserTitle( 'Admininster Group: '.$groupInfo['group_name'].' '.(isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : '') );
+		$gBitSystem->setBrowserTitle( 'Admininster Group: '.$groupInfo['group_name'].' '.($_REQUEST['tab'] ?? '') );
 		$mid = 'bitpackage:users/my_group_edit.tpl';
 	}
 
@@ -164,10 +164,10 @@ if ( ( !empty( $_REQUEST['add_public_group'] ) || !empty( $_REQUEST['remove_publ
 /* Load up public groups and check if the user can join or leave them */
 $systemGroups = $gBitUser->getGroups( $gBitUser->mUserId, true );
 $gBitSmarty->assign( 'systemGroups', $systemGroups);
-$listHash = array(
+$listHash = [
 	'is_public'=>'y',
-	'sort_mode' => array( 'is_default_asc', 'group_desc_asc' ),
-);
+	'sort_mode' => [ 'is_default_asc', 'group_desc_asc' ],
+];
 $publicGroups = $gBitUser->getAllGroups( $listHash );
 if( count( $publicGroups )) {
 	foreach ( $systemGroups as $groupId=>$groupInfo ) {
@@ -208,5 +208,5 @@ if (empty($mid)) {
 }
 
 // Display the template for group administration
-$gBitSystem->display( $mid , null, array( 'display_mode' => 'display' ));
+$gBitSystem->display( $mid , null, [ 'display_mode' => 'display' ]);
 ?>

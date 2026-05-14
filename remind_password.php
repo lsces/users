@@ -26,7 +26,7 @@ if( $gBitUser->isRegistered() ) {
 	$userInfo = '';
 	$_REQUEST["username"] = strip_tags( urldecode( $_REQUEST["username"]) );
 	$pLogin = trim( $_REQUEST["username"] );
-    if ( strlen ( $pLogin ) ) {
+	if ( strlen ( $pLogin ) ) {
 		$loginCol = strpos( $pLogin, '@' ) ? 'email' : 'login';
 		$userInfo = $gBitUser->getUserInfo( [ $loginCol => $pLogin ] );
 	}

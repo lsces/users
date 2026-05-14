@@ -21,7 +21,7 @@ class Hybrid_Auth {
 	 * Configuration array
 	 * @var array
 	 */
-	public static $config = array();
+	public static $config = [];
 
 	/**
 	 * Auth cache
@@ -165,9 +165,8 @@ class Hybrid_Auth {
 			// Exception::getPrevious (PHP 5 >= 5.3.0) http://php.net/manual/en/exception.getprevious.php
 			if (version_compare(PHP_VERSION, '5.3.0', '>=') && ($p instanceof Exception)) {
 				throw new Exception($m, $c, $p);
-			} else {
-				throw new Exception($m, $c);
 			}
+				throw new Exception($m, $c);
 		}
 
 		Hybrid_Logger::info("Hybrid_Auth initialize: no error found. initialization succeed.");
@@ -263,7 +262,7 @@ class Hybrid_Auth {
 		}
 
 		if (!$params) {
-			$params = array();
+			$params = [];
 			Hybrid_Logger::info("Hybrid_Auth::setup( $providerId ), no stored params found for this provider. Initialize a new one for new session");
 		}
 
@@ -293,7 +292,7 @@ class Hybrid_Auth {
 	 * @return array
 	 */
 	public static function getConnectedProviders() {
-		$idps = array();
+		$idps = [];
 
 		foreach (Hybrid_Auth::$config["providers"] as $idpid => $params) {
 			if (Hybrid_Auth::isConnectedWith($idpid)) {
@@ -317,11 +316,11 @@ class Hybrid_Auth {
 	 * @return array
 	 */
 	public static function getProviders() {
-		$idps = array();
+		$idps = [];
 
 		foreach (Hybrid_Auth::$config["providers"] as $idpid => $params) {
 			if ($params['enabled']) {
-				$idps[$idpid] = array('connected' => false);
+				$idps[$idpid] = ['connected' => false];
 
 				if (Hybrid_Auth::isConnectedWith($idpid)) {
 					$idps[$idpid]['connected'] = true;

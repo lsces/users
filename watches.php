@@ -17,18 +17,18 @@ use Bitweaver\KernelTools;
 $user = $gBitUser->mUserId;
 if (!$user) {
 	$gBitSmarty->assign('msg', KernelTools::tra( "You must log in to use this feature" ));
-	$gBitSystem->display( 'error.tpl' , null, array( 'display_mode' => 'display' ));
+	$gBitSystem->display( 'error.tpl' , null, [ 'display_mode' => 'display' ]);
 	die;
 }
 
 $gBitSystem->verifyFeature( 'users_watches' );
 
 if (isset($_REQUEST['hash'])) {
-	
+
 	$gBitUser->remove_user_watch_by_hash($_REQUEST['hash']);
 }
 if (isset($_REQUEST['watch'])) {
-	
+
 	foreach (array_keys($_REQUEST["watch"])as $item) {
 		$gBitUser->remove_user_watch_by_hash($item);
 	}
@@ -43,5 +43,5 @@ if (!isset($_REQUEST['event']))
 $watches = $gBitUser->getWatches( $_REQUEST['event'] );
 $gBitSmarty->assign('watches', $watches);
 
-$gBitSystem->display( 'bitpackage:users/user_watches.tpl', null, array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/user_watches.tpl', null, [ 'display_mode' => 'display' ]);
 ?>

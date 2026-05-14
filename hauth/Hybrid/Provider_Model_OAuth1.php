@@ -45,7 +45,7 @@ class Hybrid_Provider_Model_OAuth1 extends Hybrid_Provider_Model {
 	 * @return string
 	 */
 	function errorMessageByStatus($code = null) {
-		$http_status_codes = array(
+		$http_status_codes = [
 			200 => "OK: Success!",
 			304 => "Not Modified: There was no new data to return.",
 			400 => "Bad Request: The request was invalid.",
@@ -55,8 +55,8 @@ class Hybrid_Provider_Model_OAuth1 extends Hybrid_Provider_Model {
 			406 => "Not Acceptable.",
 			500 => "Internal Server Error: Something is broken.",
 			502 => "Bad Gateway.",
-			503 => "Service Unavailable."
-		);
+			503 => "Service Unavailable.",
+		];
 
 		if (!$code && $this->api) {
 			$code = $this->api->http_code;
@@ -78,21 +78,21 @@ class Hybrid_Provider_Model_OAuth1 extends Hybrid_Provider_Model {
 
 		// 2 - include OAuth lib and client
 		if (! class_exists('OAuthConsumer') ) {
-          		require_once Hybrid_Auth::$config["path_libraries"] . "OAuth/OAuth.php";
-		}	
-        	require_once Hybrid_Auth::$config["path_libraries"] . "OAuth/OAuth1Client.php";
+				  require_once Hybrid_Auth::$config["path_libraries"] . "OAuth/OAuth.php";
+		}
+			require_once Hybrid_Auth::$config["path_libraries"] . "OAuth/OAuth1Client.php";
 
 		// 3.1 - setup access_token if any stored
 		if ($this->token("access_token")) {
 			$this->api = new OAuth1Client(
-					$this->config["keys"]["key"], $this->config["keys"]["secret"], $this->token("access_token"), $this->token("access_token_secret")
+					$this->config["keys"]["key"], $this->config["keys"]["secret"], $this->token("access_token"), $this->token("access_token_secret"),
 			);
 		}
 
 		// 3.2 - setup request_token if any stored, in order to exchange with an access token
 		elseif ($this->token("request_token")) {
 			$this->api = new OAuth1Client(
-					$this->config["keys"]["key"], $this->config["keys"]["secret"], $this->token("request_token"), $this->token("request_token_secret")
+					$this->config["keys"]["key"], $this->config["keys"]["secret"], $this->token("request_token"), $this->token("request_token_secret"),
 			);
 		}
 

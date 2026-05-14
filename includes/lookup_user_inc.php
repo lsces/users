@@ -7,6 +7,7 @@
  */
 
 namespace Bitweaver\Users;
+
 use Bitweaver\BitBase;
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\KernelTools;
@@ -24,7 +25,7 @@ if( isset( $_REQUEST['fHomepage'] )) {
 	$userInfo = $gBitUser->getUserInfo( [ 'content_id' => $_REQUEST['content_id'] ?? 0 ]);
 	$_REQUEST['home'] = !empty( $userInfo['login'] ) ? $userInfo['login'] : null;
 } elseif( isset($_REQUEST['user_id']) && BitBase::verifyId( $_REQUEST['user_id'] )) {
-	$userInfo = $gBitUser->getUserInfo( array( 'user_id' => $_REQUEST['user_id'] ));
+	$userInfo = $gBitUser->getUserInfo( [ 'user_id' => $_REQUEST['user_id'] ]);
 	$_REQUEST['home'] = !empty( $userInfo['login'] ) ? $userInfo['login'] : null;
 }
 

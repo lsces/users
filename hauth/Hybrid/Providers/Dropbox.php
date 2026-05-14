@@ -12,18 +12,18 @@
  */
 
 class Hybrid_Providers_Dropbox extends Hybrid_Provider_Model_OAuth2
-{ 
+{
 	/**
 	* IDp wrappers initializer 
 	*/
-	function initialize() 
+	function initialize()
 	{
 		parent::initialize();
 
 		// Provider apis end-points
 		$this->api->api_base_url  = "https://api.dropbox.com/1/";
 		$this->api->authorize_url = "https://www.dropbox.com/1/oauth2/authorize";
-		$this->api->token_url     = "https://api.dropbox.com/1/oauth2/token"; 
+		$this->api->token_url     = "https://api.dropbox.com/1/oauth2/token";
 	}
 
 	/**
@@ -31,7 +31,7 @@ class Hybrid_Providers_Dropbox extends Hybrid_Provider_Model_OAuth2
 	*/
 	function getUserProfile()
 	{
-		// refresh tokens if needed 
+		// refresh tokens if needed
 		$this->refreshToken();
 
 		try{
@@ -49,7 +49,7 @@ class Hybrid_Providers_Dropbox extends Hybrid_Provider_Model_OAuth2
 		if ( ! is_object( $response ) || ! isset( $response->uid ) ){
 			throw new Exception( "User profile request failed! {$this->providerId} api returned an invalid response.", 6 );
 		}
-		# store the user profile.  
+		# store the user profile.
 		$this->user->profile->identifier		=	(property_exists($response,'uid'))?$response->uid:"";
 		$this->user->profile->profileURL		=	"";
 		$this->user->profile->webSiteURL		=	"";

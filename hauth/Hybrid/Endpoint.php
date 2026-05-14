@@ -90,7 +90,7 @@ class Hybrid_Endpoint {
 		header("Content-Type: application/xrds+xml");
 
 		$output = str_replace("{RETURN_TO_URL}", str_replace(
-						array("<", ">", "\"", "'", "&"), array("&lt;", "&gt;", "&quot;", "&apos;", "&amp;"), Hybrid_Auth::getCurrentUrl(false)
+						["<", ">", "\"", "'", "&"], ["&lt;", "&gt;", "&quot;", "&apos;", "&amp;"], Hybrid_Auth::getCurrentUrl(false),
 				), file_get_contents(dirname(__FILE__) . "/resources/openid_xrds.xml"));
 		print $output;
 		die();
@@ -103,7 +103,7 @@ class Hybrid_Endpoint {
 	protected function processOpenidRealm() {
 		$output = str_replace("{X_XRDS_LOCATION}", htmlentities(Hybrid_Auth::getCurrentUrl(false), ENT_QUOTES, 'UTF-8')
 				. "?get=openid_xrds&v="
-				. Hybrid_Auth::$version, file_get_contents(dirname(__FILE__) . "/resources/openid_realm.html"));
+				. Hybrid_Auth::$version, file_get_contents(dirname(__FILE__) . "/resources/openid_realm.html"), );
 		print $output;
 		die();
 	}

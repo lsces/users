@@ -24,8 +24,8 @@ if( $gBitUser->isRegistered() ){
 		if( $gContent->hasViewPermission() ){
 			if( $gContent->hasService( CONTENT_SERVICE_USERS_FAVS ) ){
 				// default action is to add the favorite
-				$_REQUEST['action'] = empty( $_REQUEST['action'] )?'add':$_REQUEST['action']; 
-				// add or remove 
+				$_REQUEST['action'] = empty( $_REQUEST['action'] )?'add':$_REQUEST['action'];
+				// add or remove
 				switch( $_REQUEST['action'] ){
 					case 'add':
 						$gBitUser->storeFavorite( $_REQUEST['content_id'] );
@@ -61,4 +61,4 @@ $gBitSmarty->assign( 'statusCode', $statusCode );
 $gBitSmarty->assign( 'error', $error );
 $gBitSmarty->assign( 'msg', $msg );
 $gBitThemes->setFormatHeader( 'json' );
-$gBitSystem->display('bitpackage:users/edit_user_fav_json.tpl', null, array( 'format' => 'center_only', 'display_mode' => 'edit' ));
+$gBitSystem->display('bitpackage:users/edit_user_fav_json.tpl', null, [ 'format' => 'center_only', 'display_mode' => 'edit' ]);

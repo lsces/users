@@ -10,53 +10,53 @@ use Bitweaver\Users\BitHybridAuthManager;
 
 require_once USERS_PKG_CLASS_PATH.'BaseAuth.php';
 
-$loginSettings = array(
-	'users_allow_register' => array(
+$loginSettings = [
+	'users_allow_register' => [
 		'label' => "Users can register",
 		'type' => "checkbox",
 		'note' => "Registration is attempted for the lowest level supporting the creation of new users.",
-	),
-	'send_welcome_email' => array(
+	],
+	'send_welcome_email' => [
 		'label' => "Send registration welcome email",
 		'type' => "checkbox",
 		'note' => "Upon successful registration, this will send the user an email with login information, including their password.",
-	),
-	'after_reg_url' => array(
+	],
+	'after_reg_url' => [
 		'label' => "After registration url",
 		'type' => "text",
 		'note' => "Set a url users will be directed to after registration. Default is your site's home page.",
-	),
-	'users_login_homepage' => array(
+	],
+	'users_login_homepage' => [
 		'label' => "After login url",
 		'type' => "text",
 		'note' => "Set a custom url where users will be directed after logging in. It should not include a leading slash or subdirectory. Default is users/my.php",
-	),
-	'users_eponymous_groups' => array(
+	],
+	'users_eponymous_groups' => [
 		'label' => "Create a group for each user",
 		'type' => "checkbox",
 		'note' => "This will create a group for each user with the same name as the user. This might be useful if you want to assign different permission settings to every user.",
-	),
-	'users_forgot_pass' => array(
+	],
+	'users_forgot_pass' => [
 		'label' => "Remind passwords by email",
 		'type' => "checkbox",
 		'note' => "This will display a 'forgot password' link on the login page and allow users to have their password sent to their registered email address.",
-	),
-	'users_remember_me' => array(
+	],
+	'users_remember_me' => [
 		'label' => "Remember me feature",
 		'type' => "checkbox",
 		'note' => "Registered users will stay logged even if they close their browser.",
-	),
-	'cookie_domain' => array(
+	],
+	'cookie_domain' => [
 		'label' => "Remember me domain",
 		'type' => "text",
 		'note' => "Remember to use a '.' wildcard prefix if you want domain wide cookies.<br />e.g.: <strong>.mysite.com</strong> for a domain called <strong>www.mysite.com</strong>",
-	),
-	'cookie_path' => array(
+	],
+	'cookie_path' => [
 		'label' => "Remember me path",
 		'type' => "text",
 		'note' => "The path '/foo' would match '/foobar' and '/foo/bar.html'",
-	),
-);
+	],
+];
 $gBitSmarty->assign( 'loginSettings', $loginSettings );
 
 $registerSettings = [
@@ -218,7 +218,6 @@ $httpSettings = [
 ];
 $gBitSmarty->assign( 'httpSettings', $httpSettings );
 
-
 if (defined ('ROLE_MODEL') ) {
 	$listHash = [ 'sort_mode' => 'role_name_asc' ];
 	$gBitSmarty->assign( 'roleList', $gBitUser->getAllRoles( $listHash ));
@@ -253,7 +252,7 @@ if( !empty( $_POST ) ) {
 	}
 
 	// Save all preferences
-	foreach( array( 'loginprefs'=>'loginSettings', 'registerprefs'=>'registerSettings', 'httpprefs'=>'httpSettings' ) as $prefGroup=>$prefHash ) {
+	foreach( [ 'loginprefs'=>'loginSettings', 'registerprefs'=>'registerSettings', 'httpprefs'=>'httpSettings' ] as $prefGroup=>$prefHash ) {
 		$settings = $$prefHash;
 		foreach( array_keys( $settings ) as $feature ) {
 			if( $settings[$feature]['type'] == 'text' ) {
@@ -280,10 +279,10 @@ if( !empty( $_POST ) ) {
 
 	if( isset( $_REQUEST['registration_group_choice'] ) ) {
 		$listHash = [];
-		$groupList = ( defined( 'ROLE_MODEL' ) ) 
-			? $gBitUser->getAllRoles( $listHash ) 
+		$groupList = ( defined( 'ROLE_MODEL' ) )
+			? $gBitUser->getAllRoles( $listHash )
 			: $gBitUser->getAllGroups( $listHash );
-		
+
 		$in = [];
 		$out = [];
 		foreach( $groupList as $gr ) {
@@ -309,7 +308,6 @@ if( !empty( $_POST ) ) {
 }
 
 $gBitSmarty->assign( 'hybridProviders', $gBitHybridAuthManager->getAllProviders() );
-
 
 $listHash = [];
 

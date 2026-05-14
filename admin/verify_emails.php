@@ -6,11 +6,11 @@
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
 
-if( $validatedGroup = $gBitSystem->getConfig( 'users_validate_email_group' ) ) {	
+if( $validatedGroup = $gBitSystem->getConfig( 'users_validate_email_group' ) ) {
 	$gBitUser->verifyTicket();
 
 	$whereSql = '';
-	$bindVars = array( $gBitSystem->getConfig('users_validate_email_group') );
+	$bindVars = [ $gBitSystem->getConfig('users_validate_email_group') ];
 	if( !empty( $_REQUEST['start_user_id'] ) ) {
 		$whereSql = " AND user_id>?";
 		$bindVars[] = $_REQUEST['start_user_id'];
@@ -34,7 +34,5 @@ if( $validatedGroup = $gBitSystem->getConfig( 'users_validate_email_group' ) ) {
 		print "<br/>\n";
 		flush();
 	}
-} else {
-	
 }
 

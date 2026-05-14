@@ -5,8 +5,6 @@
  * @subpackage functions
  */
 
-
- 
 /**
  * Initialization
  */
@@ -31,10 +29,10 @@ if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
 	$cacheFile = TEMP_PKG_PATH.RSS_PKG_NAME.'/'.USERS_PKG_NAME.'/'.$cacheFileTail;
 	$rss->useCached( $rss_version_name, $cacheFile, $gBitSystem->getConfig( 'rssfeed_cache_time' ));
 
-	$listHash = array(
+	$listHash = [
 		'max_records' => $gBitSystem->getConfig( 'users_rss_max_records' ),
 		'sort_mode' => 'registration_date_desc',
-	);
+	];
 	$gBitUser->getList( $listHash );
 	$feeds = $listHash['data'];
 

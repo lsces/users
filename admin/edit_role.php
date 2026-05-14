@@ -35,11 +35,11 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 	} else {
 		$gBitSystem->setBrowserTitle( KernelTools::tra( 'Confirm Batch Role Assignment' ) );
 		$formHash['batch_assign'] = $_REQUEST["batch_assign"];
-		$msgHash = array(
+		$msgHash = [
 			'label' => KernelTools::tra( 'Batch Assign Users to Role' ),
 			'confirm_item' => $roleInfo['role_name'],
 			'warning' => KernelTools::tra( 'This will assign every user on the site to the role' ).' <strong>'.$roleInfo['role_name'].'</strong>',
-		);
+		];
 		$gBitSystem->confirmDialog( $formHash,$msgHash );
 	}
 } elseif( isset($_REQUEST["members"] ) ) {
@@ -96,10 +96,10 @@ if( !empty( $_REQUEST["cancel"] ) ) {
 			unset( $_REQUEST['role_id'] );
 		} else {
 			$gBitSystem->setBrowserTitle( KernelTools::tra('Delete role') );
-			$msgHash = array(
+			$msgHash = [
 				'confirm_item' => KernelTools::tra( 'Are you sure you want to remove the role?' ),
 				'warning' => KernelTools::tra( 'This will permentally delete the role' )." <strong>$roleInfo[role_name]</strong>",
-			);
+			];
 			$gBitSystem->confirmDialog( $formHash,$msgHash );
 		}
 	} elseif ($_REQUEST["action"] == 'remove') {

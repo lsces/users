@@ -19,6 +19,7 @@
  * required setup
  */
 namespace Bitweaver\Users;
+
 use Bitweaver\BitBase;
 use Bitweaver\KernelTools;
 use Bitweaver\Liberty\LibertyContent;
@@ -145,7 +146,7 @@ class RolePermUser extends RoleUser {
 				$roleParams = [
 					'user_id' => $this->mUserId,
 					'name'    => $pParamHash['user_store']['login'],
-					'desc'    => "Personal role for ".( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] )
+					'desc'    => "Personal role for ".( !empty( $pParamHash['user_store']['real_name'] ) ? $pParamHash['user_store']['real_name'] : $pParamHash['user_store']['login'] ),
 				];
 				if( $this->storeRole( $roleParams ) ) {
 					$this->addUserToRole( $this->mUserId, $roleParams['role_id'] );
@@ -359,7 +360,7 @@ class RolePermUser extends RoleUser {
 			ORDER BY ur.`role_name` ASC";
 		return $this->mDb->getAssoc( $sql, [ $pUserId ] );
 	}
-	
+
 	public function getAllGroups( &$pListHash ) {
 		return [];
 	}
@@ -759,9 +760,9 @@ class RolePermUser extends RoleUser {
 		global $gBitSmarty, $gBitSystem, ${$pPermission};
 		if( empty( $pPermission ) || $this->hasPermission( $pPermission ) ) {
 			return;
-		} else {
-			$gBitSystem->fatalPermission( $pPermission, $pMsg );
 		}
+			$gBitSystem->fatalPermission( $pPermission, $pMsg );
+
 	}
 
 	public function getGroupPermissions( $pParamHash = null ) {
@@ -782,8 +783,8 @@ class RolePermUser extends RoleUser {
 		$ret = $bindVars = [];
 		$whereSql = $selectSql = $fromSql = '';
 
-		$sortMode = !empty( $pParamHash['sort_mode'] ) 
-			? $this->mDb->convertSortmode( $pParamHash['sort_mode'] ) 
+		$sortMode = !empty( $pParamHash['sort_mode'] )
+			? $this->mDb->convertSortmode( $pParamHash['sort_mode'] )
 			: 'up.`package`, up.`perm_name` ASC';
 
 		if( !empty( $pParamHash['package'] )) {

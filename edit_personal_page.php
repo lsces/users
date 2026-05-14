@@ -42,10 +42,10 @@ if(isset($_REQUEST["preview"])) {
 	}
 	$gBitUser->mInfo['data'] = $_REQUEST["edit"];
 
-	$parseHash = array( 
-		'data' => $_REQUEST["edit"], 
+	$parseHash = [
+		'data' => $_REQUEST["edit"],
 		'format' => BitBase::getParameter( $_REQUEST, 'format_guid', $gBitUser->getField( 'format_guid', 'tikiwiki' ) ),
-	);
+	];
 
 	$parsed = LibertyContent::parseDataHash( $parseHash );
 	$gBitUser->mInfo['parsed_data'] = $parsed;
@@ -64,5 +64,5 @@ $gBitSmarty->assign( 'gContent', $gBitUser );
 $gBitSmarty->assign( 'show_page_bar', 'y' );
 $gBitSystem->setConfig( 'wiki_description', 'n' );
 
-$gBitSystem->display( 'bitpackage:users/edit_personal_page.tpl', null, array( 'display_mode' => 'edit' ) );
+$gBitSystem->display( 'bitpackage:users/edit_personal_page.tpl', null, [ 'display_mode' => 'edit' ] );
 ?>

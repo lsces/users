@@ -112,7 +112,7 @@ $max_attempts = 100;
 // the fonts included with freeCap *only* include lowercase alphabetic characters
 // so are not suitable for most other uses
 // to increase security, you really should add other fonts
-$font_locations = Array("./.ht_freecap_font1.gdf","./.ht_freecap_font2.gdf","./.ht_freecap_font3.gdf","./.ht_freecap_font4.gdf","./.ht_freecap_font5.gdf");
+$font_locations = ["./.ht_freecap_font1.gdf","./.ht_freecap_font2.gdf","./.ht_freecap_font3.gdf","./.ht_freecap_font4.gdf","./.ht_freecap_font5.gdf"];
 
 // background:
 // 0=transparent (if jpg, white)
@@ -127,7 +127,7 @@ $bg_type = 2;
 $blur_bg = true;
 // for bg_type 3, which images should we use?
 // if you add your own, make sure they're fairly 'busy' images (ie a lot of shapes in them)
-$bg_images = Array("./.ht_freecap_im1.jpg","./.ht_freecap_im2.jpg","./.ht_freecap_im3.jpg","./.ht_freecap_im4.jpg","./.ht_freecap_im5.jpg");
+$bg_images = ["./.ht_freecap_im1.jpg","./.ht_freecap_im2.jpg","./.ht_freecap_im3.jpg","./.ht_freecap_im4.jpg","./.ht_freecap_im5.jpg"];
 // for non-transparent backgrounds only:
 	// if 0, merges CAPTCHA with bg
 	// if 1, write CAPTCHA over bg
@@ -138,8 +138,6 @@ $bg_images = Array("./.ht_freecap_im1.jpg","./.ht_freecap_im2.jpg","./.ht_freeca
 // you shouldn't need to edit anything below this, but it's extensively commented if you do want to play
 // have fun, and email me with ideas, or improvements to the code (very interested in speed improvements)
 // hope this script saves some spam :-)
-
-
 
 //////////////////////////////////////////////////////
 ////// Create Images + initialise a few things
@@ -169,7 +167,7 @@ switch($bg_type)
 $bg_fade_pct += $rand_func(-2,2);
 
 // read each font and get font character widths
-$font_widths = Array();
+$font_widths = [];
 for($i=0 ; $i<sizeof($font_locations) ; $i++)
 {
 	$handle = fopen($font_locations[$i],"r");
@@ -186,8 +184,6 @@ $height = !empty( $_REQUEST['height'] ) ? $_REQUEST['height'] : 75;
 
 $im = ImageCreate($width, $height);
 $im2 = ImageCreate($width, $height);
-
-
 
 //////////////////////////////////////////////////////
 ////// Avoid Brute Force Attacks:
@@ -225,17 +221,13 @@ if(empty($_SESSION['freecap_attempts']))
 	}
 }
 
-
-
-
-
 //////////////////////////////////////////////////////
 ////// Functions:
 //////////////////////////////////////////////////////
 function make_seed() {
 // from http://php.net/srand
-    list($usec, $sec) = explode(' ', microtime());
-    return (float) $sec + ((float) $usec * 100000);
+	list($usec, $sec) = explode(' ', microtime());
+	return (float) $sec + ((float) $usec * 100000);
 }
 
 function rand_color() {
@@ -244,9 +236,9 @@ function rand_color() {
 	{
 		// needs darker colour..
 		return $rand_func(10,100);
-	} else {
-		return $rand_func(60,170);
 	}
+		return $rand_func(60,170);
+
 }
 
 function myImageBlur($im)
@@ -316,9 +308,6 @@ function sendImage($pic)
 	exit();
 }
 
-
-
-
 //////////////////////////////////////////////////////
 ////// Choose Word:
 //////////////////////////////////////////////////////
@@ -367,9 +356,6 @@ if($use_dict==1)
 // hence, even if attackers can read the session file, they can't get the freeCap word
 // (though most hashes are easy to brute force for simple strings)
 $_SESSION['captcha'] = $hash_func($word);
-
-
-
 
 //////////////////////////////////////////////////////
 ////// Fill BGs and Allocate Colours:
@@ -463,7 +449,7 @@ if($bg_type!=0)
 			$text_b = $rand_func(100,150);
 			$text_colour3 = ImageColorAllocate($temp_bg, $text_r, $text_g, $text_b);
 
-			$points = Array();
+			$points = [];
 			// draw random squiggle for each character
 			// the longer the loop, the more complex the squiggle
 			// keep random so OCR can't say "if found shape has 10 points, ignore it"
@@ -475,7 +461,7 @@ if($bg_type!=0)
 				$points[] = $rand_func(30,$height+30);
 			}
 
-			ImagePolygon($temp_bg,$points,intval(sizeof($points)/2),$text_colour3);
+			ImagePolygon($temp_bg,$points,(int) (sizeof($points)/2),$text_colour3);
 		}
 
 	} else if($bg_type==3) {
@@ -561,9 +547,6 @@ if($bg_type!=0)
 // for debug:
 //sendImage($im3);
 
-
-
-
 //////////////////////////////////////////////////////
 ////// Write Word
 //////////////////////////////////////////////////////
@@ -601,10 +584,6 @@ $font_pixelwidth = $font_widths[$j];
 
 // for debug:
 //sendImage($im2);
-
-
-
-
 
 //////////////////////////////////////////////////////
 ////// Morph Image:
@@ -701,10 +680,6 @@ if($output!="jpg" && $bg_type==0)
 	ImageColorTransparent($im,$bg);
 }
 
-
-
-
-
 //////////////////////////////////////////////////////
 ////// Try to avoid 'free p*rn' style CAPTCHA re-use
 //////////////////////////////////////////////////////
@@ -724,12 +699,12 @@ if(is_array($site_tags))
 		if($tag_pos==0 || $tag_pos==2)
 		{
 			// write at top
-			ImageString($im2, 2, intval($width/2)-intval($tag_width/2), (10*$i), $site_tags[$i], $site_tag_col2);
+			ImageString($im2, 2, (int) ($width/2)-(int) ($tag_width/2), (10*$i), $site_tags[$i], $site_tag_col2);
 		}
 		if($tag_pos==1 || $tag_pos==2)
 		{
 			// write at bottom
-			ImageString($im2, 2, intval($width/2)-intval($tag_width/2), ($height-34+($i*10)), $site_tags[$i], $site_tag_col2);
+			ImageString($im2, 2, (int) ($width/2)-(int) ($tag_width/2), ($height-34+($i*10)), $site_tags[$i], $site_tag_col2);
 		}
 	}
 }
@@ -737,9 +712,6 @@ ImageCopyMerge($im2,$im,0,0,0,0,$width,$height,80);
 ImageCopy($im,$im2,0,0,0,0,$width,$height);
 // for debug:
 //sendImage($im);
-
-
-
 
 //////////////////////////////////////////////////////
 ////// Merge with obfuscated background
@@ -778,7 +750,6 @@ if($bg_type!=0)
 }
 // for debug:
 //sendImage($im);
-
 
 //////////////////////////////////////////////////////
 ////// Write tags, remove variables and output!
@@ -819,7 +790,6 @@ unset($morph_bg);
 unset($col_type);
 unset($max_attempts);
 unset($font_locations);
-
 
 // output final image :-)
 sendImage($im);

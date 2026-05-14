@@ -1,5 +1,6 @@
 <?php
 namespace Bitweaver\Liberty;
+
 use Bitweaver\KernelTools;
 
 /**
@@ -39,7 +40,7 @@ $pluginParams = [
 	'description' => KernelTools::tra("Will show a link to the userpage for a given login name or email."),
 	'help_function' => 'data_userlink_help',
 	'syntax' => "{USERLINK login='bigwasp'}",
-	'plugin_type' => DATA_PLUGIN
+	'plugin_type' => DATA_PLUGIN,
 ];
 $gLibertySystem->registerPlugin( PLUGIN_GUID_DATAUSERLINK, $pluginParams );
 $gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_DATAUSERLINK );
@@ -47,24 +48,24 @@ $gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_DATAUSERLINK
 // Help Function
 function data_userlink_help() {
 	$help =
-	        '<table class="data help">'
-		        .'<tr>'
-			        .'<th>' . KernelTools::tra( "Key" ) . '</th>'
+			'<table class="data help">'
+				.'<tr>'
+					.'<th>' . KernelTools::tra( "Key" ) . '</th>'
 				.'<th>' . KernelTools::tra( "Type" ) . '</th>'
 				.'<th>' . KernelTools::tra( "Comments") . '</th>'
 			.'</tr>'
 			.'<tr class="odd">'
-			        .'<td>login</td>'
-			        .'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
+					.'<td>login</td>'
+					.'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
 				.'<td>' . KernelTools::tra( "The login name to generate the link" ) . '</td>'
 			.'</tr>'
 			.'<tr class="even">'
-			        .'<td>email</td>'
+					.'<td>email</td>'
 				.'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
 				.'<td>' . KernelTools::tra( "The e-mail address to generate the link" ) . '</td>'
 			.'</tr>'
 			.'<tr class="odd">'
-			        .'<td>label</td>'
+					.'<td>label</td>'
 				.'<td>' . KernelTools::tra( "string" ) . '<br />' . KernelTools::tra( "(optional)") . '</td>'
 				.'<td>' . KernelTools::tra( "The label to show; default is user's name" ) . '</td>'
 			.'</tr>'

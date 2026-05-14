@@ -41,7 +41,7 @@ class Hybrid_Storage implements Hybrid_Storage_Interface {
 		} elseif (isset($_SESSION["HA::CONFIG"][$key])) {
 			return unserialize($_SESSION["HA::CONFIG"][$key]);
 		}
-		
+
 		return null;
 	}
 
@@ -78,7 +78,7 @@ class Hybrid_Storage implements Hybrid_Storage_Interface {
 	 * @return void
 	 */
 	function clear() {
-		$_SESSION["HA::STORE"] = array();
+		$_SESSION["HA::STORE"] = [];
 	}
 
 	/**

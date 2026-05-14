@@ -38,9 +38,9 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 		$listHash = [ 'sort_mode' => !empty( $_REQUEST['sort_mode'] ) ? $_REQUEST['sort_mode'] : 'role_name_asc' ];
 		$roleList = $gBitUser->getAllRoles( $listHash );
 	}
-	
+
 	// Remember a package limit if it is set.
-	$gBitSmarty->assign( 'package',isset( $_REQUEST['package'] ) ? $_REQUEST['package'] : 'all' );
+	$gBitSmarty->assign( 'package',$_REQUEST['package'] ?? 'all' );
 
 	// Save the join
 	if( isset($_REQUEST["save"] ) ) {
@@ -116,7 +116,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 	// get rolelist separately from the $users stuff to avoid splitting of data due to pagination
 	$listHash = [ 'sort_mode' => 'role_name_asc' ];
 	$roleList = $gBitUser->getAllUserRoles();
-	
+
 	if( !empty( $_REQUEST['role_id'] ) ) {
 		// we don't want our own role listed when editing
 		if( !empty( $roleList[$_REQUEST['role_id']] ) ) {
@@ -127,9 +127,9 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 		$gBitSmarty->assign('roleUsers', $roleUsers);
 		$gBitSmarty->assign('roleInfo', $roleInfo);
 		$gBitSmarty->assign( 'allPerms', $allPerms );
-		$gBitSystem->setBrowserTitle( 'Admininster Role: '.$roleInfo['role_name'].' '.(isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : '') );
+		$gBitSystem->setBrowserTitle( 'Admininster Role: '.$roleInfo['role_name'].' '.($_REQUEST['tab'] ?? '') );
 		$mid = 'bitpackage:users/my_role_edit.tpl';
-	} 
+	}
 
 	$gBitSmarty->assign('roles', $roleList);
 	//	$gBitSmarty->assign( (!empty( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'edit').'TabSelect', 'tdefault' );
@@ -139,7 +139,7 @@ if ( $gBitUser->hasPermission('p_users_create_personal_roles' ) ) {
 if ( ( !empty( $_REQUEST['add_public_role'] ) || !empty( $_REQUEST['remove_public_role'] ) ) && !empty( $_REQUEST['public_role_id'] ) ) {
 	$roleInfo = $gBitUser->getRoleInfo( $_REQUEST['public_role_id'] );
 	if ( empty($roleInfo) || $roleInfo['is_public'] != 'y' ) {
-		$errorMsg[] = ( empty( $_REQUEST['add_public_role'] ) ) ? KernelTools::tra( "You can't join this role." ) : KernelTools::tra( "You can't leave this role." );			
+		$errorMsg[] = ( empty( $_REQUEST['add_public_role'] ) ) ? KernelTools::tra( "You can't join this role." ) : KernelTools::tra( "You can't leave this role." );
 	} elseif ( !empty( $_REQUEST['add_public_role'] ) ) {
 		$gBitUser->addUserToRole( $gBitUser->mUserId, $_REQUEST['public_role_id'] );
 	} elseif ( !empty( $_REQUEST['remove_public_role'] ) ) {
@@ -166,7 +166,7 @@ $listHash = [
 	'is_public' => 'y',
 	'sort_mode' => [ 'is_default_asc', 'role_desc_asc' ],
 ];
-$publicRoles = $gBitUser->getAllRoles( $listHash );	
+$publicRoles = $gBitUser->getAllRoles( $listHash );
 if( count( $publicRoles )) {
 	foreach ( $systemRoles as $roleId=>$roleInfo ) {
 		foreach ( $publicRoles as $key=>$publicRole) {
@@ -192,7 +192,7 @@ if( count( $publicRoles )) {
 	}
 }
 
-// Remember error and success messages.	
+// Remember error and success messages.
 if (!empty($errorMsg)) {
 	$gBitSmarty->assign('errorMsg',$errorMsg);
 }

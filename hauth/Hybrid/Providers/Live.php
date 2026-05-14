@@ -80,10 +80,10 @@ class Hybrid_Providers_Live extends Hybrid_Provider_Model_OAuth2 {
 		}
 
 		if (!isset($response->data) || ( isset($response->errcode) && $response->errcode != 0 )) {
-			return array();
+			return [];
 		}
 
-		$contacts = array();
+		$contacts = [];
 
 		foreach ($response->data as $item) {
 			$uc = new Hybrid_User_Contact();

@@ -6,11 +6,10 @@
 // Initialization
 require_once( '../../kernel/includes/setup_inc.php' );
 
-	
 	$gBitUser->verifyTicket();
 
 	$whereSql = '';
-	$bindVars = array( $gBitSystem->getConfig('users_validate_email_role') );
+	$bindVars = [ $gBitSystem->getConfig('users_validate_email_role') ];
 	if( !empty( $_REQUEST['start_user_id'] ) ) {
 		$whereSql = " AND user_id>?";
 		$bindVars[] = $_REQUEST['start_user_id'];
@@ -34,5 +33,4 @@ require_once( '../../kernel/includes/setup_inc.php' );
 		print "<br/>\n";
 		flush();
 	}
-
 

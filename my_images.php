@@ -48,4 +48,4 @@ if( !empty( $_REQUEST['store'] )) {
 // dunno why, but this fixes the bug. XOXO spiderr
 $gBitSmarty->assign( 'gQueryUser', $gQueryUser );
 
-$gBitSystem->display( 'bitpackage:users/my_images.tpl', KernelTools::tra( 'Personal Images' ), array( 'display_mode' => 'display' ));
+$gBitSystem->display( 'bitpackage:users/my_images.tpl', KernelTools::tra( 'Personal Images' ), [ 'display_mode' => 'display' ]);

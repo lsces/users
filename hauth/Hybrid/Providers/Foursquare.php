@@ -27,7 +27,7 @@
  */
 class Hybrid_Providers_Foursquare extends Hybrid_Provider_Model_OAuth2 {
 
-	private static $apiVersion = array("v" => "20120610");
+	private static $apiVersion = ["v" => "20120610"];
 	private static $defPhotoSize = "100x100";
 
 	/**
@@ -78,8 +78,8 @@ class Hybrid_Providers_Foursquare extends Hybrid_Provider_Model_OAuth2 {
 		$this->refreshToken();
 
 		//
-		$response = array();
-		$contacts = array();
+		$response = [];
+		$contacts = [];
 		try {
 			$response = $this->api->api("users/self/friends", "GET", Hybrid_Providers_Foursquare::$apiVersion);
 		} catch (Exception $e) {

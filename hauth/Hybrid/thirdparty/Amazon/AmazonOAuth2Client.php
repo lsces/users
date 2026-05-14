@@ -25,13 +25,13 @@ class AmazonOAuth2Client extends OAuth2Client {
 
 	public function authenticate( $code ) {
 
-		$params = array(
+		$params = [
 			"client_id"     => $this->client_id,
 			"client_secret" => $this->client_secret,
 			"grant_type"    => 'authorization_code',
 			"redirect_uri"  => $this->redirect_uri,
 			"code"          => $code,
-		);
+		];
 
 		$response = $this->request( $this->token_url, http_build_query($params), $this->curl_authenticate_method );
 
@@ -62,7 +62,7 @@ class AmazonOAuth2Client extends OAuth2Client {
 			$url = $url . ( strpos( $url, '?' ) ? '&' : '?' ) . http_build_query($params, '', '&');
 		}
 
-		$this->http_info = array();
+		$this->http_info = [];
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL            , $url );

@@ -1,7 +1,7 @@
 <?php
 global $gBitInstaller;
 
-$tables = (defined( 'ROLE_MODEL' )) 
+$tables = (defined( 'ROLE_MODEL' ))
 	? [
 
 'users_users' => "
@@ -270,24 +270,23 @@ $gBitInstaller->registerUserPermissions( USERS_PKG_NAME, [
 	//array(USERS_PKG_NAME,'usermenu','n'),
 ] );
 
-$team_indices = (defined( 'ROLE_MODEL' )) 
+$team_indices = (defined( 'ROLE_MODEL' ))
 	?  [
 		'users_roles_user_idx' 		=> [ 'table' => 'users_roles', 'cols' => 'user_id', 'opts' => null ],
 		'users_roles_user_name_idx' => [ 'table' => 'users_roles', 'cols' => 'user_id,role_name', 'opts' => [ 'UNIQUE' ] ],
 		'users_role_perm_role_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'role_id', 'opts' => null ],
 		'users_role_perm_perm_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'perm_name', 'opts' => null ],
 		'users_roles_map_user_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'user_id', 'opts' => null ],
-		'users_roles_map_role_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'role_id', 'opts' => null ]
-	] 
+		'users_roles_map_role_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'role_id', 'opts' => null ],
+	]
 	:  [
 		'users_groups_user_idx' 		=> [ 'table' => 'users_groups', 'cols' => 'user_id', 'opts' => NULL ],
 		'users_groups_user_name_idx' 	=> [ 'table' => 'users_groups', 'cols' => 'user_id,group_name', 'opts' => [ 'UNIQUE' ] ],
 		'users_group_perm_group_idx' 	=> [ 'table' => 'users_group_permissions', 'cols' => 'group_id', 'opts' => null ],
 		'users_group_perm_perm_idx' 	=> [ 'table' => 'users_group_permissions', 'cols' => 'perm_name', 'opts' => null ],
 		'users_groups_map_user_idx' 	=> [ 'table' => 'users_groups_map', 'cols' => 'user_id', 'opts' => null ],
-		'users_groups_map_group_idx' 	=> [ 'table' => 'users_groups_map', 'cols' => 'group_id', 'opts' => null ]
+		'users_groups_map_group_idx' 	=> [ 'table' => 'users_groups_map', 'cols' => 'group_id', 'opts' => null ],
 	];
-
 
 $indices = [ ...$team_indices,
 	'users_users_email_idx'         => [ 'table' => 'users_users', 'cols' => 'email', 'opts' => [ 'UNIQUE' ] ],
@@ -354,8 +353,8 @@ $gBitInstaller->registerUserPermissions( USERS_PKG_NAME, [
 
 // Package Requirements
 $gBitInstaller->registerRequirements( USERS_PKG_NAME, [
-	'liberty'   => array( 'min' => '5.0.0' ),
-	'kernel'    => array( 'min' => '5.0.0' ),
-	'themes'    => array( 'min' => '5.0.0' ),
-	'languages' => array( 'min' => '5.0.0' ),
+	'liberty'   => [ 'min' => '5.0.0' ],
+	'kernel'    => [ 'min' => '5.0.0' ],
+	'themes'    => [ 'min' => '5.0.0' ],
+	'languages' => [ 'min' => '5.0.0' ],
 ]);
