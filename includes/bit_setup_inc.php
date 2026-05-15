@@ -48,9 +48,6 @@ if( !defined( 'LOGO_MAX_DIM' )) {
 	define( 'LOGO_MAX_DIM', 600 );
 }
 
-// a package can decide to override the default user class
-$userClass = $gBitSystem->getConfig( 'user_class', (defined('ROLE_MODEL') ) ?  '\Bitweaver\Users\RolePermUser' : '\Bitweaver\Users\BitPermUser' );
-
 // set session lifetime
 if( $gBitSystem->isFeatureActive( 'site_session_lifetime' )) {
 	ini_set( 'session.gc_maxlifetime', $gBitSystem->isFeatureActive( 'site_session_lifetime' ));

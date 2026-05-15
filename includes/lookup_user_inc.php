@@ -32,7 +32,6 @@ if( isset( $_REQUEST['fHomepage'] )) {
 if( isset( $_REQUEST['home'] )) {
 	// this allows for a numeric user_id or alpha_numeric user_id
 	$queryUserId = $gBitUser->lookupHomepage( $_REQUEST['home'] ); //, $gBitSystem->getConfig( 'users_case_sensitive_login' ) == 'y' );
-	$userClass = $gBitSystem->getConfig( 'user_class', (defined('ROLE_MODEL') ) ?  '\Bitweaver\Users\RolePermUser' : '\Bitweaver\Users\BitPermUser' );
 	$gQueryUser = new RolePermUser( $queryUserId );
 	$gQueryUser->load( true );
 	$gQueryUser->setCacheableObject( false );

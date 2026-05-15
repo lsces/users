@@ -48,8 +48,7 @@ if( isset( $_REQUEST["register"] ) ) {
 	$reg = $_REQUEST;
 
 	// Register the new user
-	$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
-	$newUser = new $userClass();
+	$newUser = new RolePermUser();
 	if( $newUser->preRegisterVerify( $reg ) && $newUser->register( $reg ) ) {
 		$gBitUser->mUserId = $newUser->mUserId;
 

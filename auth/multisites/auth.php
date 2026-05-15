@@ -128,7 +128,7 @@ class MultisitesAuth extends BaseAuth {
 
 	function createUser( &$pUserHash ) {
 		//$authUserInfo = array( 'login' => $instance->mInfo['login'], 'password' => $instance->mInfo['password'], 'real_name' => $instance->mInfo['real_name'], 'email' => $instance->mInfo['email'] );
-		$u = new BitPermUser();
+		$u = new RolePermUser();
 
 		if( !$u->store( $pUserHash ) ) {
 			$this->mErrors = array_merge($this->mErrors,$u->mErrors);

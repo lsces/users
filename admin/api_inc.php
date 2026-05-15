@@ -14,7 +14,7 @@ function bituser_api_handler( $pMethod, $pRequest ) {
 
 	if( $routeAction == 'register' ) {
 		if( $pMethod == 'POST' ) {
-			$newUser = new BitPermUser();
+			$newUser = new RolePermUser();
 			if( $newUser->register( $pRequest ) ) {
 				$respStatus = HttpStatusCodes::HTTP_OK;
 				$respData = $newUser->exportHash();

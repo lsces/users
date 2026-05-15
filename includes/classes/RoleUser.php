@@ -2821,9 +2821,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	}
 
 	public static function getUserObject( $pUserId ) {
-		global $gBitSystem;
-		$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
-		if( $ret = new $userClass( $pUserId ) ) {
+		if( $ret = new RolePermUser( $pUserId ) ) {
 			$ret->load();
 		}
 		return $ret;

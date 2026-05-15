@@ -17,7 +17,7 @@ $feedback = [];
 
 if( isset($_REQUEST["newuser"] ) ) {
 	$userRecord = $_REQUEST;
-	$newUser =  defined( 'ROLE_MODEL' ) ? new RolePermUser() : new BitPermUser();
+	$newUser = new RolePermUser();
 
 	if( $newUser->importUser( $userRecord ) ) {
 		$gBitSmarty->assign( 'addSuccess', "User Added Successfully" );
@@ -71,7 +71,7 @@ if( isset( $_REQUEST["action"] ) ) {
 			$fp = fopen($file, 'w');
 			$printHeader = true;
 			foreach( $_REQUEST['batch_user_ids'] as $uid ) {
-				$listUser = BitUser::getUserObject( $uid );
+				$listUser = RoleUser::getUserObject( $uid );
 				$hash = $listUser->exportHash();
 				if( $printHeader ) {
 					fputcsv( $fp, array_keys( $hash ) );
@@ -90,7 +90,7 @@ if( isset( $_REQUEST["action"] ) ) {
 			$gBitUser->verifyTicket();
 			$delUsers = $errDelUsers = "";
 			foreach( $_REQUEST['batch_user_ids'] as $uid ) {
-				$expungeUser = BitUser::getUserObject( $uid );
+				$expungeUser = RoleUser::getUserObject( $uid );
 				$userInfo = $gBitUser->getUserInfo( [ 'user_id' => $uid ] );
 				if( $expungeUser->load() && $expungeUser->expunge( BitBase::getParameter( $_REQUEST, 'delete_user_content' ) ) ) {
 					$delUsers .= "<li>{$userInfo['real_name']} ({$userInfo['login']})</li>";
@@ -123,8 +123,7 @@ if( isset( $_REQUEST["action"] ) ) {
 		$formHash['user_id'] = $_REQUEST['user_id'];
 		$userInfo = $gBitUser->getUserInfo( [ 'user_id' => $_REQUEST["user_id"] ] );
 		if( !empty( $userInfo['user_id'] ) ) {
-				$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
-				$reqUser = new $userClass( $_REQUEST["user_id"] );
+				$reqUser = new RolePermUser( $_REQUEST["user_id"] );
 			if( isset( $_REQUEST["confirm"] ) ) {
 				$gBitUser->verifyTicket();
 				switch(  $_REQUEST["action"] ){
@@ -191,23 +190,12 @@ if( isset( $_REQUEST["action"] ) ) {
 	if ($_REQUEST["action"] == 'removerole') {
 		$gBitUser->removeUserFromRole($_REQUEST["user"], $_REQUEST["role"]);
 	}
-	if ($_REQUEST["action"] == 'removegroup') {
-		$gBitUser->removeUserFromGroup($_REQUEST["user"], $_REQUEST["group"]);
-	}
 }
 
-if ( defined( 'ROLE_MODEL' ) ) {
-	// get default role and pass it to tpl
-	foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
-		$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
-		$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
-	}
-} else {
-	// get default group and pass it to tpl
-	foreach( $gBitUser->getDefaultGroup() as $defaultGroupId => $defaultGroupName ) {
-		$gBitSmarty->assign('defaultGroupId', $defaultGroupId );
-		$gBitSmarty->assign('defaultGroupName', $defaultGroupName );
-	}
+
+foreach( $gBitUser->getDefaultRole() as $defaultRoleId => $defaultRoleName ) {
+	$gBitSmarty->assign('defaultRoleId', $defaultRoleId );
+	$gBitSmarty->assign('defaultRoleName', $defaultRoleName );
 }
 
 // override default max_records
@@ -221,20 +209,10 @@ $listHash['listInfo']["URL"] = USERS_PKG_URL."admin/index.php";
 $gBitSmarty->assign('control', $listHash['listInfo']);
 $gBitSmarty->assign('listInfo', $listHash['listInfo']);
 
-if ( defined( 'ROLE_MODEL' ) ) {
-	// invoke edit service for the add user feature
-	$userObj = new RolePermUser();
-	$userObj->invokeServices( 'content_edit_function' );
-	// Get roles (list of roles)
-	$rolelist = $gBitUser->getRoles(0, false);
-	$gBitSmarty->assign( 'rolelist', $rolelist );
-} else {
-	// invoke edit service for the add user feature
-	$userObj = new BitPermUser();
-	$userObj->invokeServices( 'content_edit_function' );	// Get groups (list of groups)
-	$grouplist = $gBitUser->getGroups('', '', 'group_name_asc');
-	$gBitSmarty->assign( 'grouplist', $grouplist );
-}
+$userObj = new RolePermUser();
+$userObj->invokeServices( 'content_edit_function' );
+$rolelist = $gBitUser->getRoles(0, false);
+$gBitSmarty->assign( 'rolelist', $rolelist );
 $gBitSmarty->assign( 'feedback', $feedback );
 
 $gBitSmarty->assign( (!empty( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'userlist').'TabSelect', 'tdefault' );

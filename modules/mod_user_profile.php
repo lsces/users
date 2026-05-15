@@ -15,14 +15,13 @@
 global $gQueryUser, $gBitUser, $gBitSmarty, $moduleParams;
 extract( $moduleParams );
 
-$userClass = $gBitSystem->getConfig( 'user_class', 'BitPermUser' );
 if( !empty( $module_params['user_id'] )) {
-	$user = $userClass( $module_params['user_id'] );
+	$user = new RolePermUser( $module_params['user_id'] );
 	$user->load();
 	$userInfo = &$user->mInfo;
 	$userPrefs = &$user->mPrefs;
 } elseif( !empty( $module_params['login'] )) {
-	$user = $userClass();
+	$user = new RolePermUser();
 	$user->load(null,$module_params['login']);
 	$userInfo = &$user->mInfo;
 	$userPrefs = &$user->mPrefs;
