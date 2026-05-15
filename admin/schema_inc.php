@@ -1,8 +1,8 @@
 <?php
 global $gBitInstaller;
 
-$tables = (defined( 'ROLE_MODEL' ))
-	? [
+$tables = [
+
 
 'users_users' => "
   user_id I4 PRIMARY,
@@ -107,113 +107,6 @@ $tables = (defined( 'ROLE_MODEL' ))
   CONSTRAINT ', CONSTRAINT `users_watches_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
 ",
 
-]
-	: [
-
-'users_users' => "
-  user_id I4 PRIMARY,
-  content_id I4,
-  email C(200),
-  login C(40),
-  real_name C(64),
-  user_password C(32),
-  provpass C(32),
-  provpass_expires I8,
-  default_group_id I4,
-  last_login I8,
-  current_login I8,
-  registration_date I8 NOTNULL,
-  registration_ip C(32) NOTNULL,
-  challenge C(32),
-  pass_due I8,
-  hash C(32),
-  created I8,
-  avatar_attachment_id I4,
-  portrait_attachment_id I4,
-  logo_attachment_id I4
-  CONSTRAINT	', CONSTRAINT `users_avatar_attach_ref` FOREIGN KEY (`avatar_attachment_id`) REFERENCES `".BIT_DB_PREFIX."liberty_attachments` (`attachment_id`)
-				 , CONSTRAINT `users_content_ref` FOREIGN KEY (`content_id`) REFERENCES `".BIT_DB_PREFIX."liberty_content` (`content_id`)
-				 , CONSTRAINT `users_portrait_attach_ref` FOREIGN KEY (`portrait_attachment_id`) REFERENCES `".BIT_DB_PREFIX."liberty_attachments` (`attachment_id`)
-				 , CONSTRAINT `users_logo_attach_ref` FOREIGN KEY (`logo_attachment_id`) REFERENCES `".BIT_DB_PREFIX."liberty_attachments` (`attachment_id`)'
-",
-
-'users_auth_map' => "
-  user_id I4 PRIMARY,
-  provider C(64) PRIMARY,
-  provider_identifier C(64) NOTNULL,
-  last_login I8,
-  profile_json X
-  CONSTRAINT ', CONSTRAINT `users_auth_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
-",
-
-'users_favorites_map' => "
-  favorite_content_id I4 PRIMARY,
-  user_id I4 PRIMARY,
-  map_position I4
-  CONSTRAINT ', CONSTRAINT `users_fav_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)
-			  , CONSTRAINT `users_fav_con_ref` FOREIGN KEY (`favorite_content_id`) REFERENCES `".BIT_DB_PREFIX."liberty_content` (`content_id`)'
-			 '
-",
-
-'users_permissions' => "
-  perm_name C(30) PRIMARY,
-  perm_desc C(250),
-  perm_level C(80),
-  package C(100)
-",
-
-'users_groups' => "
-  group_id I4 PRIMARY,
-  user_id I4 NOTNULL,
-  group_name C(30),
-  is_default C(1),
-  group_desc C(255),
-  group_home C(255),
-  is_public C(1),
-  after_registration_page C(255)
-  CONSTRAINT ', CONSTRAINT `users_groups_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
-",
-
-'users_group_permissions' => "
-  group_id I4 PRIMARY,
-  perm_name C(30) PRIMARY,
-  perm_value C(1) default ''
-  CONSTRAINT ', CONSTRAINT `users_group_perm_group_ref` FOREIGN KEY (`group_id`) REFERENCES `".BIT_DB_PREFIX."users_groups` (`group_id`)
- 				, CONSTRAINT `users_group_perm_perm_ref` FOREIGN KEY (`perm_name`) REFERENCES `".BIT_DB_PREFIX."users_permissions` (`perm_name`)'
-",
-
-'users_groups_map' => "
-  user_id I4 PRIMARY,
-  group_id I4 PRIMARY
-  CONSTRAINT ', CONSTRAINT `users_groups_map_group_ref` FOREIGN KEY (`group_id`) REFERENCES `".BIT_DB_PREFIX."users_groups` (`group_id`)
-  				, CONSTRAINT `users_groups_map_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
-",
-
-'users_cnxn' => "
-  user_id I4,
-  cookie C(64),
-  ip C(39),
-  last_get I8,
-  connect_time I8,
-  get_count I8,
-  user_agent C(128),
-  assume_user_id I4,
-  current_view X
-  CONSTRAINT ', CONSTRAINT `users_cnxn_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
-",
-
-'users_watches' => "
-  user_id I4 PRIMARY,
-  event C(40) PRIMARY,
-  object C(120) PRIMARY,
-  hash C(32),
-  title C(250),
-  watch_type C(200),
-  url C(250),
-  email C(200)
-  CONSTRAINT ', CONSTRAINT `users_watches_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
-",
-
 ];
 
 foreach( array_keys( $tables ) AS $tableName ) {
@@ -270,23 +163,14 @@ $gBitInstaller->registerUserPermissions( USERS_PKG_NAME, [
 	//array(USERS_PKG_NAME,'usermenu','n'),
 ] );
 
-$team_indices = (defined( 'ROLE_MODEL' ))
-	?  [
-		'users_roles_user_idx' 		=> [ 'table' => 'users_roles', 'cols' => 'user_id', 'opts' => null ],
-		'users_roles_user_name_idx' => [ 'table' => 'users_roles', 'cols' => 'user_id,role_name', 'opts' => [ 'UNIQUE' ] ],
-		'users_role_perm_role_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'role_id', 'opts' => null ],
-		'users_role_perm_perm_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'perm_name', 'opts' => null ],
-		'users_roles_map_user_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'user_id', 'opts' => null ],
-		'users_roles_map_role_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'role_id', 'opts' => null ],
-	]
-	:  [
-		'users_groups_user_idx' 		=> [ 'table' => 'users_groups', 'cols' => 'user_id', 'opts' => NULL ],
-		'users_groups_user_name_idx' 	=> [ 'table' => 'users_groups', 'cols' => 'user_id,group_name', 'opts' => [ 'UNIQUE' ] ],
-		'users_group_perm_group_idx' 	=> [ 'table' => 'users_group_permissions', 'cols' => 'group_id', 'opts' => null ],
-		'users_group_perm_perm_idx' 	=> [ 'table' => 'users_group_permissions', 'cols' => 'perm_name', 'opts' => null ],
-		'users_groups_map_user_idx' 	=> [ 'table' => 'users_groups_map', 'cols' => 'user_id', 'opts' => null ],
-		'users_groups_map_group_idx' 	=> [ 'table' => 'users_groups_map', 'cols' => 'group_id', 'opts' => null ],
-	];
+$team_indices = [
+	'users_roles_user_idx' 		=> [ 'table' => 'users_roles', 'cols' => 'user_id', 'opts' => null ],
+	'users_roles_user_name_idx' => [ 'table' => 'users_roles', 'cols' => 'user_id,role_name', 'opts' => [ 'UNIQUE' ] ],
+	'users_role_perm_role_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'role_id', 'opts' => null ],
+	'users_role_perm_perm_idx' 	=> [ 'table' => 'users_role_permissions', 'cols' => 'perm_name', 'opts' => null ],
+	'users_roles_map_user_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'user_id', 'opts' => null ],
+	'users_roles_map_role_idx' 	=> [ 'table' => 'users_roles_map', 'cols' => 'role_id', 'opts' => null ],
+];
 
 $indices = [ ...$team_indices,
 	'users_users_email_idx'         => [ 'table' => 'users_users', 'cols' => 'email', 'opts' => [ 'UNIQUE' ] ],
@@ -306,12 +190,9 @@ $gBitInstaller->registerPackageInfo( USERS_PKG_NAME, [
 
 // ### Sequences
 
-$sequences = ( defined( 'ROLE_MODEL' ) ) ? [
+$sequences = [
 	'users_users_user_id_seq' => [ 'start' => 2 ],
 	'users_roles_id_seq'      => [ 'start' => 4 ],
-] : [
-	'users_users_user_id_seq' => [ 'start' => 2 ],
-	'users_groups_id_seq'     => [ 'start' => 4 ],
 ];
 $gBitInstaller->registerSchemaSequences( USERS_PKG_NAME, $sequences );
 
