@@ -16,6 +16,7 @@ namespace Bitweaver\Liberty;
 use Bitweaver\HttpStatusCodes;
 use Bitweaver\Users\BaseAuth;
 use Bitweaver\Wiki\BitPage;
+use Bitweaver\KernelTools;
 
 // Avoid user hell
 if( isset( $_REQUEST['tk'] ) ) {
@@ -41,7 +42,7 @@ if( !empty( $_REQUEST['returnto'] ) ) {
 }
 
 if( $gBitUser->isRegistered() ) {
-	bit_redirect( $gBitSystem->getDefaultPage() );
+	KernelTools::bit_redirect( $gBitSystem->getDefaultPage() );
 }
 if( isset( $_REQUEST["register"] ) ) {
 
@@ -72,7 +73,7 @@ if( isset( $_REQUEST["register"] ) ) {
 
 		// requires validation by email
 		if( $gBitSystem->isFeatureActive( 'users_validate_user' ) ) {
-			$gBitSmarty->assign('msg',tra('You will receive an email with information to login for the first time into this site'));
+			$gBitSmarty->assign('msg',KernelTools::tra('You will receive an email with information to login for the first time into this site'));
 			$gBitSmarty->assign('showmsg','y');
 		} else {
 			if( !empty( $_SESSION['loginfrom'] ) ) {

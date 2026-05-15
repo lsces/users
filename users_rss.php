@@ -18,8 +18,8 @@ $gBitSystem->verifyFeature( 'users_rss' );
 
 require_once RSS_PKG_INCLUDE_PATH.'rss_inc.php';
 
-$rss->title = $gBitSystem->getConfig( 'users_rss_title', $gBitSystem->getConfig( 'site_title' ).' - '.tra( 'Registrations' ) );
-$rss->description = $gBitSystem->getConfig( 'users_rss_description', $gBitSystem->getConfig( 'site_title' ).' - '.tra( 'RSS Feed' ) );
+$rss->title = $gBitSystem->getConfig( 'users_rss_title', $gBitSystem->getConfig( 'site_title' ).' - '.KernelTools::tra( 'Registrations' ) );
+$rss->description = $gBitSystem->getConfig( 'users_rss_description', $gBitSystem->getConfig( 'site_title' ).' - '.KernelTools::tra( 'RSS Feed' ) );
 
 // check permission to view users pages
 if( !$gBitUser->hasPermission( 'p_users_view_user_list' ) ) {
