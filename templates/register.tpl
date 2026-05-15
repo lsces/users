@@ -199,25 +199,6 @@
 		</div>
 	{/foreach}
 
-	{if $groupList && count($groupList) > 1}
-		<hr />
-		{formlabel label="Group" for="group"}
-		{forminput}
-			{foreach item=gr from=$groupList name=group}
-				<input class="form-control" type="radio" name="group" value="{$gr.group_id|escape}"{if ($reg.group eq '' && $smarty.foreach.group.last) || $reg.group eq $gr.group_id} checked="checked"{/if}>
-					{if $gr.is_default eq "y"}
-						{tr}None{/tr}
-					{elseif $gr.group_desc}
-						{$gr.group_desc}
-					{else}
-						{$gr.group_name}
-					{/if}
-				</input>
-				{if !$smarty.foreach.group.last}<br />{/if}
-			{/foreach}
-			{formhelp note="Choose the group you belong to."}
-		{/forminput}
-	{/if}
 
 	{foreach item=package from=$packages}
 		{include file=$package.template }

@@ -8,8 +8,7 @@
 					{smartlink ipackage=bitcommerce ifile="admin/list_orders.php" user_id=$userInfo.user_id ititle="Orders" booticon="fa-shopping-cart"}
 				{/if}
 				{smartlink ipackage=users ifile="admin/index.php" assume_user=$userInfo.user_id tk=$gBitUser->mTicket ititle="Assume user identity" booticon="fa-user-doctor"}
-				{smartlink ipackage=users ifile="admin/assign_user.php" assign_user=$userInfo.user_id ititle="Assign Group" booticon="fa-key"}
-				{smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userInfo.user_id ititle="User Activity" booticon="fa-bolt"}
+{smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userInfo.user_id ititle="User Activity" booticon="fa-bolt"}
 				{if $userInfo.user_id != $smarty.const.ANONYMOUS_USER_ID}
 					{smartlink ipackage=liberty ifile="list_content.php" user_id=$userInfo.user_id ititle="User Content" booticon="fa-square-list"}
 					{smartlink ipackage=users ifile="admin/index.php" action=delete user_id=$userInfo.user_id ititle="Remove" booticon="fa-trash"}

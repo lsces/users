@@ -36,7 +36,6 @@ use Bitweaver\Liberty\LibertyContent;
 class RolePermUser extends RoleUser {
 
 	public $mPerms;
-	public $mGroups;
 	public $mPermsOverride;
 
 	/**
@@ -232,9 +231,6 @@ class RolePermUser extends RoleUser {
 		return true;
 	}
 
-	public function isInGroup( $pGroupMixed ) { return false; }
-	public function groupExists( $pGroupMixed ) { return false; }
-
 	// =-=-=-=-=-=-=-=-=-=-=-= Role Functions =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	/**
 	 * loadRoles load roles into $this->mRoles
@@ -248,12 +244,6 @@ class RolePermUser extends RoleUser {
 			$this->mRoles = $this->getRoles( 0, $pForceRefresh );
 		}
 	}
-	function loadGroups( $pForceRefresh = false ) {
-		if( $this->isValid() ) {
-			$this->mRoles = $this->getRoles( 0, $pForceRefresh );
-		}
-	}
-
 	/**
 	 * isInRole work out if a given user is assigned to a role
 	 * 
@@ -361,13 +351,6 @@ class RolePermUser extends RoleUser {
 		return $this->mDb->getAssoc( $sql, [ $pUserId ] );
 	}
 
-	public function getAllGroups( &$pListHash ) {
-		return [];
-	}
-
-	function getAllUserGroups( $pUserId = null ) {
-		return [];
-	}
 	/**
 	 * expungeRole remove a role
 	 * 
@@ -432,9 +415,6 @@ class RolePermUser extends RoleUser {
 	 * @access public
 	 * @return bool true on success, false on failure - mErrors will contain reason for failure
 	 */
-	public function getGroupHome( $pRoleId ) {
-		return $this->getRoleHome( $pRoleId );
-	}
 	public function getRoleHome( $pRoleId ) {
 		$ret = false;
 		if( BitBase::verifyId( $pRoleId )) {
@@ -763,10 +743,6 @@ class RolePermUser extends RoleUser {
 		}
 			$gBitSystem->fatalPermission( $pPermission, $pMsg );
 
-	}
-
-	public function getGroupPermissions( $pParamHash = null ) {
-		$this->getRolePermissions( $pParamHash );
 	}
 
 	/**

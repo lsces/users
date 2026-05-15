@@ -1262,11 +1262,10 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			// default to general post-login
 			// @see \Bitweaver\BitSystem::getIndexPage
 			$indexType = 'my_page';
-			// getGroupHome is BitPermUser method
-			if( method_exists( $this, 'getGroupHome' ) &&
-				(( @$this->verifyId( $this->mInfo['default_group_id'] ) && ( $group_home = $this->getGroupHome( $this->mInfo['default_group_id'] ) ) ) ||
-				( $gBitSystem->getConfig( 'default_home_group' ) && ( $group_home = $this->getGroupHome( $gBitSystem->getConfig( 'default_home_group' ) ) ) )) ){
-				$indexType = 'group_home';
+			if( method_exists( $this, 'getRoleHome' ) &&
+				(( @$this->verifyId( $this->mInfo['default_role_id'] ) && ( $role_home = $this->getRoleHome( $this->mInfo['default_role_id'] ) ) ) ||
+				( $gBitSystem->getConfig( 'default_home_role' ) && ( $role_home = $this->getRoleHome( $gBitSystem->getConfig( 'default_home_role' ) ) ) )) ){
+				$indexType = 'role_home';
 			}
 
 			$url = $_SESSION['loginfrom'] ?? $gBitSystem->getIndexPage( $indexType );

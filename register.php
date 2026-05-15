@@ -92,12 +92,6 @@ closedir( $h );
 sort( $flags );
 $gBitSmarty->assign('flags', $flags);
 
-$listHash = [
-	'is_public' => 'y',
-	'sort_mode' => [ 'is_default_asc', 'group_desc_asc' ],
-];
-$groupList = $gBitUser->getAllGroups( $listHash );
-$gBitSmarty->assign( 'groupList', $groupList );
 
 // include preferences settings from other packages - these will be included as individual tabs
 $packages = [];

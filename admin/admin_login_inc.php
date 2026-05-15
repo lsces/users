@@ -272,22 +272,22 @@ if( !empty( $_POST ) ) {
 	simple_set_value( 'users_auth_method', USERS_PKG_NAME );
 	simple_set_value( 'users_validate_email_group', USERS_PKG_NAME );
 
-	if( isset( $_REQUEST['registration_group_choice'] ) ) {
+	if( isset( $_REQUEST['registration_role_choice'] ) ) {
 		$listHash = [];
-		$groupList = $gBitUser->getAllRoles( $listHash );
+		$roleList = $gBitUser->getAllRoles( $listHash );
 
 		$in = [];
 		$out = [];
-		foreach( $groupList as $gr ) {
-			if( $gr['group_id'] == ANONYMOUS_GROUP_ID ) {
+		foreach( $roleList as $ro ) {
+			if( $ro['role_id'] == ANONYMOUS_TEAM_ID ) {
 				continue;
 			}
 
-			// work out if someting has been selected or deselected
-			if( $gr['is_public'] == 'y' && !in_array( $gr['group_id'], $_REQUEST['registration_group_choice'] )) {
-				$out[] = $gr['group_id'];
-			} elseif( $gr['is_public'] != 'y' && in_array( $gr['group_id'], $_REQUEST['registration_group_choice'] )) {
-				$in[] = $gr['group_id'];
+			// work out if something has been selected or deselected
+			if( $ro['is_public'] == 'y' && !in_array( $ro['role_id'], $_REQUEST['registration_role_choice'] )) {
+				$out[] = $ro['role_id'];
+			} elseif( $ro['is_public'] != 'y' && in_array( $ro['role_id'], $_REQUEST['registration_role_choice'] )) {
+				$in[] = $ro['role_id'];
 			}
 		}
 		if( count( $in ) ) {
