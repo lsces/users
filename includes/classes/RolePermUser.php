@@ -685,7 +685,7 @@ class RolePermUser extends RoleUser {
 	 */
 	public function loadPermissions( $pForceReload=false ) {
 		$this->mPerms = [];
-		if( $this->isValid() && (empty( $this->mPerms ) || $pForceReload) ) {
+		if( empty( $this->mPerms ) || $pForceReload ) {
 			// the double up.`perm_name` is intentional - the first is for hash key, the second is for hash value
 			$query = "
 				SELECT up.`perm_name` AS `hash_key`, up.`perm_name`, up.`perm_desc`, up.`perm_level`, up.`package`
@@ -736,6 +736,16 @@ class RolePermUser extends RoleUser {
 	 * @param $pPermission value of a given permission
 	 * @return void
 	 */
+	public function hasPermission( $pPerm ) {
+		if( !isset( $this->mPerms ) ) {
+			$this->loadPermissions();
+		}
+		if( $this->isAdmin() ) {
+			return true;
+		}
+		return isset( $this->mPerms[$pPerm] );
+	}
+
 	public function verifyPermission( $pPermission, $pMsg = null ) {
 		global $gBitSmarty, $gBitSystem, ${$pPermission};
 		if( empty( $pPermission ) || $this->hasPermission( $pPermission ) ) {
