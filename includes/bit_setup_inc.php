@@ -128,13 +128,12 @@ if( empty( $gBitUser ) || !$gBitUser->isValid() ) {
 	if( !($gBitUser = RolePermUser::loadFromCache( ANONYMOUS_USER_ID ) ) ) { // $userClass::loadFromCache( ANONYMOUS_USER_ID ) ) ) {
 		if( empty($gBitUser) ) {
 			$gBitUser = new RolePermUser();
-			// maybe do something...
 			unset( $_SESSION['user_role'] );
 		}
 	}
 } else {
-	if (empty($_SESSION['user_role'])) {
-		$_SESSION['user_role'] = 3;
+	if( empty( $_SESSION['user_role'] ) ) {
+		$_SESSION['user_role'] = array_keys( $gBitUser->getRoles() );
 	}
 }
 
