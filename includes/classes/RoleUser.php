@@ -2679,8 +2679,8 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	 * @access public
 	 * @return int|array|bool false on failure - mErrors will contain reason for failure
 	 */
-	public function getRoles( int $pUserId = -1, bool $pForceRefresh = false ) {
-		$userId = $pUserId ?? ( $this->mUserId ?? -1 );
+	public function getRoles( ?int $pUserId = null, bool $pForceRefresh = false ) {
+		$userId = $pUserId ?? $this->mUserId ?? -1;
 		if( !isset( $this->cUserRoles[$userId] ) || $pForceRefresh ) {
 			$query = "
 				SELECT ur.`role_id`, ur.`role_name`, ur.`user_id` as role_owner_user_id
