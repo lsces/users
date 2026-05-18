@@ -727,6 +727,9 @@ class RolePermUser extends RoleUser {
 	 */
 	public function isAdmin() {
 		// we can't use hasPermission here since it turn into an endless loop
+		if( !isset( $this->mPerms ) ) {
+			$this->loadPermissions();
+		}
 		return !empty( $this->mPerms['p_admin'] );
 	}
 
