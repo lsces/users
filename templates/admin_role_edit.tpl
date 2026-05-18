@@ -20,7 +20,6 @@
 			{jstab title="Edit Role"}
 				{form legend="Add or Edit a Role"}
 					<input type="hidden" name="role_id" value="{$roleInfo.role_id ?? 0}" />
-					<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 					<div class="form-group">
 						{formlabel label="Role" for="roles_role"}
 						{forminput}

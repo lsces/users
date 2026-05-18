@@ -68,7 +68,6 @@
 				{jstab title="$editLabel Body"}
 					{legend legend="`$editLabel` Body"}
 						<input type="hidden" name="page_id" value="{$pageInfo.page_id ?? 0}" />
-						<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 
 						<div class="form-group">
 							{formfeedback warning=$errors.title ?? ''}

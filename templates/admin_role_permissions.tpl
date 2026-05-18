@@ -9,7 +9,6 @@
 
 		{form}
 			<input type="hidden" name="package" value="{$smarty.request.package|default:'All'}" />
-			<input type="hidden" name="tk" value="{$gBitUser->mTicket}" />
 
 			<p>
 				{smartlink ititle=All package=$packageKey}
