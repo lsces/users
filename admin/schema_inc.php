@@ -45,7 +45,6 @@ $tables = [
   provider_identifier C(64) NOTNULL,
   last_login I8,
   profile_json X
-  CONSTRAINT ', CONSTRAINT `users_auth_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users` (`user_id`)'
 ",
 
 'users_permissions' => "
@@ -182,6 +181,13 @@ $indices = [ ...$team_indices,
 	'users_fav_user_idx'            => [ 'table' => 'users_favorites_map', 'cols' => 'user_id', 'opts' => null ],
 ];
 $gBitInstaller->registerSchemaIndexes( USERS_PKG_NAME, $indices );
+
+$constraints = [
+	'users_auth_map' => [ 'users_auth_user_ref' => 'FOREIGN KEY (`user_id`) REFERENCES `' . BIT_DB_PREFIX . 'users_users` (`user_id`)' ],
+];
+foreach( array_keys( $constraints ) as $tableName ) {
+	$gBitInstaller->registerSchemaConstraints( USERS_PKG_NAME, $tableName, $constraints[$tableName] );
+}
 
 $gBitInstaller->registerPackageInfo( USERS_PKG_NAME, [
 	'description' => "The users package contains all user information and gives you the possiblity to assign permissions to users.",
