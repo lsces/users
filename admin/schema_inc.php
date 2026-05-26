@@ -43,6 +43,7 @@ $tables = [
   user_id I4 PRIMARY,
   provider C(64) PRIMARY,
   provider_identifier C(64) NOTNULL,
+  
   last_login I8,
   profile_json X
 ",
