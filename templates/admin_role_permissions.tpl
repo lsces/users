@@ -8,16 +8,16 @@
 		{formfeedback hash=$feedback}
 
 		{form}
-			<input type="hidden" name="package" value="{$smarty.request.package|default:'All'}" />
+			<input type="hidden" name="package" value="{$smarty.request.package}" />
 
-			<p>
-				{smartlink ititle=All package=$packageKey}
+			<ul class="list-inline">
+				<li>{smartlink ititle=All}</li>
 				{foreach from=$permPackages key=i item=packageKey}
 					{if $gBitSystem->isPackageActive($packageKey)}
-						&nbsp;&bull; {smartlink ititle=$gBitSystem->mPackages.$packageKey.name|default:$packageKey package=$packageKey}
+						<li>&bull; {smartlink ititle=$gBitSystem->mPackages.$packageKey.name|default:$packageKey package=$packageKey}</li>
 					{/if}
 				{/foreach}
-			</p>
+			</ul>
 
 			<table class="table data">
 				<caption>{tr}Available Permissions{/tr}</caption>
