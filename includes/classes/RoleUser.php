@@ -1209,7 +1209,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			if( $gBitSystem->isFeatureActive( 'users_remember_me' ) && isset( $_REQUEST['rme'] ) && $_REQUEST['rme'] == 'on' ) {
 				$cookieTime = (int)( time() + (int)$gBitSystem->getConfig( 'users_remember_time', 86400 ));
 				$cookiePath = $gBitSystem->getConfig( 'cookie_path', $cookiePath );
-				$cookieDomain = parse_url(BIT_ROOT_URL, PHP_URL_HOST) ?? '/';
+				$cookieDomain = parse_url(BIT_ROOT_URL, PHP_URL_HOST) ?? '';
 				$gBitSystem->getConfig( 'cookie_domain', $cookieDomain);
 			}
 		}
