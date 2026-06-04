@@ -89,7 +89,7 @@
 			{forminput}
 				{foreach from=$hybridProviders key=providerKey item=providerHash}
 					{assign var=providerActive value="users_ha_`$providerKey`_enabled"}
-					<fieldset><legend class="checkbox"><label><input id="{$providerActive}_checkbox" type="checkbox" name="hybridauth[{$providerActive}]" {if $gBitSystem->getConfig($providerActive)}checked{/if}> {booticon iname="fa-`$providerHash.icon`"} {$providerHash.provider}</label></legend>
+					<fieldset><legend class="checkbox"><label><input id="{$providerActive}_checkbox" type="checkbox" name="hybridauth[{$providerActive}]" {if $gBitSystem->getConfig($providerActive)}checked{/if}> {biticon ipackage="icons" iname="fa-`$providerHash.icon`"} {$providerHash.provider}</label></legend>
 					<script>
 					$('#{$providerActive}_checkbox').change(function(){
 						if($(this).prop("checked")) $('#{$providerActive}').show(); else $('#{$providerActive}').hide();

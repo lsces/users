@@ -3,7 +3,7 @@
 
 <div class="floaticon">
 	<a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php">
-		{booticon iname="fa-users" iexplain="Role List"}
+		{biticon ipackage="icons" iname="system-users" iexplain="Role List"}
 	</a>
 	{bithelp}
 </div>

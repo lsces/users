@@ -77,19 +77,19 @@
 							<strong title="{tr}Content Count{/tr}">{$contentCount} </strong>
 						{/if}
 						{if $gBitSystem->isPackageActive( 'bitcommerce' ) && $gBitUser->hasPermission( 'p_commerce_admin' )}
-							{smartlink ipackage=bitcommerce ifile="admin/list_orders.php" user_id=$userHash.user_id ititle="Orders" booticon="fa-shopping-cart"}
+							{smartlink ipackage=bitcommerce ifile="admin/list_orders.php" user_id=$userHash.user_id ititle="Orders" biticon="package-x-generic"}
 						{/if}
-						{smartlink ipackage=liberty ifile="list_content.php" user_id=$userHash.user_id ititle="User Content" booticon="fa-list"}
-						{smartlink ipackage=users ifile="admin/index.php" assume_user=$userHash.user_id ititle="Assume User Identity" booticon="fa-user-doctor"}
-						{smartlink ipackage=users ifile="preferences.php" view_user=$userHash.user_id ititle="Edit User Information" booticon="fa-edit"}
-{smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userHash.user_id ititle="User Activity" booticon="fa-bolt"}
+						{smartlink ipackage=liberty ifile="list_content.php" user_id=$userHash.user_id ititle="User Content" biticon="text-x-generic"}
+						{smartlink ipackage=users ifile="admin/index.php" assume_user=$userHash.user_id ititle="Assume User Identity" biticon="system-users"}
+						{smartlink ipackage=users ifile="preferences.php" view_user=$userHash.user_id ititle="Edit User Information" biticon="document-properties"}
+{smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userHash.user_id ititle="User Activity" biticon="utilities-system-monitor"}
 						{if $userHash.user_id != $smarty.const.ANONYMOUS_USER_ID && $userHash.user_id != $smarty.const.ROOT_USER_ID && $userHash.user_id != $gBitUser->mUserId}
 							{if $userHash.content_status_id > 0}
-								{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=ban ititle="Disable Account" booticon="fa-ban"}
+								{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=ban ititle="Disable Account" biticon="process-stop"}
 							{else}
-								{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=unban ititle="Re-enable Account" booticon="fa-user-lock"}
+								{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=unban ititle="Re-enable Account" biticon="lock"}
 							{/if}
-							{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=delete ititle="Remove" booticon="fa-trash"}
+							{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=delete ititle="Remove" biticon="edit-delete"}
 						{/if}
 					</div>
 					<div>{tr}User ID{/tr}: {$userHash.user_id}</div>

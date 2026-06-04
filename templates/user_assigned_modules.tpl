@@ -25,15 +25,15 @@
 											{tr}Position {$modules.$area[ix].ord}{/tr}<br />
 											{$modules.$area[ix].name}
 											<div style="text-align:center;">
-												{smartlink ititle="Up" booticon="fa-arrow-up" fMove=up fPackage=$fPackage fModule=$modules.$area[ix].module_id}
-												{smartlink ititle="Down" booticon="fa-arrow-down" fMove=down fPackage=$fPackage fModule=$modules.$area[ix].module_id}
+												{smartlink ititle="Up" biticon="go-up" fMove=up fPackage=$fPackage fModule=$modules.$area[ix].module_id}
+												{smartlink ititle="Down" biticon="go-down" fMove=down fPackage=$fPackage fModule=$modules.$area[ix].module_id}
 												{if $colkey eq 'right'}
-													{smartlink ititle="Move to Left" booticon="fa-arrow-left" fMove=left fPackage=$fPackage fModule=$modules.$area[ix].module_id}
+													{smartlink ititle="Move to Left" biticon="go-previous" fMove=left fPackage=$fPackage fModule=$modules.$area[ix].module_id}
 												{elseif $colkey eq 'left'}
-													{smartlink ititle="Move to Right" booticon="fa-arrow-right" fMove=right fPackage=$fPackage fModule=$modules.$area[ix].module_id}
+													{smartlink ititle="Move to Right" biticon="go-next" fMove=right fPackage=$fPackage fModule=$modules.$area[ix].module_id}
 												{/if}
 												{if $column[ix].type ne 'P'}
-													{smartlink ititle="Unassign" booticon="fa-trash" onclick="return confirm('Are you sure you want to remove `$modules.$area[ix].name`?');" fMove=unassign fPackage=$fPackage fModule=$modules.$area[ix].module_id}
+													{smartlink ititle="Unassign" biticon="edit-delete" onclick="return confirm('Are you sure you want to remove `$modules.$area[ix].name`?');" fMove=unassign fPackage=$fPackage fModule=$modules.$area[ix].module_id}
 												{/if}
 											</div>
 										</td>

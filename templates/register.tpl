@@ -12,7 +12,7 @@
 		<div class="form-group">
 			{formlabel label="Click to Register" for="user"}
 			{forminput}
-				{foreach from=$hybridProviders key=providerKey item=providerHash}<a class="btn btn-default" href="{$smarty.const.USERS_PKG_URL}validate?provider={$providerHash.provider}">{booticon iname=$providerHash.icon} {$providerHash.provider}</a> {/foreach}
+				{foreach from=$hybridProviders key=providerKey item=providerHash}<a class="btn btn-default" href="{$smarty.const.USERS_PKG_URL}validate?provider={$providerHash.provider}">{biticon ipackage="icons" iname=$providerHash.icon} {$providerHash.provider}</a> {/foreach}
 				{formhelp note="1-Click registration with any of the sites above."}
 			{/forminput}
 		</div>
