@@ -35,7 +35,7 @@
 			<li><a class="item" href="{$smarty.const.QUOTA_PKG_URL}">{biticon ipackage="icons" iname="drive-harddisk" iexplain="My quota and usage"}My quota and usage</a></li>
 		{/if}
 		{if $gBitUser->hasPermission( 'p_liberty_attach_attachments' )}
-			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}attachments.php">{biticon ipackage="icons" iname="mail-attachment" iexplain="My Files"}My Files</a></li>
+			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}attachments.php">{biticon ipackage="icons" iname="stock_attach" iexplain="My Files"}My Files</a></li>
 		{/if}
 		{if $gBitUser->hasPermission('p_liberty_list_content')}
 			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}list_content.php">{biticon ipackage="icons" iname="text-x-generic" iexplain="List Site Content"}List Site Content</a></li>
