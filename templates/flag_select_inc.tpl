@@ -4,11 +4,12 @@
 {assign var=_fsSizes value=['small'=>['w'=>21,'h'=>16],'medium'=>['w'=>32,'h'=>24],'large'=>['w'=>43,'h'=>32]]}
 {assign var=_fsDims value=$_fsSizes[$fsSize|default:'small']}
 {assign var=_fsStyle value="width:{$_fsDims.w}px;line-height:1.5em;vertical-align:middle"}
-{assign var=fsFlagCode value=$countryFlags[$fsValue]|default:''}
+{assign var=_fsVal value=$fsValue|default:''}
+{assign var=fsFlagCode value=$countryFlags[$_fsVal]|default:''}
 <div class="bw-flag-select" id="{$fsId}">
-	<input type="hidden" name="{$fsName}" value="{$fsValue|escape}">
+	<input type="hidden" name="{$fsName}" value="{$_fsVal|escape}">
 	<button type="button" class="bw-flag-trigger form-control" style="text-align:left;cursor:pointer">
-		{if $fsFlagCode}<span class="fi fi-{$fsFlagCode}" style="{$_fsStyle};margin-right:6px"></span>{/if}<span class="bw-flag-label">{$countries[$fsValue]|default:''|escape}</span>
+		{if $fsFlagCode}<span class="fi fi-{$fsFlagCode}" style="{$_fsStyle};margin-right:6px"></span>{/if}<span class="bw-flag-label">{$countries[$_fsVal]|default:''|escape}</span>
 		<span class="caret" style="float:right;margin-top:8px"></span>
 	</button>
 	<div class="bw-flag-dropdown panel panel-default" style="display:none;position:absolute;z-index:1050;min-width:300px">
