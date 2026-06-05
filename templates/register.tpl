@@ -130,10 +130,10 @@
 				{formlabel label="Country" for="country"}
 				{forminput}
 					<select name="prefs[users_country]" id="country">
-						<option value="" />
-							{section name=ix loop=$flags}
-								<option value="{$flags[ix]|escape}" {if $smarty.request.prefs.users_country eq $flags[ix]}selected="selected"{/if}>{tr}{$flags[ix]|replace:'_':' '}{/tr}</option>
-							{/section}
+						<option value=""></option>
+						{foreach $countries as $code => $name}
+							<option value="{$code|escape}"{if $smarty.request.prefs.users_country eq $code} selected="selected"{/if}>{$name|escape}</option>
+						{/foreach}
 					</select>
 					{formhelp note=""}
 				{/forminput}

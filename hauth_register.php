@@ -79,18 +79,9 @@ $languages = $gBitLanguage->listLanguages();
 $gBitSmarty->assign( 'languages', $languages );
 $gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
-// Get flags here
-$flags = [];
-$h = opendir( USERS_PKG_PATH.'icons/flags/' );
-while( $file = readdir( $h )) {
-	if( strstr( $file, ".gif" )) {
-		$parts = explode( '.', $file );
-		$flags[] = $parts[0];
-	}
-}
-closedir( $h );
-sort( $flags );
-$gBitSmarty->assign('flags', $flags);
+require_once( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
+asort( $bwCountries );
+$gBitSmarty->assign( 'countries', $bwCountries );
 
 
 // include preferences settings from other packages - these will be included as individual tabs

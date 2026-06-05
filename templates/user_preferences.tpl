@@ -63,12 +63,12 @@
 							{forminput}
 								<select name="users_country" id="country" class="form-control">
 									<option value=""></option>
-										{section name=ix loop=$flags}
-											<option value="{$flags[ix]|escape}" {if $editUser->mPrefs.flag eq $flags[ix]}selected="selected"{/if}>{tr}{$flags[ix]|replace:'_':' '}{/tr}</option>
-										{/section}
+									{foreach $countries as $code => $name}
+										<option value="{$code|escape}"{if $editUser->mPrefs.users_country_code eq $code} selected="selected"{/if}>{$name|escape}</option>
+									{/foreach}
 								</select>
 								&nbsp;
-								{if $editUser->getPreference('flag')}{biticon iforce=icon ipackage=users ipath="flags/" iname=$editUser->getPreference('flag') iexplain=$editUser->getPreference('flag')}{/if}
+								{if $editUser->mPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$editUser->mPrefs.flag iexplain=$editUser->mPrefs.users_country}{/if}
 							{/forminput}
 						</div>
 

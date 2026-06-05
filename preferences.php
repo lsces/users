@@ -225,17 +225,9 @@ $languages = [];
 $languages = $gBitLanguage->listLanguages();
 $gBitSmarty->assign( 'languages', $languages );
 
-// Get flags
-$flags = [];
-$h = opendir( USERS_PKG_PATH.'icons/flags/' );
-while( $file = readdir( $h )) {
-	if( strstr( $file, ".gif" )) {
-		$flags[] = preg_replace( "/\.gif/", "", $file );
-	}
-}
-closedir( $h );
-sort( $flags );
-$gBitSmarty->assign( 'flags', $flags );
+require_once( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
+asort( $bwCountries );
+$gBitSmarty->assign( 'countries', $bwCountries );
 
 $editUser->mInfo['users_homepage'] = $editUser->getPreference( 'users_homepage', '' );
 
