@@ -30,6 +30,7 @@ $bwCountries = [
 	'BMU' => 'Bermuda',
 	'BTN' => 'Bhutan',
 	'BOL' => 'Bolivia',
+	'BES' => 'Bonaire, Sint Eustatius and Saba',
 	'BIH' => 'Bosnia and Herzegovina',
 	'BWA' => 'Botswana',
 	'BVT' => 'Bouvet Island',
@@ -115,11 +116,13 @@ $bwCountries = [
 	'ITA' => 'Italy',
 	'JAM' => 'Jamaica',
 	'JPN' => 'Japan',
+	'JEY' => 'Jersey',
 	'JOR' => 'Jordan',
 	'KAZ' => 'Kazakhstan',
 	'KEN' => 'Kenya',
 	'KIR' => 'Kiribati',
 	'KOR' => 'Korea',
+	'XKX' => 'Kosovo',
 	'KWT' => 'Kuwait',
 	'KGZ' => 'Kyrgyzstan',
 	'LAO' => 'Laos',
@@ -192,6 +195,7 @@ $bwCountries = [
 	'SHN' => 'Saint Helena',
 	'KNA' => 'Saint Kitts and Nevis',
 	'LCA' => 'Saint Lucia',
+	'MAF' => 'Saint Martin',
 	'SPM' => 'Saint Pierre and Miquelon',
 	'VCT' => 'Saint Vincent and the Grenadines',
 	'WSM' => 'Samoa',
@@ -204,6 +208,7 @@ $bwCountries = [
 	'SYC' => 'Seychelles',
 	'SLE' => 'Sierra Leone',
 	'SGP' => 'Singapore',
+	'SXM' => 'Sint Maarten',
 	'SVK' => 'Slovakia',
 	'SVN' => 'Slovenia',
 	'SLB' => 'Solomon Islands',
@@ -257,7 +262,7 @@ $bwCountries = [
 ];
 
 // alpha-3 => alpha-2 lowercase, for flag image filename
-// Entries without a mapping (SEA, AZR, FLD, CUW, BLM, SSD) show no flag
+// Entries without a mapping (SEA, AZR, FLD) show no flag
 $bwIso3166 = [
 	'GBR' => 'gb',
 	'ABW' => 'aw',
@@ -290,6 +295,8 @@ $bwIso3166 = [
 	'BLZ' => 'bz',
 	'BMU' => 'bm',
 	'BOL' => 'bo',
+	'BES' => 'bq',
+	'BLM' => 'bl',
 	'BRA' => 'br',
 	'BRB' => 'bb',
 	'BRN' => 'bn',
@@ -299,6 +306,7 @@ $bwIso3166 = [
 	'CAF' => 'cf',
 	'CAN' => 'ca',
 	'CCK' => 'cc',
+	'CUW' => 'cw',
 	'CHE' => 'ch',
 	'CHL' => 'cl',
 	'CHN' => 'cn',
@@ -368,6 +376,7 @@ $bwIso3166 = [
 	'ISR' => 'il',
 	'ITA' => 'it',
 	'JAM' => 'jm',
+	'JEY' => 'je',
 	'JOR' => 'jo',
 	'JPN' => 'jp',
 	'KAZ' => 'kz',
@@ -376,7 +385,7 @@ $bwIso3166 = [
 	'KHM' => 'kh',
 	'KIR' => 'ki',
 	'KNA' => 'kn',
-	'KOR' => 'ko',
+	'KOR' => 'kr',
 	'KWT' => 'kw',
 	'LAO' => 'la',
 	'LBN' => 'lb',
@@ -389,6 +398,7 @@ $bwIso3166 = [
 	'LTU' => 'lt',
 	'LUX' => 'lu',
 	'LVA' => 'lv',
+	'MAF' => 'mf',
 	'MAC' => 'mo',
 	'MAR' => 'ma',
 	'MCO' => 'mc',
@@ -448,6 +458,7 @@ $bwIso3166 = [
 	'SAU' => 'sa',
 	'SCT' => 'gb-sct',
 	'SDN' => 'sd',
+	'SSD' => 'ss',
 	'SEN' => 'sn',
 	'SER' => 'rs',
 	'SGP' => 'sg',
@@ -463,6 +474,7 @@ $bwIso3166 = [
 	'STP' => 'st',
 	'SUR' => 'sr',
 	'SVK' => 'sk',
+	'SXM' => 'sx',
 	'SVN' => 'si',
 	'SWE' => 'se',
 	'SWZ' => 'sz',
@@ -503,6 +515,14 @@ $bwIso3166 = [
 	'ZAF' => 'za',
 	'ZMB' => 'zm',
 	'ZWE' => 'zw',
+	'XKX' => 'xk',
 	'GGY' => 'gg',
 	'IOM' => 'im',
+	// lipis flag-icons SVGs present in icons/flags/ but not mapped here:
+	// Regional/sub-national: es-ct (Catalonia), es-ga (Galicia), es-pv (Basque Country),
+	//   sh-ac (Ascension Island), sh-hl (Saint Helena island), sh-ta (Tristan da Cunha)
+	//   — need new alpha-3 entries in both arrays above if wanted
+	// Organisations: arab, asean, cefta, eac, eu, pc, un — not countries
+	// Territories without clean entry: cp (Clipperton), dg (Diego Garcia), ic (Canary Islands)
+	// Placeholder: xx (unknown flag)
 ];
