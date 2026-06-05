@@ -116,7 +116,7 @@
 									{foreach from=$roleInfo.perms key=permName item=perm}
 										<tr class="{cycle values="odd,even"}">
 											<td>
-												{smartlink ititle="Remove" biticon="edit-delete" package=$package role_id=$roleInfo.role_id action=remove permission=$permName}
+												{smartlink ititle="Remove" biticon="user-trash" package=$package role_id=$roleInfo.role_id action=remove permission=$permName}
 												&nbsp;{$permName}
 											</td>
 											<td>{$perm.perm_desc}</td>

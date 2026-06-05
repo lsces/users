@@ -52,7 +52,7 @@
 						<a href="{$smarty.const.USERS_PKG_URL}admin/edit_role.php?role_id={$roleId}">{$role.role_name}</a>
 						{if $roleId eq $assignUser->mInfo.default_role_id}</strong>{/if}
 						{if $roleId != -1}
-							&nbsp;<a class="btn btn-xs btn-danger" href="{$smarty.const.USERS_PKG_URL}admin/assign_role_user.php?action=removerole&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}&amp;tk={$gBitUser->mTicket}">{biticon ipackage="icons" iname="edit-delete" iexplain="remove from role"}</a>
+							&nbsp;<a class="btn btn-xs btn-danger" href="{$smarty.const.USERS_PKG_URL}admin/assign_role_user.php?action=removerole&amp;role_id={$roleId}&amp;assign_user={$assignUser->mUserId}&amp;tk={$gBitUser->mTicket}">{biticon ipackage="icons" iname="user-trash" iexplain="remove from role"}</a>
 						{/if}
 						<br />
 					{/foreach}

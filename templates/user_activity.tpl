@@ -35,7 +35,7 @@
 
 			{if $watches}
 				<tr>
-					<td><button class="btn btn-default btn-sm" name="delete" value="{tr}delete{/tr}">{biticon ipackage="icons" iname="edit-delete" iexplain=Remove}</button></td>
+					<td><button class="btn btn-default btn-sm" name="delete" value="{tr}delete{/tr}">{biticon ipackage="icons" iname="user-trash" iexplain=Remove}</button></td>
 				</tr>
 			{/if}
 		</table>

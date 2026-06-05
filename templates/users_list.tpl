@@ -89,7 +89,7 @@
 							{else}
 								{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=unban ititle="Re-enable Account" biticon="lock"}
 							{/if}
-							{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=delete ititle="Remove" biticon="edit-delete"}
+							{smartlink ipackage=users ifile="admin/index.php" user_id=$userHash.user_id action=delete ititle="Remove" biticon="user-trash"}
 						{/if}
 					</div>
 					<div>{tr}User ID{/tr}: {$userHash.user_id}</div>

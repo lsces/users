@@ -11,7 +11,7 @@
 {smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userInfo.user_id ititle="User Activity" biticon="utilities-system-monitor"}
 				{if $userInfo.user_id != $smarty.const.ANONYMOUS_USER_ID}
 					{smartlink ipackage=liberty ifile="list_content.php" user_id=$userInfo.user_id ititle="User Content" biticon="text-x-generic"}
-					{smartlink ipackage=users ifile="admin/index.php" action=delete user_id=$userInfo.user_id ititle="Remove" biticon="edit-delete"}
+					{smartlink ipackage=users ifile="admin/index.php" action=delete user_id=$userInfo.user_id ititle="Remove" biticon="user-trash"}
 				{/if}
 				{if $gBitUser->mUserId != $gQueryUser->mUserId}
 					{smartlink ipackage=users ifile="preferences.php" view_user=$userInfo.user_id ititle="Edit User Information" biticon="dialog-ok"}

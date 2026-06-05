@@ -23,7 +23,7 @@
 						{smartlink ititle="Role Members" ipackage="users" ifile="admin/edit_role.php" biticon="system-users" members=$roleId}
 						{if $roleId ne $smarty.const.ANONYMOUS_TEAM_ID}
 							{smartlink ititle="Batch assign" ipackage="users" ifile="admin/edit_role.php" biticon="preferences-system" batch_assign=$roleId}
-							{smartlink ititle="Remove" ipackage="users" ifile="admin/edit_role.php" biticon="edit-delete" action=delete role_id=$roleId}
+							{smartlink ititle="Remove" ipackage="users" ifile="admin/edit_role.php" biticon="user-trash" action=delete role_id=$roleId}
 						{/if}
 					</div>
 
