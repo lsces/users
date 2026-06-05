@@ -79,7 +79,7 @@ $languages = $gBitLanguage->listLanguages();
 $gBitSmarty->assign( 'languages', $languages );
 $gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
-require_once( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
+require( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
 asort( $bwCountries );
 $gBitSmarty->assign( 'countries', $bwCountries );
 
