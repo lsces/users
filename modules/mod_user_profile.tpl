@@ -34,7 +34,7 @@
 	<div>{tr}Joined{/tr}: {$userInfo.registration_date|bit_short_date}</div>
 	<div>{tr}Last visit{/tr}: {$userInfo.last_login|bit_short_date}</div>
 
-	{if $userPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$userPrefs.flag iexplain=$userPrefs.users_country}{/if} {assign var=langcode value=$userPrefs.bitlanguage|default:$gBitSystem->getConfig('bitlanguage','en')}{$gBitLanguage->mLanguageList.$langcode.native_name}
+	{if $userPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$userPrefs.flag iexplain=$userPrefs.users_country width=32 height=24}{/if} {assign var=langcode value=$userPrefs.bitlanguage|default:$gBitSystem->getConfig('bitlanguage','en')}{$gBitLanguage->mLanguageList.$langcode.native_name}
 {/bitmodule}
 {/strip}
 {/if}

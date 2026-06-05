@@ -68,7 +68,7 @@
 									{/foreach}
 								</select>
 								&nbsp;
-								{if $editUser->mPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$editUser->mPrefs.flag iexplain=$editUser->mPrefs.users_country}{/if}
+								{if $editUser->mPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$editUser->mPrefs.flag iexplain=$editUser->mPrefs.users_country width=32 height=24}{/if}
 							{/forminput}
 						</div>
 

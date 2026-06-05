@@ -23,7 +23,7 @@
 		<div class="form-group">
 			{formlabel label="Country"}
 			{forminput}
-				{biticon ipackage="users" ipath="flags/" iname=$userData->getPreference('flag') iexplain=$userData->getPreference('users_country') iforce="icon"} {$userData->getPreference('users_country')}
+				{biticon ipackage="users" ipath="flags/" iname=$userData->getPreference('flag') iexplain=$userData->getPreference('users_country') iforce="icon" width=32 height=24} {$userData->getPreference('users_country')}
 			{/forminput}
 		</div>
 
