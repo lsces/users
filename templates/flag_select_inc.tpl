@@ -3,7 +3,7 @@
    Optional: fsSize (small|medium|large, default small) *}
 {assign var=_fsSizes value=['small'=>['w'=>21,'h'=>16],'medium'=>['w'=>32,'h'=>24],'large'=>['w'=>43,'h'=>32]]}
 {assign var=_fsDims value=$_fsSizes[$fsSize|default:'small']}
-{assign var=_fsStyle value="width:{$_fsDims.w}px;line-height:1.5em;vertical-align:middle"}
+{assign var=_fsStyle value="width:{$_fsDims.w}px;line-height:1.6em;vertical-align:middle;border:1px solid #000"}
 {assign var=_fsVal value=$fsValue|default:''}
 {assign var=fsFlagCode value=$countryFlags[$_fsVal]|default:''}
 <div class="bw-flag-select" id="{$fsId}">
