@@ -10,7 +10,7 @@
 				{smartlink ipackage=users ifile="admin/index.php" assume_user=$userInfo.user_id tk=$gBitUser->mTicket ititle="Assume user identity" biticon="system-users"}
 {smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userInfo.user_id ititle="User Activity" biticon="utilities-system-monitor"}
 				{if $userInfo.user_id != $smarty.const.ANONYMOUS_USER_ID}
-					{smartlink ipackage=liberty ifile="list_content.php" user_id=$userInfo.user_id ititle="User Content" biticon="text-x-generic"}
+					{smartlink ipackage=liberty ifile="list_content.php" user_id=$userInfo.user_id ititle="User Content" biticon="view-list-text"}
 					{smartlink ipackage=users ifile="admin/index.php" action=delete user_id=$userInfo.user_id ititle="Remove" biticon="user-trash"}
 				{/if}
 				{if $gBitUser->mUserId != $gQueryUser->mUserId}
@@ -22,7 +22,7 @@
 					{smartlink ipackage=users ifile="preferences.php" ititle="Edit personal profile and images" biticon="dialog-ok"}
 				{/if}
 				{if $gBitUser->hasPermission('p_users_edit_user_homepage')}
-					{smartlink ipackage=users ifile="edit_personal_page.php" ititle="Edit personal wiki page" biticon="document-properties"}
+					{smartlink ipackage=users ifile="edit_personal_page.php" ititle="Edit personal wiki page" biticon="edit"}
 				{/if}
 			{/if}
 		</div>

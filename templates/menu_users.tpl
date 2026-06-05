@@ -10,7 +10,7 @@
 			<li><a class="item" href="{$gBitUser->getDisplayUrl()}">{biticon ipackage="icons" iname="go-home" iexplain="My Profile"}My Profile</a></li>
 		{/if}
 		{if $gBitUser->hasPermission( 'p_users_edit_user_homepage' )}
-			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}edit_personal_page.php">{biticon ipackage="icons" iname="document-properties" iexplain="Edit My Homepage"}Edit My Homepage</a></li>
+			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}edit_personal_page.php">{biticon ipackage="icons" iname="edit" iexplain="Edit My Homepage"}Edit My Homepage</a></li>
 		{/if}
 		{if $gBitSystem->isFeatureActive( 'users_preferences' )}
 			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}preferences.php">{biticon ipackage="icons" iname="internet-mail" iexplain="Preferences"}Preferences</a></li>
@@ -38,7 +38,7 @@
 			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}attachments.php">{biticon ipackage="icons" iname="stock_attach" iexplain="My Files"}My Files</a></li>
 		{/if}
 		{if $gBitUser->hasPermission('p_liberty_list_content')}
-			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}list_content.php">{biticon ipackage="icons" iname="text-x-generic" iexplain="List Site Content"}List Site Content</a></li>
+			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}list_content.php">{biticon ipackage="icons" iname="view-list-text" iexplain="List Site Content"}List Site Content</a></li>
 		{/if}
 		{if $gBitUser->hasPermission('p_users_view_user_list')}
 			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}index.php">{biticon ipackage="icons" iname="system-users" ipackage="icons" iexplain="List Site Users"}List Site Users</a></li>

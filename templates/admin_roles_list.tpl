@@ -19,7 +19,7 @@
 			{foreach from=$roleList key=roleId item=grp}
 				<li class="item {cycle values='odd,even'}">
 					<div class="floaticon">
-						{smartlink ititle="Edit" ipackage="users" ifile="admin/edit_role.php" biticon="document-properties" role_id=$roleId}
+						{smartlink ititle="Edit" ipackage="users" ifile="admin/edit_role.php" biticon="edit" role_id=$roleId}
 						{smartlink ititle="Role Members" ipackage="users" ifile="admin/edit_role.php" biticon="system-users" members=$roleId}
 						{if $roleId ne $smarty.const.ANONYMOUS_TEAM_ID}
 							{smartlink ititle="Batch assign" ipackage="users" ifile="admin/edit_role.php" biticon="preferences-system" batch_assign=$roleId}

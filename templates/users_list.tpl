@@ -79,9 +79,9 @@
 						{if $gBitSystem->isPackageActive( 'bitcommerce' ) && $gBitUser->hasPermission( 'p_commerce_admin' )}
 							{smartlink ipackage=bitcommerce ifile="admin/list_orders.php" user_id=$userHash.user_id ititle="Orders" biticon="package-x-generic"}
 						{/if}
-						{smartlink ipackage=liberty ifile="list_content.php" user_id=$userHash.user_id ititle="User Content" biticon="text-x-generic"}
+						{smartlink ipackage=liberty ifile="list_content.php" user_id=$userHash.user_id ititle="User Content" biticon="view-list-text"}
 						{smartlink ipackage=users ifile="admin/index.php" assume_user=$userHash.user_id ititle="Assume User Identity" biticon="system-users"}
-						{smartlink ipackage=users ifile="preferences.php" view_user=$userHash.user_id ititle="Edit User Information" biticon="document-properties"}
+						{smartlink ipackage=users ifile="preferences.php" view_user=$userHash.user_id ititle="Edit User Information" biticon="edit"}
 {smartlink ipackage=users ifile="admin/user_activity.php" user_id=$userHash.user_id ititle="User Activity" biticon="utilities-system-monitor"}
 						{if $userHash.user_id != $smarty.const.ANONYMOUS_USER_ID && $userHash.user_id != $smarty.const.ROOT_USER_ID && $userHash.user_id != $gBitUser->mUserId}
 							{if $userHash.content_status_id > 0}

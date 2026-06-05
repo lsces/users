@@ -113,7 +113,7 @@
 								{/if}
 
 								<td class="actionicon">
-									<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?role_id={$roleId}">{biticon ipackage="icons" iname="document-properties" iexplain="edit"}</a>
+									<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?role_id={$roleId}">{biticon ipackage="icons" iname="edit" iexplain="edit"}</a>
 									{if $roleId ne -1}{* sorry for hardcoding, really need php define ANONYMOUS_TEAM_ID - spiderr *}
 										<a href="{$smarty.const.USERS_PKG_URL}my_roles.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;action=delete&amp;role_id={$roleId}" 
 										onclick="return confirm('{tr}Are you sure you want to delete this role?{/tr}')">{biticon ipackage="icons" iname="user-trash" iexplain="Delete Role"}</a>
