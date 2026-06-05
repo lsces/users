@@ -61,14 +61,7 @@
 						<div class="form-group">
 							{formlabel label="Country" for="country"}
 							{forminput}
-								<select name="users_country" id="country" class="form-control">
-									<option value=""></option>
-									{foreach $countries as $code => $name}
-										<option value="{$code|escape}"{if $editUser->mPrefs.users_country_code eq $code} selected="selected"{/if}>{$name|escape}</option>
-									{/foreach}
-								</select>
-								&nbsp;
-								{if $editUser->mPrefs.flag}{biticon iforce=icon ipackage=users ipath="flags/" iname=$editUser->mPrefs.flag iexplain=$editUser->mPrefs.users_country istyle=flag}{/if}
+								{include file="bitpackage:users/flag_select_inc.tpl" fsName="users_country" fsValue=$editUser->mPrefs.users_country_code fsId="flag-select-prefs" fsSize="medium"}
 							{/forminput}
 						</div>
 

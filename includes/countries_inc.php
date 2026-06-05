@@ -526,3 +526,14 @@ $bwIso3166 = [
 	// Territories without clean entry: cp (Clipperton), dg (Diego Garcia), ic (Canary Islands)
 	// Placeholder: xx (unknown flag)
 ];
+
+asort( $bwCountries );
+
+global $gBitSmarty, $gBitThemes;
+if (!empty($gBitSmarty)) {
+	$gBitSmarty->assign( 'countries', $bwCountries );
+	$gBitSmarty->assign( 'countryFlags', $bwIso3166 );
+	if (!empty($gBitThemes)) {
+		$gBitThemes->loadCss( USERS_PKG_PATH.'css/flag-icons.css' );
+	}
+}

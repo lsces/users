@@ -226,8 +226,6 @@ $languages = $gBitLanguage->listLanguages();
 $gBitSmarty->assign( 'languages', $languages );
 
 require( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
-asort( $bwCountries );
-$gBitSmarty->assign( 'countries', $bwCountries );
 
 $editUser->mInfo['users_homepage'] = $editUser->getPreference( 'users_homepage', '' );
 

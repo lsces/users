@@ -129,12 +129,7 @@
 			<div class="form-group">
 				{formlabel label="Country" for="country"}
 				{forminput}
-					<select name="prefs[users_country]" id="country">
-						<option value=""></option>
-						{foreach $countries as $code => $name}
-							<option value="{$code|escape}"{if $smarty.request.prefs.users_country eq $code} selected="selected"{/if}>{$name|escape}</option>
-						{/foreach}
-					</select>
+					{include file="bitpackage:users/flag_select_inc.tpl" fsName="prefs[users_country]" fsValue=$smarty.request.prefs.users_country fsId="flag-select-reg"}
 					{formhelp note=""}
 				{/forminput}
 			</div>

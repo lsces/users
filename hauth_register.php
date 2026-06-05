@@ -80,8 +80,6 @@ $gBitSmarty->assign( 'languages', $languages );
 $gBitSmarty->assign( 'gBitLanguage', $gBitLanguage );
 
 require( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
-asort( $bwCountries );
-$gBitSmarty->assign( 'countries', $bwCountries );
 
 
 // include preferences settings from other packages - these will be included as individual tabs
