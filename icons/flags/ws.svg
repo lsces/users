@@ -1,13 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://web.resource.org/cc/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" width="864" height="432" id="svg1353">
-  
-  <defs id="defs1358"/>
-  <sodipodi:namedview borderopacity="1.0" bordercolor="#666666" pagecolor="#ffffff" id="base"/>
-  <rect id="red area" width="864" height="432" x="0" y="0" fill="#D21034" fill-opacity="1" stroke="none" stroke-opacity="1"/>
-  <rect id="blue quarter" width="432" height="216" x="0" y="0" fill="#003580" fill-opacity="1" stroke="none" stroke-opacity="1"/>
-  <polygon transform="matrix(31.54387,0,0,31.54387,216,181.4805)" points="0,-1 0.587,0.809 -0.95105652,-0.30901699 0.95105652,-0.30901699 -0.58778525,0.80901699 0,-1 " fill="#ffffff"/>
-  <polygon transform="matrix(25.23509,0,0,25.23509,150,88.23538)" points="0,-1 0.587,0.809 -0.95105652,-0.30901699 0.95105652,-0.30901699 -0.58778525,0.80901699 0,-1 " fill="#ffffff"/>
-  <polygon transform="matrix(23.6579,0,0,23.6579,283.5,77.65836)" points="0,-1 0.587,0.809 -0.95105652,-0.30901699 0.95105652,-0.30901699 -0.58778525,0.80901699 0,-1 " fill="#ffffff"/>
-  <polygon transform="matrix(25.23509,0,0,25.23509,216,34.23538)" points="0,-1 0.587,0.809 -0.95105652,-0.30901699 0.95105652,-0.30901699 -0.58778525,0.80901699 0,-1 " fill="#ffffff"/>
-  <polygon transform="matrix(15.77193,0,0,15.77193,249,125.2402)" points="0,-1 0.587,0.809 -0.95105652,-0.30901699 0.95105652,-0.30901699 -0.58778525,0.80901699 0,-1 " fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-ws" viewBox="0 0 640 480">
+  <g fill-rule="evenodd" stroke-width="1pt">
+    <path fill="#ce1126" d="M0 0h640v480H0z"/>
+    <path fill="#002b7f" d="M0 0h320v240H0z"/>
+    <path fill="#fff" d="m180 229.3-20.7-14-19.9 14.1 6.5-24.9-19-15.2 24.5-1.5 8.1-23.6 8.8 24 24 .7-19 16.3zm-3.6-165.6L159.8 53l-16 10.4 4.4-20-14.6-12.7 19.4-1.6 7.2-18.6 7.4 18.7 19.1 1.7L172 44.3zm-73 59.5-16-11-16.7 11 5.2-19.4L60.8 91 80 90l7-19 6.8 18.9 19.6 1.1-15 12.5zM250 110l-15.4-10-15 10 4.4-18.3-14-11.8 18.3-1.5 6.3-17.2 7 17.4 17.7 1-13.7 12.3zm-43.1 43.4-10.3-6.4-10.3 6.6 2.7-12.3-9.2-8.3 12-1 4.6-11.6 4.9 11.6 11.9 1-9.1 8.3z"/>
+  </g>
 </svg>

@@ -1,19 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="1026" height="684" viewBox="0 0 360 240" id="Flag of Turkey">
-  <defs id="defs2102"/>
-  <g fill="#e30a17">
-    <rect width="360" height="240" x="0" y="0"/>
-    <circle cx="120" cy="120" r="60" fill="white"/>
-    <circle cx="135" cy="120" r="48"/>
-  </g>
-  <g transform="matrix(0,-30,30,0,200.7,120)" id="star" fill="white">
-    <g id="cone">
-      <polygon points="0,0 0,1 0.5,1 0,0 " transform="matrix(0.951057,0.309017,-0.309017,0.951057,0,-1)" id="triangle"/>
-      <use transform="scale(-1,1)" id="use2091" x="0" y="0" width="360" height="240" xlink:href="#triangle"/>
-    </g>
-    <use transform="matrix(0.309017,0.951057,-0.951057,0.309017,0,0)" id="use2093" x="0" y="0" width="360" height="240" xlink:href="#cone"/>
-    <use transform="matrix(0.309017,-0.951057,0.951057,0.309017,0,0)" id="use2095" x="0" y="0" width="360" height="240" xlink:href="#cone"/>
-    <use transform="matrix(-0.809017,0.587785,-0.587785,-0.809017,0,0)" id="use2097" x="0" y="0" width="360" height="240" xlink:href="#cone"/>
-    <use transform="matrix(-0.809017,-0.587785,0.587785,-0.809017,0,0)" id="use2099" x="0" y="0" width="360" height="240" xlink:href="#cone"/>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-tr" viewBox="0 0 640 480">
+  <g fill-rule="evenodd">
+    <path fill="#e30a17" d="M0 0h640v480H0z"/>
+    <path fill="#fff" d="M407 247.5c0 66.2-54.6 119.9-122 119.9s-122-53.7-122-120 54.6-119.8 122-119.8 122 53.7 122 119.9"/>
+    <path fill="#e30a17" d="M413 247.5c0 53-43.6 95.9-97.5 95.9s-97.6-43-97.6-96 43.7-95.8 97.6-95.8 97.6 42.9 97.6 95.9z"/>
+    <path fill="#fff" d="m430.7 191.5-1 44.3-41.3 11.2 40.8 14.5-1 40.7 26.5-31.8 40.2 14-23.2-34.1 28.3-33.9-43.5 12-25.8-37z"/>
   </g>
 </svg>

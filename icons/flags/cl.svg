@@ -1,16 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1500" height="1000" id="Flag of Chile" version="1.1">
-  <rect width="1500" height="1000" fill="#fff"/>
-  <rect width="500" height="1000" fill="#0035AD"/>
-  <rect width="1500" height="500" y="500" fill="#D42E12"/>
-  <g id="star" transform="translate(250,250) scale(125)" fill="white">
-    <g id="cone">
-      <polygon id="triangle" points="0,0 0,1 .5,1" transform="translate(0,-1) rotate(18)"/>
-      <use xlink:href="#triangle" transform="scale(-1,1)" id="use12"/>
-    </g>
-    <use xlink:href="#cone" transform="rotate(72)" id="use14"/>
-    <use xlink:href="#cone" transform="rotate(-72)" id="use16"/>
-    <use xlink:href="#cone" transform="rotate(144)" id="use18"/>
-    <use xlink:href="#cone" transform="rotate(-144)" id="use20"/>
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-cl" viewBox="0 0 640 480">
+  <defs>
+    <clipPath id="cl-a">
+      <path fill-opacity=".7" d="M0 0h682.7v512H0z"/>
+    </clipPath>
+  </defs>
+  <g fill-rule="evenodd" clip-path="url(#cl-a)" transform="scale(.9375)">
+    <path fill="#fff" d="M256 0h512v256H256z"/>
+    <path fill="#0039a6" d="M0 0h256v256H0z"/>
+    <path fill="#fff" d="M167.8 191.7 128.2 162l-39.5 30 14.7-48.8L64 113.1l48.7-.5L127.8 64l15.5 48.5 48.7.1-39.2 30.4z"/>
+    <path fill="#d52b1e" d="M0 256h768v256H0z"/>
   </g>
 </svg>

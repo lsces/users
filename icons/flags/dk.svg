@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" version="1.0" width="370" height="280">
-  <rect width="370" height="280" fill="#d00c33"/>
-  <path d="M140,0 v280" stroke-width="40" stroke="white"/>
-  <path d="M0,140 h370" stroke-width="40" stroke="white"/>
-  
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-dk" viewBox="0 0 640 480">
+  <path fill="#c8102e" d="M0 0h640.1v480H0z"/>
+  <path fill="#fff" d="M205.7 0h68.6v480h-68.6z"/>
+  <path fill="#fff" d="M0 205.7h640.1v68.6H0z"/>
 </svg>

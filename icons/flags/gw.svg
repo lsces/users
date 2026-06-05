@@ -1,16 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1200" height="600" viewBox="0 0 12 6" id="Flag_of_Guinea-Bissau">
-<rect width="4" height="6" fill="#ce1126"/>
-<rect width="8" height="3" x="4" fill="#fcd116"/>
-<rect width="8" height="3" x="4" y="3" fill="#009e49"/>
-<g id="star" fill="black" transform="translate(2,3) scale(1)">
-  <g id="cone">
-    <polygon id="triangle" points="0,0 0,1 .5,1" transform="translate(0,-1) rotate(18)"/>
-    <use xlink:href="#triangle" transform="scale(-1,1)"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="flag-icons-gw" viewBox="0 0 640 480">
+  <path fill="#ce1126" d="M0 0h220v480H0z"/>
+  <path fill="#fcd116" d="M220 0h420v240H220z"/>
+  <path fill="#009e49" d="M220 240h420v240H220z"/>
+  <g id="gw-b" transform="matrix(80 0 0 80 110 240)">
+    <path id="gw-a" fill="#000001" d="M0-1v1h.5" transform="rotate(18 0 -1)"/>
+    <use xlink:href="#gw-a" width="100%" height="100%" transform="scale(-1 1)"/>
   </g>
-  <use xlink:href="#cone" transform="rotate(72)"/>
-  <use xlink:href="#cone" transform="rotate(-72)"/>
-  <use xlink:href="#cone" transform="rotate(144)"/>
-  <use xlink:href="#cone" transform="rotate(-144)"/>
-</g>
+  <use xlink:href="#gw-b" width="100%" height="100%" transform="rotate(72 110 240)"/>
+  <use xlink:href="#gw-b" width="100%" height="100%" transform="rotate(144 110 240)"/>
+  <use xlink:href="#gw-b" width="100%" height="100%" transform="rotate(-144 110 240)"/>
+  <use xlink:href="#gw-b" width="100%" height="100%" transform="rotate(-72 110 240)"/>
 </svg>
