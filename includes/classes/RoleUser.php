@@ -210,7 +210,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 				// Load attachments
 				\Bitweaver\Liberty\LibertyMime::load();
 				if( $code = $this->getPreference( 'users_country' ) ) {
-					require_once( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
+					require( USERS_PKG_INCLUDE_PATH.'countries_inc.php' );
 					$this->setPreference( 'users_country_code', $code );
 					$this->setPreference( 'flag', $bwIso3166[$code] ?? '' );
 					$this->setPreference( 'users_country', $bwCountries[$code] ?? $code );
