@@ -1229,18 +1229,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	public static function getSiteCookieName() {
 		global $gBitSystem;
 
-		$cookie_site = strtolower( preg_replace( "/[^a-zA-Z0-9]/", "", $gBitSystem->getConfig( 'site_title', '' )));
-		if( empty( $cookie_site ) ) {
-			// site_title not yet in kernel_config (e.g. during installer/upgrade).
-			// Reuse any existing bit-user-* cookie so the session name stays consistent
-			// across requests rather than splitting into bit-user-bitweaver vs the real name.
-			foreach( array_keys( $_COOKIE ) as $name ) {
-				if( strpos( $name, 'bit-user-' ) === 0 ) {
-					return $name;
-				}
-			}
-			$cookie_site = 'bitweaver';
-		}
+		$cookie_site = strtolower( preg_replace( "/[^a-zA-Z0-9]/", "", $gBitSystem->getConfig( 'site_title', 'bitweaver' )));
 		return 'bit-user-'.$cookie_site;
 	}
 

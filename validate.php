@@ -151,13 +151,6 @@ if( !empty( $tpl ) ) {
 	$redirectUrl = $gBitUser->getPostLoginUrl();
 }
 
-// If the admin just logged in and the installer is still required, go there directly.
-// This bypasses the unreliable session-based loginfrom mechanism used during upgrades,
-// where the session cookie name can differ between pages if kernel_config isn't fully loaded.
-if( $gBitUser->isAdmin() && !empty( $gBitSystem->mConfig ) && version_compare( MIN_BIT_VERSION, $gBitSystem->getVersion(), '>' ) ) {
-	KernelTools::bit_redirect( INSTALL_PKG_URL.'install.php' );
-}
-
 if( !empty( $redirectUrl ) ) {
 	KernelTools::bit_redirect( $redirectUrl );
 }
