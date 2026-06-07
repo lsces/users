@@ -41,7 +41,7 @@
 			<li><a class="item" href="{$smarty.const.LIBERTY_PKG_URL}list_content.php">{biticon ipackage="icons" iname="view-list-text" iexplain="List Site Content"}List Site Content</a></li>
 		{/if}
 		{if $gBitUser->hasPermission('p_users_view_user_list')}
-			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}index.php">{biticon ipackage="icons" iname="system-users" ipackage="icons" iexplain="List Site Users"}List Site Users</a></li>
+			<li><a class="item" href="{$smarty.const.USERS_PKG_URL}index.php">{biticon ipackage="icons" iname="system-users" iexplain="List Site Users"}List Site Users</a></li>
 		{/if}
 		<li><a class="item" href="{$smarty.const.USERS_PKG_URL}logout.php">{biticon ipackage="icons" iname="system-log-out" iexplain="Log out"}Log out</a></li>
 	{else}
