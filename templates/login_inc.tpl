@@ -32,7 +32,8 @@
 				<input class="form-control" type="password" name="pass" id="password" />
 				<span class="input-group-btn">
 					<button class="btn btn-default" type="button" id="bw-toggle-password">
-						<span class="glyphicon glyphicon-eye-open"></span>
+						{biticon ipackage="icons" iname="password-show-on" iexplain="Show password" id="bw-pw-show"}
+						{biticon ipackage="icons" iname="password-show-off" iexplain="Hide password" id="bw-pw-hide" style="display:none"}
 					</button>
 				</span>
 			</div>
@@ -67,13 +68,14 @@
 	$(document).ready(function() {
 		$('#bw-toggle-password').click(function() {
 			var passwordField = $('#password');
-			var passwordFieldType = passwordField.attr('type');
-			if (passwordFieldType === 'password') {
+			if (passwordField.attr('type') === 'password') {
 				passwordField.attr('type', 'text');
-				$(this).find('span').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+				$('#bw-pw-show').hide();
+				$('#bw-pw-hide').show();
 			} else {
 				passwordField.attr('type', 'password');
-				$(this).find('span').removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+				$('#bw-pw-hide').hide();
+				$('#bw-pw-show').show();
 			}
 		});
 	});
