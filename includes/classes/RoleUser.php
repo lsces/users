@@ -150,7 +150,7 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 			if( !empty( $extraParams[0] ) && $extraParams[0] ) {
 				$fullSelect = ' , lc.* ';
 				$fullJoin = " LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( uu.`content_id`=lc.`content_id` )";
-				$this->getServicesSql( 'content_load_sql_function', $fullSelect, $fullJoin, $whereSql, $bindVars );
+				$this->getServicesSql( 'content_load_sql_function', $fullSelect, $fullJoin, $whereSql, $bindVars, $this );
 			}
 			// uu.`user_id` AS `uu_user_id` is last and aliases to avoid possible column name collisions
 			$query = "
