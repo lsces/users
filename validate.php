@@ -31,7 +31,8 @@ $redirectUrl = false;
 //do not use session loginfrom with signin.php or register.php - only "inline" login forms display in perm denied fatals, etc.
 if( isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/login' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/register' ) === false && strpos( $_SERVER['HTTP_REFERER'], USERS_PKG_PATH.'/validate' ) === false ) {
 	$from = parse_url( $_SERVER['HTTP_REFERER'] );
-	if( $_SERVER['HTTP_HOST'] == $from['host'] ) {
+	// HTTP_HOST includes a non-standard port (e.g. srv9's :8443 DR failover); $from['host'] never does
+	if( strtok( $_SERVER['HTTP_HOST'], ':' ) == $from['host'] ) {
 		// We have a referer  from this site, but not an authentication URL
 		$_SESSION['loginfrom'] = (!empty($from['path']) ? $from['path'] : '').( !empty( $from['query'] ) ? '?'.$from['query'] : '' );
 	}
