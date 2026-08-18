@@ -694,7 +694,15 @@ class RolePermUser extends RoleUser {
 					INNER JOIN `".BIT_DB_PREFIX."users_roles` ur ON ( ur.`role_id`=urp.`role_id` )
 					LEFT OUTER JOIN `".BIT_DB_PREFIX."users_roles_map` urm ON ( urm.`role_id`=urp.`role_id` AND urm.`user_id` = ? )
 				WHERE ur.`role_id`= ".ANONYMOUS_TEAM_ID." OR urm.`role_id`=ur.`role_id`";
-			$this->mPerms = $this->mDb->getAssoc( $query, [ $this->mUserId ] );
+			try {
+				$this->mPerms = $this->mDb->getAssoc( $query, [ $this->mUserId ] );
+			} catch( \Throwable $e ) {
+				$this->mPerms = false;
+			}
+			if( !\is_array( $this->mPerms ) ) {
+				// query fails before the users package's tables (and a real DB connection) exist yet (fresh install)
+				$this->mPerms = [];
+			}
 			// Add in override permissions
 			if( !empty( $this->mPermsOverride ) ) {
 				foreach( $this->mPermsOverride as $key => $val ) {

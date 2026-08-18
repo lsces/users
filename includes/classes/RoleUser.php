@@ -1739,7 +1739,12 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	 */
 	public function getUserIdFromCookie( string $pCookie ) {
 		$query = "SELECT `user_id` FROM `".BIT_DB_PREFIX."users_cnxn` WHERE `cookie` = ?";
-		$result = $this->mDb->getOne( $query, [ $pCookie ]);
+		try {
+			$result = $this->mDb->getOne( $query, [ $pCookie ]);
+		} catch( \Throwable $e ) {
+			// users_cnxn doesn't exist yet before the users package is installed (fresh install)
+			$result = null;
+		}
 		return $result ? (int)$result : null;
 	}
 
