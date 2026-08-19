@@ -6,7 +6,7 @@ use Bitweaver\KernelTools;
 use Bitweaver\Wiki\BitPage;
 
 // Register the new user
-	$userClass = $gBitSystem->getConfig( 'user_class', 'RolePermUser' );
+	$userClass = $gBitSystem->getConfig( 'user_class', '\Bitweaver\Users\RolePermUser' );
 	$newUser = new $userClass();
 
 	if( $newUser->preRegisterVerify( $pRegisterHash ) && $newUser->register( $pRegisterHash ) ) {

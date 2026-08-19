@@ -115,7 +115,7 @@ foreach( array_keys( $tables ) AS $tableName ) {
 
 // ### Default Preferences
 $gBitInstaller->registerPreferences( USERS_PKG_NAME, [
-	[ USERS_PKG_NAME, 'user_class', 'RolePermUser' ],
+	[ USERS_PKG_NAME, 'user_class', '\Bitweaver\Users\RolePermUser' ],
 ] );
 
 // ### Default Permissions
