@@ -241,7 +241,7 @@ class RolePermUser extends RoleUser {
 	 */
 	function loadRoles( $pForceRefresh = false ) {
 		if( $this->isValid() ) {
-			$this->mRoles = $this->getRoles( 0, $pForceRefresh );
+			$this->mRoles = $this->getRoles( null, $pForceRefresh );
 		}
 	}
 	/**
