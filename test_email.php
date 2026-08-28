@@ -1,7 +1,7 @@
 <?php
 // test_email.php
 
-$to = 'lester@lsces.uk'; // Replace with the recipient's email address
+$to = 'name@example.com'; // Replace with the recipient's email address
 $subject = 'Test Email';
 $message = 'This is a test email to verify email forwarding.';
 $headers = 'From: root@rdm1.uk' . "\r\n" . // Replace with the sender's email address
