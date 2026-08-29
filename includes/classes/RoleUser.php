@@ -277,6 +277,27 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 	}
 
 	/**
+	 * Returns this user's own configured display timezone (the same
+	 * `site_display_timezone` preference `'Fixed'` display mode uses) as a real
+	 * `DateTimeZone` — for code that needs a genuine named IANA zone (parsing,
+	 * calendar-day bucketing) regardless of the user's display-mode setting.
+	 * UTC fallback if unset or invalid, never a hardcoded place.
+	 *
+	 * @return \DateTimeZone
+	 */
+	public function getUserTimezone(): \DateTimeZone {
+		$tzName = $this->getPreference( 'site_display_timezone', 'UTC' );
+		if( empty( $tzName ) ) {
+			$tzName = 'UTC';
+		}
+		try {
+			return new \DateTimeZone( $tzName );
+		} catch ( \Exception $e ) {
+			return new \DateTimeZone( 'UTC' );
+		}
+	}
+
+	/**
 	 * verify store hash
 	 *
 	 * @param array $pParamHash Data to be verified
