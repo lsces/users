@@ -48,7 +48,7 @@
 					{/if}
 
 					<div class="form-group submit">
-						<input type="submit" class="btn btn-default" name="cancel" value="{tr}Cancel{/tr}" />&nbsp;
+						<input type="submit" class="btn btn-default" name="cancel" value="{tr}Cancel{/tr}" />
 						<input type="submit" class="btn btn-default" name="save" value="{tr}Save Group{/tr}" />
 					</div>
 				{/form}
