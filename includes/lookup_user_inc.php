@@ -35,8 +35,9 @@ if( isset( $_REQUEST['home'] )) {
 	$gQueryUser = new RolePermUser( $queryUserId );
 	$gQueryUser->load( true );
 	$gQueryUser->setCacheableObject( false );
-} elseif( $gBitUser->isValid() ) {
-	// We are looking at ourself, use our existing BitUser
+} else {
+	// We are looking at ourself, use our existing BitUser. Nobody logged in and nobody asked for is still an object (not valid), so the members
+	// list page can ask its permission question instead of calling methods on null.
 	global $gBitUser;
 	$gQueryUser = &$gBitUser;
 }
