@@ -1251,9 +1251,13 @@ class RoleUser extends \Bitweaver\Liberty\LibertyMime {
 		global $gBitSystem;
 
 		// The installer runs with no site configuration loaded, so the title would fall back to 'bitweaver' and name a different cookie
-		// than the session auth_config.php has already started; with no title known, use that session's name.
-		if( !$gBitSystem->getConfig( 'site_title' ) && session_status() === PHP_SESSION_ACTIVE && strpos( session_name(), 'bit-user-' ) === 0 ) {
-			return session_name();
+		// from the site's own (and the name would change part way through, once the configuration loads). With no title known, take the
+		// session name auth_config.php holds for this site.
+		if( !$gBitSystem->getConfig( 'site_title' ) && defined( 'CONFIG_PKG_PATH' ) ) {
+			$authFile = CONFIG_PKG_PATH.'kernel/auth_config.php';
+			if( is_readable( $authFile ) && preg_match( "/session_name\( '(bit-user-[^']+)' \)/", (string)file_get_contents( $authFile ), $m )) {
+				return $m[1];
+			}
 		}
 
 		$cookie_site = strtolower( preg_replace( "/[^a-zA-Z0-9]/", "", $gBitSystem->getConfig( 'site_title', 'bitweaver' )));
